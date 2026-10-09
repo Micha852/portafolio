@@ -1,0 +1,106 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Paleta: tinta azul profunda + turquesa + ámbar */
+:root {
+  --bg: 244 241 234;
+  --surface: 255 255 255;
+  --line: 222 216 204;
+  --ink: 22 27 38;
+  --muted: 92 99 115;
+  --accent: 13 128 116;
+  --warm: 196 120 18;
+}
+
+.dark {
+  --bg: 9 13 22;
+  --surface: 17 23 37;
+  --line: 35 44 64;
+  --ink: 228 233 242;
+  --muted: 140 151 172;
+  --accent: 45 212 191;
+  --warm: 245 184 65;
+}
+
+html {
+  scroll-behavior: smooth;
+  scroll-padding-top: 6rem;
+}
+
+body {
+  @apply bg-bg text-ink font-sans antialiased transition-colors duration-500;
+}
+
+::selection {
+  @apply bg-accent/30;
+}
+
+/* Fondo con cuadrícula sutil para el hero */
+.grid-bg {
+  background-image: linear-gradient(rgb(var(--line) / 0.5) 1px, transparent 1px),
+    linear-gradient(90deg, rgb(var(--line) / 0.5) 1px, transparent 1px);
+  background-size: 48px 48px;
+  mask-image: radial-gradient(ellipse at center, black 30%, transparent 75%);
+}
+
+/* Botón con borde animado (inspirado en websen) */
+.btn-outline {
+  @apply relative inline-flex items-center justify-center gap-2 rounded-full px-7 py-3 font-semibold text-ink overflow-hidden;
+  isolation: isolate;
+}
+.btn-outline::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  padding: 2px;
+  background: conic-gradient(from var(--angle, 0deg), rgb(var(--accent)), rgb(var(--warm)), rgb(var(--accent)));
+  -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  z-index: -1;
+}
+.btn-outline:hover::before {
+  animation: spin-border 2.5s linear infinite;
+}
+.btn-solid {
+  @apply inline-flex items-center justify-center gap-2 rounded-full px-7 py-3 font-semibold bg-accent text-bg transition hover:brightness-110 hover:-translate-y-0.5;
+}
+
+@property --angle {
+  syntax: "<angle>";
+  initial-value: 0deg;
+  inherits: false;
+}
+@keyframes spin-border {
+  to {
+    --angle: 360deg;
+  }
+}
+
+/* Aparición al hacer scroll */
+.reveal {
+  opacity: 0;
+  transform: translateY(28px);
+  transition: opacity 0.8s ease, transform 0.8s ease;
+}
+.reveal.is-visible {
+  opacity: 1;
+  transform: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+  .reveal {
+    opacity: 1;
+    transform: none;
+    transition: none;
+  }
+  .animate-float,
+  .btn-outline:hover::before {
+    animation: none;
+  }
+}
