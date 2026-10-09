@@ -9,7 +9,7 @@ npm install
 npm run dev
 ```
 
-Abre http://localhost:4000.
+Abre http://localhost:4321.
 
 ## Editar el contenido
 

@@ -5,7 +5,7 @@ import { Icon } from "./Icons";
 import { projects } from "@/data/profile";
 
 function ProjectCard({ project, index }) {
-  const { title, description, image, tags, demo, repo, featured } = project;
+  const { title, description, highlights = [], image, tags, links = [], featured } = project;
 
   return (
     <Reveal
@@ -14,7 +14,7 @@ function ProjectCard({ project, index }) {
         featured ? "md:col-span-2 md:flex-row" : ""
       }`}
     >
-      <div className={`relative aspect-video overflow-hidden bg-bg ${featured ? "md:aspect-auto md:w-3/5" : ""}`}>
+      <div className={`relative aspect-video overflow-hidden bg-bg ${featured ? "md:aspect-auto md:w-2/5 md:shrink-0" : ""}`}>
         {image ? (
           <Image
             src={image}
@@ -33,7 +33,20 @@ function ProjectCard({ project, index }) {
       <div className={`flex flex-1 flex-col p-6 ${featured ? "md:p-8 md:justify-center" : ""}`}>
         {featured && <p className="text-xs font-semibold uppercase tracking-widest text-warm mb-2">Destacado</p>}
         <h3 className="font-display text-2xl font-bold">{title}</h3>
-        <p className="mt-3 text-muted leading-relaxed flex-1">{description}</p>
+        <p className="mt-3 text-muted leading-relaxed">{description}</p>
+
+        {highlights.length > 0 && (
+          <ul className="mt-4 space-y-2 text-sm text-muted">
+            {highlights.map((h) => (
+              <li key={h} className="flex gap-2.5">
+                <span className="mt-2 h-1.5 w-1.5 shrink-0 rounded-full bg-accent" />
+                {h}
+              </li>
+            ))}
+          </ul>
+        )}
+
+        <div className="flex-1" />
 
         <ul className="mt-5 flex flex-wrap gap-2">
           {tags.map((t) => (
@@ -43,20 +56,20 @@ function ProjectCard({ project, index }) {
           ))}
         </ul>
 
-        {(demo || repo) && (
-          <div className="mt-6 flex gap-5 text-sm font-semibold">
-            {demo && (
-              <a href={demo} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1.5 hover:text-accent transition">
-                <Icon name="external" className="w-4 h-4" />
-                Ver sitio
+        {links.length > 0 && (
+          <div className="mt-6 flex flex-wrap gap-x-5 gap-y-2 text-sm font-semibold">
+            {links.map((link) => (
+              <a
+                key={link.href}
+                href={link.href}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center gap-1.5 hover:text-accent transition"
+              >
+                <Icon name={link.icon ?? "external"} className="w-4 h-4" />
+                {link.label}
               </a>
-            )}
-            {repo && (
-              <a href={repo} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1.5 hover:text-accent transition">
-                <Icon name="github" className="w-4 h-4" />
-                Código
-              </a>
-            )}
+            ))}
           </div>
         )}
       </div>
