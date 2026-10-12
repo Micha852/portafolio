@@ -14,7 +14,9 @@ export const profile = {
   location: "Florencia, Caquetá, Colombia",
   available: true,
   // Pon tu foto en /public (ej: /public/foto.webp) y escribe "/foto.webp". Si queda vacío se muestran tus iniciales.
-  photo: "",
+  photo: "/michael.jpeg",
+  // Qué parte de la foto se ve al recortarla (CSS object-position)
+  photoPosition: "18% center",
   cv: "/cv-michael-martinez.pdf",
   about: [
     "Soy Ingeniero de Sistemas y desarrollador Full Stack. Trabajo en todo el ciclo del software: desde levantar requerimientos con los usuarios hasta desplegar, mantener y mejorar plataformas en producción.",
@@ -37,7 +39,11 @@ export const profile = {
 export const contact = {
   email: "may13xd@gmail.com",
   whatsapp: "573122453755", // solo números, con código de país
-  socials: [{ name: "GitHub", href: "https://github.com/Micha852", icon: "github" }],
+  socials: [
+    { name: "GitHub", href: "https://github.com/Micha852", icon: "github" },
+    { name: "LinkedIn", href: "https://www.linkedin.com/in/mamg0852/", icon: "linkedin" },
+    { name: "Portafolio en Prometeon", href: "https://prometeondev.com/", icon: "globe" },
+  ],
 };
 
 // links: lista de enlaces del proyecto. icon puede ser "external" (sitio) o "github" (código)
@@ -68,7 +74,7 @@ export const projects = [
       "Plataforma para la colección botánica del Herbario de la Universidad de la Amazonia: muestras con taxonomía, imágenes, mapa de recolección, importación y exportación Darwin Core (SiB Colombia / GBIF), fichas y etiquetas en PDF, roles con permisos y un CMS para el sitio público.",
     image: "",
     tags: ["Next.js", "TypeScript", "NestJS", "Prisma", "PostgreSQL", "Leaflet", "Docker"],
-    links: [],
+    links: [{ label: "herbariohuaz.com", href: "https://herbariohuaz.com/consultas", icon: "external" }],
   },
   {
     title: "Desarrollo Web",

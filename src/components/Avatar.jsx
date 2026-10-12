@@ -10,11 +10,19 @@ function initials(name) {
 }
 
 // Muestra la foto del perfil o, si no hay, las iniciales
-export default function Avatar({ name, photo, className = "" }) {
+export default function Avatar({ name, photo, position = "center", className = "" }) {
   return (
     <div className={`relative overflow-hidden rounded-[2rem] border border-line bg-surface ${className}`}>
       {photo ? (
-        <Image src={photo} alt={name} fill sizes="(max-width: 768px) 80vw, 400px" className="object-cover" priority />
+        <Image
+          src={photo}
+          alt={name}
+          fill
+          sizes="(max-width: 768px) 80vw, 400px"
+          className="object-cover"
+          style={{ objectPosition: position }}
+          priority
+        />
       ) : (
         <div className="absolute inset-0 grid place-items-center bg-gradient-to-br from-accent/25 via-surface to-warm/20">
           <span className="font-display text-7xl font-bold text-accent">{initials(name)}</span>
