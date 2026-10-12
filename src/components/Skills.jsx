@@ -8,9 +8,9 @@ export default function Skills() {
       <div className="mx-auto max-w-6xl px-6">
         <SectionHeading number="03" title="Habilidades" subtitle="Las herramientas con las que trabajo día a día." />
 
-        <div className="grid gap-6 md:grid-cols-3">
+        <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
           {skills.map((group, i) => (
-            <Reveal key={group.group} delay={i * 120} className="rounded-3xl border border-line bg-surface p-7">
+            <Reveal key={group.group} delay={(i % 4) * 100} className="rounded-3xl border border-line bg-surface p-6">
               <h3 className="font-display text-xl font-bold">
                 <span className="text-accent">/</span> {group.group}
               </h3>
