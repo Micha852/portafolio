@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { Icon } from "../Icons";
-import { useSim, ExecLog, Panel, Row, Badge } from "./ui";
+import { useSim, ExecLog, Panel, Row, Badge, ProdLink } from "./ui";
 
 // Réplica del módulo de Propiedad Horizontal de Contagracia (Ley 675): facturación por coeficiente,
 // mora y pronto pago por días del mes, portería, asambleas con quórum por coeficiente y PQRS con flujos.
@@ -920,6 +920,7 @@ function Asamblea() {
 
 /* ───────────────────────────── 5. PQRS ───────────────────────────── */
 
+const PQRS_FORM_URL = "https://contagracia.com/ph/pqrs/2bf7cc00-acfc-444c-98df-1790907c4c4a";
 const PQRS_STATUS = { Abierto: "#3B82F6", "En Proceso": "#F59E0B", Resuelto: "#10B981", Cerrado: "#94A3B8" };
 
 function Pqrs() {
@@ -1056,6 +1057,11 @@ function Pqrs() {
       }
       side={
         <>
+          <ProdLink
+            href={PQRS_FORM_URL}
+            title="Formulario público de PQRS"
+            description="Ejemplo real: así lo ve el residente al escanear el QR del conjunto. Puede radicar de forma anónima y recibe un código de seguimiento."
+          />
           <Panel title="Flujos que se dispararon" icon="bolt">
             {st.flows.length === 0 ? (
               <p className="text-xs text-muted">Ninguno todavía.</p>

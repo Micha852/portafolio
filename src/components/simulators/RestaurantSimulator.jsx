@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { Icon } from "../Icons";
-import { useSim, MobileTabs, ExecLog, Panel, Row, Badge } from "./ui";
+import { useSim, MobileTabs, ExecLog, Panel, Row, Badge, ProdLink } from "./ui";
 
 // Réplica del módulo de restaurante + POS de Contagracia: mesas, platos con variantes y adiciones,
 // comandas por área, pantalla de cocina, cobro en POS con propina, factura FES y consumo de recetas.
@@ -139,7 +139,7 @@ const initialState = () => ({
   seq: { item: 0, comanda: 40, oco: 0 },
 });
 
-export default function RestaurantSimulator() {
+function TableService() {
   const { st, update, reset, sequence, busy } = useSim(initialState);
   const [tab, setTab] = useState("mesero");
   const [kdsFilter, setKdsFilter] = useState("todas");
@@ -871,5 +871,260 @@ function ComandaTicket({ p }) {
         </div>
       ))}
     </div>
+  );
+}
+
+/* ───────────────────────────── Vistas del simulador ───────────────────────────── */
+
+export default function RestaurantSimulator() {
+  const [view, setView] = useState("mesa");
+  return (
+    <div className="flex h-full flex-col">
+      <div className="flex shrink-0 gap-1 overflow-x-auto border-b border-line px-3 py-2">
+        {[
+          ["mesa", "Atender una mesa", "user"],
+          ["sedes", "Sedes y menú público", "grid"],
+        ].map(([k, label, icon]) => (
+          <button
+            key={k}
+            onClick={() => setView(k)}
+            className={`inline-flex shrink-0 items-center gap-1.5 rounded-full px-3.5 py-1.5 text-xs font-semibold transition ${
+              view === k ? "bg-accent/15 text-accent" : "text-muted hover:text-ink"
+            }`}
+          >
+            <Icon name={icon} className="h-3.5 w-3.5" />
+            {label}
+          </button>
+        ))}
+      </div>
+      {/* Las dos vistas quedan montadas para conservar su avance */}
+      <div className={view === "mesa" ? "min-h-0 flex-1" : "hidden"}>
+        <TableService />
+      </div>
+      <div className={view === "sedes" ? "min-h-0 flex-1" : "hidden"}>
+        <SedesMenu />
+      </div>
+    </div>
+  );
+}
+
+/* ───────────────────────────── Sedes y menú público ───────────────────────────── */
+
+const MENU_URL = "https://contagracia.com/menu/2bf7cc00-acfc-444c-98df-1790907c4c4a/a1939a84-f77c-4bdb-b7dd-d249580ee52f";
+
+// Catálogo del menú público: secciones Platos, Adiciones y Productos
+const CATALOG = [
+  { id: "bandeja", section: "Platos", name: "Bandeja paisa", desc: "Frijol, arroz, carne molida, chicharrón, plátano y arepa", price: 32000 },
+  { id: "hamburguesa", section: "Platos", name: "Hamburguesa BBQ", desc: "Pan brioche, carne de res, queso y salsa BBQ", price: 28000 },
+  { id: "papas", section: "Platos", name: "Papas gajo", desc: "Papa en gajos con especias", price: 9000 },
+  { id: "limonada-coco", section: "Platos", name: "Limonada de coco", desc: "Limón, crema de coco y hielo", price: 18000 },
+  { id: "huevo", section: "Adiciones", name: "Huevo", desc: "Frito o revuelto", price: 3000 },
+  { id: "aguacate", section: "Adiciones", name: "Aguacate", desc: "Media unidad", price: 4000 },
+  { id: "tocineta", section: "Adiciones", name: "Tocineta", desc: "Dos tiras crocantes", price: 4000 },
+  { id: "gaseosa", section: "Productos", name: "Gaseosa 400 ml", desc: "Sabores surtidos", price: 5000 },
+  { id: "agua", section: "Productos", name: "Agua sin gas", desc: "Botella 600 ml", price: 4000 },
+];
+const SECTIONS = ["Platos", "Adiciones", "Productos"];
+
+const SEDES = [
+  { id: "centro", name: "Sede Centro", address: "Cra. 7 # 12-40", slug: "a1939a84" },
+  { id: "norte", name: "Sede Norte", address: "Av. 19 # 140-22", slug: "7c52e1f0" },
+];
+const copMenu = (n) => `$ ${n.toLocaleString("es-CO")},00`;
+
+function SedesMenu() {
+  const { st, update } = useSim(() => ({
+    sede: "centro",
+    // Visibilidad y disponibilidad por sede
+    visible: {
+      centro: Object.fromEntries(CATALOG.map((p) => [p.id, true])),
+      norte: Object.fromEntries(CATALOG.map((p) => [p.id, p.id !== "bandeja" && p.id !== "aguacate"])),
+    },
+    soldOut: { centro: {}, norte: { "limonada-coco": true } },
+    log: [],
+  }));
+  const [section, setSection] = useState("Platos");
+  const [search, setSearch] = useState("");
+  const log = (msg, tone = "info") => update((x) => x.log.push({ msg, tone, id: x.log.length }));
+  const sede = SEDES.find((s) => s.id === st.sede);
+
+  const toggle = (kind, p) => {
+    update((x) => (x[kind][x.sede][p.id] = !x[kind][x.sede][p.id]));
+    const on = st[kind][st.sede][p.id];
+    if (kind === "visible") log(`${sede.name}: «${p.name}» ${on ? "se muestra" : "se oculta"} en el menú público`, on ? "ok" : "warn");
+    else log(`${sede.name}: «${p.name}» ${on ? "marcado como Agotado" : "disponible de nuevo"}`, on ? "warn" : "ok");
+  };
+
+  const shown = CATALOG.filter(
+    (p) => p.section === section && st.visible[st.sede][p.id] && p.name.toLowerCase().includes(search.trim().toLowerCase())
+  );
+  const count = (sec) => CATALOG.filter((p) => p.section === sec && st.visible[st.sede][p.id]).length;
+
+  return (
+    <div className="h-full overflow-y-auto lg:grid lg:min-h-0 lg:grid-cols-[1fr_400px] lg:overflow-hidden">
+      {/* Administración: qué muestra cada sede */}
+      <section className="flex flex-col lg:min-h-0">
+        <div className="shrink-0 border-b border-line bg-warm/10 px-5 py-2.5 text-xs font-medium text-warm">
+          Elige la sede y decide qué productos aparecen en su menú público. La vista previa del celular se actualiza al instante.
+        </div>
+        <div className="space-y-5 p-5 lg:min-h-0 lg:flex-1 lg:overflow-y-auto">
+          <div className="grid grid-cols-2 gap-3">
+            {SEDES.map((s) => (
+              <button
+                key={s.id}
+                onClick={() => update((x) => (x.sede = s.id))}
+                className={`rounded-2xl border p-3 text-left transition ${st.sede === s.id ? "border-accent bg-accent/10" : "border-line hover:border-accent/60"}`}
+              >
+                <p className="font-display font-bold">{s.name}</p>
+                <p className="text-xs text-muted">{s.address}</p>
+                <p className="mt-1 text-[11px] text-accent">{CATALOG.filter((p) => st.visible[s.id][p.id]).length} productos en el menú</p>
+              </button>
+            ))}
+          </div>
+
+          {SECTIONS.map((sec) => (
+            <div key={sec}>
+              <p className="mb-2 text-[11px] font-semibold uppercase tracking-widest text-muted">{sec}</p>
+              <div className="overflow-hidden rounded-xl border border-line">
+                {CATALOG.filter((p) => p.section === sec).map((p) => {
+                  const on = st.visible[st.sede][p.id];
+                  const out = st.soldOut[st.sede][p.id];
+                  return (
+                    <div key={p.id} className="flex items-center gap-3 border-b border-line/60 px-3 py-2 text-sm last:border-0">
+                      <span className={`min-w-0 flex-1 truncate ${on ? "" : "text-muted line-through"}`}>{p.name}</span>
+                      <span className="hidden text-xs text-muted sm:inline">{copMenu(p.price)}</span>
+                      <button
+                        onClick={() => toggle("soldOut", p)}
+                        disabled={!on}
+                        className={`rounded-full border px-2 py-0.5 text-[10px] transition disabled:opacity-30 ${out ? "border-[#EF4444] text-[#EF4444]" : "border-line text-muted hover:border-[#EF4444]/60"}`}
+                      >
+                        Agotado
+                      </button>
+                      <button
+                        role="switch"
+                        aria-checked={on}
+                        aria-label={`Mostrar ${p.name} en ${sede.name}`}
+                        onClick={() => toggle("visible", p)}
+                        className={`relative h-5 w-9 shrink-0 rounded-full transition ${on ? "bg-accent" : "bg-line"}`}
+                      >
+                        <span className={`absolute top-0.5 h-4 w-4 rounded-full bg-white shadow transition-all ${on ? "left-[18px]" : "left-0.5"}`} />
+                      </button>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+          ))}
+        </div>
+        <ExecLog log={st.log} empty="Cambia algo del menú de una sede…" className="h-28" />
+      </section>
+
+      {/* Lo que ve el cliente al escanear el QR */}
+      <aside className="flex flex-col gap-3 border-t border-line p-4 lg:min-h-0 lg:overflow-y-auto lg:border-l lg:border-t-0">
+        <div className="flex items-center gap-3 rounded-2xl border border-line p-3">
+          <FakeQr seed={sede.slug} />
+          <div className="min-w-0 text-xs">
+            <p className="font-semibold">QR y enlace de {sede.name}</p>
+            <p className="truncate font-mono text-[10px] text-muted">contagracia.com/menu/…/{sede.slug}</p>
+            <p className="mt-1 text-[10px] text-muted">Cada sede tiene su propio enlace. QR ilustrativo.</p>
+          </div>
+        </div>
+
+        {/* Celular con el menú público (mismo diseño que en producción) */}
+        <div className="mx-auto w-full max-w-[330px] rounded-[2rem] border-[6px] border-[#1f2328] bg-[#f6f7f9] shadow-2xl">
+          <div className="overflow-hidden rounded-[1.6rem] text-[#111827]">
+            <div className="flex items-start justify-between gap-2 border-b border-black/10 bg-white px-3 py-2.5">
+              <div className="min-w-0">
+                <p className="truncate text-sm font-semibold">{sede.name}</p>
+                <p className="truncate text-[10px] text-gray-500">📍 {sede.address}</p>
+              </div>
+            </div>
+            <div className="flex gap-1.5 bg-white px-3 pb-2.5">
+              {SECTIONS.map((sec) => (
+                <button
+                  key={sec}
+                  onClick={() => setSection(sec)}
+                  className={`rounded-full px-2.5 py-1 text-[10px] font-semibold transition ${section === sec ? "bg-[#F97316] text-white" : "bg-gray-100 text-gray-600"}`}
+                >
+                  {sec}
+                </button>
+              ))}
+            </div>
+            <div className="h-[340px] overflow-y-auto px-3 py-3">
+              <div className="mb-2 flex items-center justify-between">
+                <p className="text-xs font-bold">{section}</p>
+                <span className="rounded-full bg-gray-200 px-1.5 text-[10px] text-gray-500">{count(section)}</span>
+              </div>
+              <input
+                value={search}
+                onChange={(e) => setSearch(e.target.value)}
+                placeholder="Buscar…"
+                className="mb-3 w-full rounded-full border border-[#F97316] bg-white px-3 py-1.5 text-[11px] text-gray-800 outline-none"
+              />
+              {shown.length === 0 ? (
+                <p className="pt-8 text-center text-[11px] text-gray-400">No hay productos en esta sección.</p>
+              ) : (
+                <div className="grid grid-cols-2 gap-2">
+                  {shown.map((p) => {
+                    const out = st.soldOut[st.sede][p.id];
+                    return (
+                      <div key={p.id} className={`animate-pop overflow-hidden rounded-xl border border-black/10 bg-white ${out ? "opacity-60" : ""}`}>
+                        <div className="relative grid h-14 place-items-center bg-gray-100 text-lg">
+                          🍽️
+                          {out && <span className="absolute right-1 top-1 rounded-full bg-[#EF4444] px-1.5 text-[8px] font-bold text-white">Agotado</span>}
+                        </div>
+                        <div className="p-2">
+                          <p className="truncate text-[11px] font-semibold">{p.name}</p>
+                          <p className="line-clamp-2 text-[9px] text-gray-500">{p.desc}</p>
+                          <p className="mt-1 text-[11px] font-bold text-[#F97316]">{copMenu(p.price)}</p>
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+
+        <ProdLink
+          href={MENU_URL}
+          title="Menú público de una sede"
+          description="Ejemplo real del menú por QR o enlace. El cliente lo consulta; el pedido lo toma el mesero."
+        />
+      </aside>
+    </div>
+  );
+}
+
+// QR decorativo (no escaneable): patrones de esquina + módulos pseudoaleatorios según la sede
+function FakeQr({ seed }) {
+  const n = 21;
+  let h = [...seed].reduce((a, c) => (a * 31 + c.charCodeAt(0)) >>> 0, 7);
+  const rand = () => (h = (h * 1103515245 + 12345) >>> 0) / 2 ** 32;
+  const finder = (r, c) => {
+    for (const [r0, c0] of [
+      [0, 0],
+      [0, n - 7],
+      [n - 7, 0],
+    ]) {
+      if (r >= r0 && r < r0 + 7 && c >= c0 && c < c0 + 7) {
+        const rr = r - r0;
+        const cc = c - c0;
+        return rr === 0 || rr === 6 || cc === 0 || cc === 6 || (rr >= 2 && rr <= 4 && cc >= 2 && cc <= 4) ? 1 : 0;
+      }
+    }
+    return -1;
+  };
+  const cells = [];
+  for (let r = 0; r < n; r++)
+    for (let c = 0; c < n; c++) {
+      const f = finder(r, c);
+      if (f === 1 || (f === -1 && rand() > 0.55)) cells.push(<rect key={`${r}-${c}`} x={c} y={r} width="1" height="1" />);
+    }
+  return (
+    <svg viewBox={`-1 -1 ${n + 2} ${n + 2}`} className="h-16 w-16 shrink-0 rounded-md bg-white p-0.5" fill="#111827" aria-hidden="true">
+      {cells}
+    </svg>
   );
 }

@@ -110,7 +110,7 @@ export const contagracia = {
         id: "restaurant",
         title: "Simulador de restaurante y POS",
         subtitle:
-          "Atiende una mesa de punta a punta: arma platos con variantes, adiciones y notas, haz de cocina y cobra en el POS. Mira cuándo se mueve el inventario y la contabilidad.",
+          "Atiende una mesa de punta a punta (platos con variantes, adiciones y notas, cocina, cobro en el POS, inventario y contabilidad) y administra qué muestra el menú público de cada sede.",
       },
     },
     {

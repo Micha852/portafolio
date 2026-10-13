@@ -80,6 +80,28 @@ export function ExecLog({ log, empty = "Esperando la primera acción…", classN
   );
 }
 
+// Enlace a la versión real en producción (se abre aparte porque es otro sitio)
+export function ProdLink({ href, title, description }) {
+  return (
+    <a
+      href={href}
+      target="_blank"
+      rel="noopener noreferrer"
+      className="group block rounded-2xl border border-accent/40 bg-accent/5 p-3 transition hover:border-accent hover:bg-accent/10"
+    >
+      <p className="flex items-center gap-1.5 text-[11px] font-semibold uppercase tracking-widest text-accent">
+        <span className="h-1.5 w-1.5 rounded-full bg-accent" />
+        En producción
+      </p>
+      <p className="mt-1 flex items-center justify-between gap-2 text-sm font-semibold">
+        {title}
+        <Icon name="external" className="h-4 w-4 shrink-0 text-accent transition group-hover:translate-x-0.5" />
+      </p>
+      {description && <p className="mt-0.5 text-xs text-muted">{description}</p>}
+    </a>
+  );
+}
+
 export function Panel({ title, icon, children, className = "" }) {
   return (
     <div className={`rounded-2xl border border-line bg-bg/40 p-3 ${className}`}>
