@@ -1,9 +1,9 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import { createPortal } from "react-dom";
+import { useCallback, useState } from "react";
 import Image from "next/image";
 import { Icon } from "./Icons";
+import Modal from "./Modal";
 
 function SiteCard({ site }) {
   return (
@@ -101,17 +101,7 @@ function MosaicTrigger({ gallery, onOpen }) {
 // Abre un modal con capturas de sitios. variant: "button" | "thumbs" | "mosaic"
 export default function GalleryModal({ gallery, variant = "button" }) {
   const [open, setOpen] = useState(false);
-
-  useEffect(() => {
-    if (!open) return;
-    const onKey = (e) => e.key === "Escape" && setOpen(false);
-    document.addEventListener("keydown", onKey);
-    document.body.style.overflow = "hidden";
-    return () => {
-      document.removeEventListener("keydown", onKey);
-      document.body.style.overflow = "";
-    };
-  }, [open]);
+  const close = useCallback(() => setOpen(false), []);
 
   return (
     <>
@@ -128,46 +118,13 @@ export default function GalleryModal({ gallery, variant = "button" }) {
         </button>
       )}
 
-      {/* Se monta en <body>: dentro de la tarjeta, su transform encerraría al position: fixed */}
-      {open &&
-        createPortal(
-          <div
-            className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 p-4 backdrop-blur-sm sm:p-8"
-            onClick={() => setOpen(false)}
-            role="dialog"
-            aria-modal="true"
-            aria-label={gallery.title}
-          >
-            {/* Tamaño fijo: el encabezado queda arriba y solo la grilla hace scroll */}
-            <div
-              className="relative flex h-[min(85vh,720px)] w-full max-w-5xl flex-col overflow-hidden rounded-3xl border border-line bg-surface shadow-2xl"
-              onClick={(e) => e.stopPropagation()}
-            >
-              <div className="flex shrink-0 items-start gap-4 border-b border-line p-6">
-                <div className="min-w-0">
-                  <h3 className="font-display text-2xl font-bold">{gallery.title}</h3>
-                  {gallery.subtitle && <p className="mt-1 text-sm text-muted">{gallery.subtitle}</p>}
-                </div>
-                <button
-                  onClick={() => setOpen(false)}
-                  aria-label="Cerrar"
-                  className="ml-auto grid h-10 w-10 shrink-0 place-items-center rounded-full border border-line text-muted transition hover:border-accent hover:text-accent"
-                >
-                  <Icon name="close" className="w-5 h-5" />
-                </button>
-              </div>
-
-              <div className="flex-1 overflow-y-auto overscroll-contain p-6">
-                <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-                  {gallery.sites.map((site) => (
-                    <SiteCard key={site.href} site={site} />
-                  ))}
-                </div>
-              </div>
-            </div>
-          </div>,
-          document.body
-        )}
+      <Modal open={open} onClose={close} title={gallery.title} subtitle={gallery.subtitle}>
+        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+          {gallery.sites.map((site) => (
+            <SiteCard key={site.href} site={site} />
+          ))}
+        </div>
+      </Modal>
     </>
   );
 }

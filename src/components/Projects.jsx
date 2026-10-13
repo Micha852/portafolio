@@ -3,6 +3,7 @@ import SectionHeading from "./SectionHeading";
 import Reveal from "./Reveal";
 import { Icon } from "./Icons";
 import GalleryModal from "./GalleryModal";
+import SimulatorModal from "./simulators/SimulatorModal";
 import { contagracia, projects } from "@/data/profile";
 
 function Highlights({ items = [] }) {
@@ -104,6 +105,7 @@ function ModuleCard({ module, index }) {
       <Tags items={module.tags} />
       <Links items={module.links} />
       {module.gallery && <GalleryModal gallery={module.gallery} variant="thumbs" />}
+      {module.simulator && <SimulatorModal simulator={module.simulator} />}
     </Reveal>
   );
 }

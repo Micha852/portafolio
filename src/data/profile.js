@@ -110,6 +110,13 @@ export const contagracia = {
         "Importador de contactos por pasos y health score de clientes",
       ],
       links: [],
+      // Simulador interactivo (src/components/simulators)
+      simulator: {
+        id: "crm",
+        title: "Simulador del CRM",
+        subtitle:
+          "Escribe como cliente y mira cómo corre el flujo real «Ventas por WhatsApp: campaña, equipo comercial e IA». Las respuestas de la IA están guionizadas para la demo.",
+      },
     },
     {
       title: "Automatizaciones tipo n8n",
