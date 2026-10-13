@@ -70,20 +70,8 @@ function ProjectCard({ project, index }) {
             className="object-cover transition duration-500 group-hover:scale-105"
           />
         ) : gallery ? (
-          // Mosaico con las primeras capturas de la galería
-          <div className="absolute inset-0 grid grid-cols-2 grid-rows-2 gap-1 p-1">
-            {gallery.sites.slice(0, 4).map((site) => (
-              <div key={site.href} className="relative overflow-hidden rounded-lg">
-                <Image
-                  src={site.image}
-                  alt=""
-                  fill
-                  sizes="(max-width: 768px) 50vw, 25vw"
-                  className="object-cover object-top transition duration-500 group-hover:scale-105"
-                />
-              </div>
-            ))}
-          </div>
+          // Mosaico clicable que abre la galería
+          <GalleryModal gallery={gallery} variant="mosaic" />
         ) : (
           <div className="absolute inset-0 grid place-items-center bg-gradient-to-br from-accent/20 via-bg to-warm/15">
             <span className="font-display text-4xl font-bold text-ink/20 text-center px-4">{title}</span>
@@ -115,7 +103,7 @@ function ModuleCard({ module, index }) {
       <div className="flex-1" />
       <Tags items={module.tags} />
       <Links items={module.links} />
-      {module.gallery && <GalleryModal gallery={module.gallery} />}
+      {module.gallery && <GalleryModal gallery={module.gallery} variant="thumbs" />}
     </Reveal>
   );
 }
