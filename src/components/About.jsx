@@ -35,45 +35,41 @@ export default function About() {
             )}
           </div>
 
-          <div className="grid grid-cols-3 md:grid-cols-1 gap-4 content-start">
-            {profile.stats.map((s, i) => (
-              <Reveal key={s.label} delay={i * 120} className="rounded-2xl border border-line bg-surface p-5">
-                <p className="font-display text-3xl sm:text-4xl font-bold text-accent">{s.value}</p>
-                <p className="mt-1 text-sm text-muted">{s.label}</p>
-              </Reveal>
-            ))}
-          </div>
-        </div>
+          <div className="space-y-4">
+            <div className="grid grid-cols-2 gap-4">
+              {profile.stats.map((s, i) => (
+                <Reveal key={s.label} delay={i * 120} className="rounded-2xl border border-line bg-surface p-5">
+                  <p className="font-display whitespace-nowrap text-2xl font-bold text-accent sm:text-3xl">{s.value}</p>
+                  <p className="mt-1 text-sm text-muted">{s.label}</p>
+                  {s.detail && <p className="mt-1 text-xs font-semibold text-warm">{s.detail}</p>}
+                </Reveal>
+              ))}
+            </div>
 
-        {profile.setups?.length > 0 && (
-          <div className="mt-20">
-            <Reveal className="mb-8">
-              <h3 className="font-display text-2xl sm:text-3xl font-bold">Entornos de desarrollo</h3>
-              <p className="mt-2 text-muted">Donde paso el día construyendo.</p>
-            </Reveal>
-            <div className="grid gap-6 md:grid-cols-2">
-              {profile.setups.map((s, i) => (
-                <Reveal key={s.image} delay={i * 120}>
-                  <figure className="group overflow-hidden rounded-3xl border border-line bg-surface">
-                    <div className="relative aspect-video overflow-hidden">
+            {profile.setups?.length > 0 && (
+              <Reveal delay={240} className="pt-2">
+                <h3 className="font-display text-base font-semibold text-ink mb-3">Entornos de desarrollo</h3>
+                <div className="space-y-4">
+                  {profile.setups.map((s) => (
+                    <figure key={s.image} className="group relative aspect-video overflow-hidden rounded-2xl border border-line">
                       <Image
                         src={s.image}
                         alt={s.title}
                         fill
-                        sizes="(max-width: 768px) 100vw, 50vw"
+                        sizes="(max-width: 768px) 100vw, 420px"
                         className="object-cover transition duration-700 group-hover:scale-105"
                       />
-                    </div>
-                    <figcaption className="p-5">
-                      <p className="font-display text-lg font-bold">{s.title}</p>
-                      <p className="mt-1 text-sm text-muted">{s.caption}</p>
-                    </figcaption>
-                  </figure>
-                </Reveal>
-              ))}
-            </div>
+                      <figcaption className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/85 via-black/50 to-transparent px-4 pb-3 pt-10">
+                        <p className="font-display text-sm font-bold text-white">{s.title}</p>
+                        <p className="text-xs text-white/75">{s.caption}</p>
+                      </figcaption>
+                    </figure>
+                  ))}
+                </div>
+              </Reveal>
+            )}
           </div>
-        )}
+        </div>
       </div>
     </section>
   );

@@ -22,12 +22,14 @@ export const profile = {
     "Soy Ingeniero de Sistemas y desarrollador Full Stack. Trabajo en todo el ciclo del software: desde levantar requerimientos con los usuarios hasta desplegar, mantener y mejorar plataformas en producción.",
     "Me especializo en aplicaciones web, integración de APIs REST, automatización de procesos y bases de datos relacionales y NoSQL. Mi experiencia como analista funcional y en UX me ayuda a construir herramientas que la gente realmente entiende y usa.",
   ],
+  // Insignia junto a la foto del inicio
+  heroBadge: { value: "2+", label: "Años de experiencia" },
+  // Cifras de la sección Sobre mí
   stats: [
-    { value: "2+", label: "Años de experiencia" },
     { value: "3.9k+", label: "Commits en Contagracia" },
-    { value: "1.º", label: "Maratón de Programación 2025" },
+    { value: "2 podios", label: "Maratón de Programación", detail: "1.º 2025 · 3.º 2024-1" },
   ],
-  // Fotos de los espacios de trabajo (sección "Entornos de desarrollo" en Sobre mí)
+  // Fotos de los espacios de trabajo (columna derecha de Sobre mí)
   setups: [
     {
       title: "Estación principal",
@@ -44,7 +46,8 @@ export const profile = {
     { title: "Primer lugar — Maratón de Programación Competitiva 2025", detail: "Universidad de la Amazonia" },
     { title: "Tercer lugar — Maratón de Programación Competitiva 2024-1", detail: "Universidad de la Amazonia" },
     { title: "Matrícula Profesional COPNIA", detail: "Ingeniero de Sistemas · 2026" },
-    { title: "NDG Linux Essentials y Linux Unhatched", detail: "Cisco Networking Academy · 2022" },
+    { title: "Linux Essentials — fundamentos de Linux, nivel básico a intermedio", detail: "Cisco Networking Academy (NDG) · 2022" },
+    { title: "Linux Unhatched — curso de introducción a Linux", detail: "Cisco Networking Academy (NDG) · 2022" },
     { title: "Idiomas", detail: "Español nativo · Inglés B1 (lectura técnica y documentación)" },
   ],
 };
