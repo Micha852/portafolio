@@ -27,8 +27,13 @@ module.exports = {
           "0%, 49%": { opacity: 1 },
           "50%, 100%": { opacity: 0 },
         },
+        pop: {
+          "0%": { opacity: 0, transform: "scale(0.9) translateY(6px)" },
+          "100%": { opacity: 1, transform: "none" },
+        },
       },
       animation: {
+        pop: "pop 0.45s ease-out",
         float: "float 7s ease-in-out infinite",
         blink: "blink 1s step-end infinite",
       },

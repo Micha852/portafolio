@@ -115,7 +115,7 @@ export const contagracia = {
         id: "crm",
         title: "Simulador del CRM",
         subtitle:
-          "Escribe como cliente y mira cómo corre el flujo real «Ventas por WhatsApp: campaña, equipo comercial e IA». Las respuestas de la IA están guionizadas para la demo.",
+          "Haz de cliente: mira cómo corre el flujo real «Ventas por WhatsApp: campaña, equipo comercial e IA» y cómo avanza la oportunidad hasta cerrarse. Las respuestas están guionizadas para la demo.",
       },
     },
     {

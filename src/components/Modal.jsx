@@ -6,7 +6,7 @@ import { Icon } from "./Icons";
 
 const sizes = {
   md: "h-[min(85vh,720px)] max-w-5xl",
-  lg: "h-[min(90vh,780px)] max-w-6xl",
+  lg: "h-[min(92vh,840px)] max-w-[1360px]",
 };
 
 // Modal de tamaño fijo: encabezado arriba y el cuerpo maneja su propio scroll.
@@ -40,7 +40,7 @@ export default function Modal({ open, onClose, title, subtitle, size = "md", bod
         <div className="flex shrink-0 items-start gap-4 border-b border-line px-6 py-5">
           <div className="min-w-0">
             <h3 className="font-display text-xl font-bold sm:text-2xl">{title}</h3>
-            {subtitle && <p className="mt-1 text-sm text-muted">{subtitle}</p>}
+            {subtitle && <p className="mt-1 line-clamp-2 text-sm text-muted sm:line-clamp-none">{subtitle}</p>}
           </div>
           <button
             onClick={onClose}
