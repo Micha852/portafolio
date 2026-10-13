@@ -157,6 +157,12 @@ export const contagracia = {
       ],
       tags: ["OpenAI", "Anthropic", "Gemini", "DeepSeek"],
       links: [],
+      simulator: {
+        id: "ai",
+        title: "Simulador de la capa de IA",
+        subtitle:
+          "Configura proveedores y modelos con respaldo, pregúntale a Gracia (el chat que detecta el módulo) y procesa extractos bancarios: la IA genera la plantilla una vez y luego se leen sin IA hasta conciliar.",
+      },
     },
     {
       title: "CMS, landings y tienda en línea",

@@ -13,6 +13,7 @@ const simulators = {
   restaurant: dynamic(() => import("./RestaurantSimulator"), { ssr: false, loading }),
   ph: dynamic(() => import("./PhSimulator"), { ssr: false, loading }),
   automations: dynamic(() => import("./AutomationsSimulator"), { ssr: false, loading }),
+  ai: dynamic(() => import("./AiSimulator"), { ssr: false, loading }),
 };
 
 export default function SimulatorModal({ simulator }) {
