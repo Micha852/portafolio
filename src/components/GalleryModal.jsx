@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { createPortal } from "react-dom";
 import Image from "next/image";
 import { Icon } from "./Icons";
 
@@ -64,7 +65,9 @@ export default function GalleryModal({ gallery }) {
         Ver {gallery.sites.length} sitios
       </button>
 
-      {open && (
+      {/* Se monta en <body>: dentro de la tarjeta, su transform encerraría al position: fixed */}
+      {open &&
+        createPortal(
         <div
           className="fixed inset-0 z-50 overflow-y-auto bg-black/70 backdrop-blur-sm"
           onClick={() => setOpen(false)}
@@ -96,8 +99,9 @@ export default function GalleryModal({ gallery }) {
             </div>
           </div>
           </div>
-        </div>
-      )}
+        </div>,
+          document.body
+        )}
     </>
   );
 }
