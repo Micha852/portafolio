@@ -1,3 +1,4 @@
+import Image from "next/image";
 import SectionHeading from "./SectionHeading";
 import Reveal from "./Reveal";
 import { profile } from "@/data/profile";
@@ -34,7 +35,7 @@ export default function About() {
             )}
           </div>
 
-          <div className="grid grid-cols-3 md:grid-cols-1 gap-4">
+          <div className="grid grid-cols-3 md:grid-cols-1 gap-4 content-start">
             {profile.stats.map((s, i) => (
               <Reveal key={s.label} delay={i * 120} className="rounded-2xl border border-line bg-surface p-5">
                 <p className="font-display text-3xl sm:text-4xl font-bold text-accent">{s.value}</p>
@@ -43,6 +44,36 @@ export default function About() {
             ))}
           </div>
         </div>
+
+        {profile.setups?.length > 0 && (
+          <div className="mt-20">
+            <Reveal className="mb-8">
+              <h3 className="font-display text-2xl sm:text-3xl font-bold">Entornos de desarrollo</h3>
+              <p className="mt-2 text-muted">Donde paso el día construyendo.</p>
+            </Reveal>
+            <div className="grid gap-6 md:grid-cols-2">
+              {profile.setups.map((s, i) => (
+                <Reveal key={s.image} delay={i * 120}>
+                  <figure className="group overflow-hidden rounded-3xl border border-line bg-surface">
+                    <div className="relative aspect-video overflow-hidden">
+                      <Image
+                        src={s.image}
+                        alt={s.title}
+                        fill
+                        sizes="(max-width: 768px) 100vw, 50vw"
+                        className="object-cover transition duration-700 group-hover:scale-105"
+                      />
+                    </div>
+                    <figcaption className="p-5">
+                      <p className="font-display text-lg font-bold">{s.title}</p>
+                      <p className="mt-1 text-sm text-muted">{s.caption}</p>
+                    </figcaption>
+                  </figure>
+                </Reveal>
+              ))}
+            </div>
+          </div>
+        )}
       </div>
     </section>
   );

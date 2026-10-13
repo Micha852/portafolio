@@ -27,6 +27,19 @@ export const profile = {
     { value: "3.9k+", label: "Commits en Contagracia" },
     { value: "1.º", label: "Maratón de Programación 2025" },
   ],
+  // Fotos de los espacios de trabajo (sección "Entornos de desarrollo" en Sobre mí)
+  setups: [
+    {
+      title: "Estación principal",
+      caption: "Monitor con el editor de automatizaciones de Contagracia y la laptop con el código.",
+      image: "/setup/estacion-principal.webp",
+    },
+    {
+      title: "Segundo puesto",
+      caption: "Doble pantalla: código a la izquierda y este portafolio a la derecha.",
+      image: "/setup/segundo-puesto.webp",
+    },
+  ],
   highlights: [
     { title: "Primer lugar — Maratón de Programación Competitiva 2025", detail: "Universidad de la Amazonia" },
     { title: "Tercer lugar — Maratón de Programación Competitiva 2024-1", detail: "Universidad de la Amazonia" },

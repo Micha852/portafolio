@@ -131,38 +131,41 @@ export default function GalleryModal({ gallery, variant = "button" }) {
       {/* Se monta en <body>: dentro de la tarjeta, su transform encerraría al position: fixed */}
       {open &&
         createPortal(
-        <div
-          className="fixed inset-0 z-50 overflow-y-auto bg-black/70 backdrop-blur-sm"
-          onClick={() => setOpen(false)}
-          role="dialog"
-          aria-modal="true"
-          aria-label={gallery.title}
-        >
-          {/* min-h-full centra el panel si cabe, y si es más alto deja hacer scroll desde arriba */}
-          <div className="flex min-h-full items-center justify-center p-4 sm:p-8">
           <div
-            className="relative w-full max-w-6xl rounded-3xl border border-line bg-surface p-6 shadow-2xl sm:p-8"
-            onClick={(e) => e.stopPropagation()}
+            className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 p-4 backdrop-blur-sm sm:p-8"
+            onClick={() => setOpen(false)}
+            role="dialog"
+            aria-modal="true"
+            aria-label={gallery.title}
           >
-            <button
-              onClick={() => setOpen(false)}
-              aria-label="Cerrar"
-              className="absolute right-4 top-4 grid h-10 w-10 place-items-center rounded-full border border-line text-muted transition hover:border-accent hover:text-accent"
+            {/* Tamaño fijo: el encabezado queda arriba y solo la grilla hace scroll */}
+            <div
+              className="relative flex h-[min(85vh,720px)] w-full max-w-5xl flex-col overflow-hidden rounded-3xl border border-line bg-surface shadow-2xl"
+              onClick={(e) => e.stopPropagation()}
             >
-              <Icon name="close" className="w-5 h-5" />
-            </button>
+              <div className="flex shrink-0 items-start gap-4 border-b border-line p-6">
+                <div className="min-w-0">
+                  <h3 className="font-display text-2xl font-bold">{gallery.title}</h3>
+                  {gallery.subtitle && <p className="mt-1 text-sm text-muted">{gallery.subtitle}</p>}
+                </div>
+                <button
+                  onClick={() => setOpen(false)}
+                  aria-label="Cerrar"
+                  className="ml-auto grid h-10 w-10 shrink-0 place-items-center rounded-full border border-line text-muted transition hover:border-accent hover:text-accent"
+                >
+                  <Icon name="close" className="w-5 h-5" />
+                </button>
+              </div>
 
-            <h3 className="font-display pr-12 text-2xl font-bold sm:text-3xl">{gallery.title}</h3>
-            {gallery.subtitle && <p className="mt-2 max-w-2xl text-muted">{gallery.subtitle}</p>}
-
-            <div className="mt-6 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
-              {gallery.sites.map((site) => (
-                <SiteCard key={site.href} site={site} />
-              ))}
+              <div className="flex-1 overflow-y-auto overscroll-contain p-6">
+                <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+                  {gallery.sites.map((site) => (
+                    <SiteCard key={site.href} site={site} />
+                  ))}
+                </div>
+              </div>
             </div>
-          </div>
-          </div>
-        </div>,
+          </div>,
           document.body
         )}
     </>
