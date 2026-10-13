@@ -121,6 +121,60 @@ function ContagraciaShowcase() {
   );
 }
 
+function Showcase() {
+  const sites = contagracia.showcase ?? [];
+  if (sites.length === 0) return null;
+
+  return (
+    <div className="mt-16">
+      <Reveal className="mb-8 max-w-2xl">
+        <p className="text-xs font-semibold uppercase tracking-widest text-warm">Resultados reales</p>
+        <h3 className="font-display mt-2 text-2xl sm:text-3xl font-bold">Sitios creados con el CMS de Contagracia</h3>
+        <p className="mt-3 text-muted">
+          Negocios de distintos sectores que publican su sitio y su tienda en línea con el CMS que desarrollé.
+        </p>
+      </Reveal>
+
+      <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+        {sites.map((site, i) => (
+          <Reveal key={site.href} delay={(i % 3) * 100}>
+            <a
+              href={site.href}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="group block overflow-hidden rounded-2xl border border-line bg-surface transition duration-300 hover:-translate-y-1 hover:border-accent/60 hover:shadow-2xl hover:shadow-accent/10"
+            >
+              {/* Barra de navegador para que se lea como un sitio web */}
+              <div className="flex items-center gap-1.5 border-b border-line px-3 py-2">
+                <span className="h-2 w-2 rounded-full bg-line" />
+                <span className="h-2 w-2 rounded-full bg-line" />
+                <span className="h-2 w-2 rounded-full bg-line" />
+                <span className="ml-2 truncate text-[11px] text-muted">{site.href.replace(/^https?:\/\/|\/$/g, "")}</span>
+              </div>
+              <div className="relative aspect-[16/10] overflow-hidden">
+                <Image
+                  src={site.image}
+                  alt={`Sitio web de ${site.name}`}
+                  fill
+                  sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
+                  className="object-cover object-top transition duration-500 group-hover:scale-105"
+                />
+              </div>
+              <div className="flex items-center justify-between gap-3 px-4 py-3">
+                <div className="min-w-0">
+                  <p className="truncate font-semibold">{site.name}</p>
+                  <p className="text-xs text-muted">{site.category}</p>
+                </div>
+                <Icon name="external" className="w-4 h-4 shrink-0 text-muted transition group-hover:text-accent" />
+              </div>
+            </a>
+          </Reveal>
+        ))}
+      </div>
+    </div>
+  );
+}
+
 export default function Projects() {
   return (
     <section id="proyectos" className="py-24">
@@ -128,6 +182,7 @@ export default function Projects() {
         <SectionHeading number="02" title="Proyectos" subtitle="Productos en los que he trabajado de punta a punta." />
 
         <ContagraciaShowcase />
+        <Showcase />
 
         <Reveal className="mt-20 mb-8">
           <h3 className="font-display text-2xl sm:text-3xl font-bold">Otros proyectos</h3>

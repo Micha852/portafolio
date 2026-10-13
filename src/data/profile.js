@@ -122,12 +122,25 @@ export const contagracia = {
       description: "Gestor de contenido propio para editar las landings de cada producto, el blog y las pantallas de acceso sin tocar código.",
       highlights: [
         "Landings de ERP, PH, restaurantes y contadores editables desde el CMS",
+        "Negocios reales publican su propio sitio con él (ver galería abajo)",
         "Tienda en línea con plantillas, filtros, scroll infinito y SEO con JSON-LD",
         "Integración con Tiendanube: OAuth, webhooks firmados y recepción de pedidos",
       ],
       tags: ["Tiptap"],
       links: [],
     },
+  ],
+  // Sitios reales de clientes hechos con el CMS y la tienda de Contagracia
+  showcase: [
+    { name: "NovaTech", category: "Tecnología y accesorios", href: "https://novatech.contagracia.com/", image: "/showcase/novatech.webp" },
+    { name: "CS Supplements", category: "Suplementos naturales", href: "https://cssupplements.contagracia.com/", image: "/showcase/cssupplements.webp" },
+    { name: "Restaurante de Charles", category: "Restaurante", href: "https://restaurantedecharles.contagracia.com/", image: "/showcase/restaurantedecharles.webp" },
+    { name: "Ferrocafé Hermanos Java", category: "Ferretería", href: "https://ferrocafe.contagracia.com/", image: "/showcase/ferrocafe.webp" },
+    { name: "Kany Hernández", category: "Salud y bienestar", href: "https://kany-hernandez.contagracia.com/", image: "/showcase/kany-hernandez.webp" },
+    { name: "Maili Spa Cosmetics", category: "Belleza y cosmética", href: "https://meili.contagracia.com/", image: "/showcase/meili.webp" },
+    { name: "Melissa Zarene", category: "Vestidos de novia", href: "https://vestidosdenoviamz.contagracia.com/", image: "/showcase/vestidosdenoviamz.webp" },
+    { name: "Prieto & Asociadas SAS", category: "Asesoría contable", href: "https://priasas.contagracia.com/", image: "/showcase/priasas.webp" },
+    { name: "DAH Solar Colombia", category: "Energía solar", href: "https://dahsolar.contagracia.com/", image: "/showcase/dahsolar.webp" },
   ],
 };
 
