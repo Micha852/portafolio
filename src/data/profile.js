@@ -206,7 +206,7 @@ export const projects = [
       "Extractos bancarios con IA y OCR para PDFs escaneados",
       "Planes y suscripciones, anticipos, PILA y conciliación bancaria",
     ],
-    image: "",
+    image: "/projects/facturafacil.webp",
     tags: ["Laravel", "PHP", "Vue.js", "Element UI", "MySQL", "IA"],
     links: [{ label: "facturafacil.com.co", href: "https://facturafacil.com.co", icon: "external" }],
     featured: true,
@@ -215,7 +215,7 @@ export const projects = [
     title: "Herbario Digital HUAZ 2.0",
     description:
       "Plataforma para la colección botánica del Herbario de la Universidad de la Amazonia: muestras con taxonomía, imágenes, mapa de recolección, importación y exportación Darwin Core (SiB Colombia / GBIF), fichas y etiquetas en PDF, roles con permisos y un CMS para el sitio público.",
-    image: "",
+    image: "/projects/herbario.webp",
     tags: ["Next.js", "TypeScript", "NestJS", "Prisma", "PostgreSQL", "Leaflet", "Docker"],
     links: [{ label: "herbariohuaz.com", href: "https://herbariohuaz.com/consultas", icon: "external" }],
   },
@@ -232,7 +232,7 @@ export const projects = [
       sites: [
         { name: "Arawana Studio", category: "Agencia de marketing digital", href: "https://arawanahomestudio.com", image: "/web/arawana.webp" },
         { name: "PrometeonDev", category: "Desarrollo de software", href: "https://prometeondev.com", image: "/web/prometeon.webp" },
-        { name: "Red Digital Noticias", category: "Portal de noticias", href: "https://reddigitalnoticias.co", image: "/web/reddigital.webp" },
+        { name: "Red Digital Noticias", category: "Portal de noticias", href: "https://reddigitalnoticias.co", image: "/web/reddigital-caqueta.webp" },
         { name: "Global Play Zone", category: "Juego de billar en línea", href: "https://globalplayzone.com", image: "/web/globalplayzone.webp" },
         { name: "Dalujo CRM", category: "CRM de ventas y conversaciones", href: "https://dalujo-front.prometeondev.com", image: "/web/dalujo.webp" },
         { name: "Dr. Gilberto Rincón", category: "Psiquiatría · landing", href: "https://gilberto-landing.vercel.app", image: "/web/gilberto.webp" },

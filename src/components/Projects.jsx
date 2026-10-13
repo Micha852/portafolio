@@ -68,7 +68,7 @@ function ProjectCard({ project, index }) {
             alt={title}
             fill
             sizes="(max-width: 768px) 100vw, 60vw"
-            className="object-cover transition duration-500 group-hover:scale-105"
+            className="object-cover object-left-top transition duration-500 group-hover:scale-105"
           />
         ) : gallery ? (
           // Mosaico clicable que abre la galería

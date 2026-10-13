@@ -1090,7 +1090,7 @@ function SedesMenu() {
         <ProdLink
           href={MENU_URL}
           title="Menú público de una sede"
-          description="Ejemplo real del menú por QR o enlace. El cliente lo consulta; el pedido lo toma el mesero."
+          description="Menú de una sede de prueba en producción: así se ve el enlace público por QR. El cliente lo consulta; el pedido lo toma el mesero."
         />
       </aside>
     </div>
