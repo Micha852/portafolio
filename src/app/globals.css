@@ -104,3 +104,56 @@ body {
     animation: none;
   }
 }
+
+/* Recorrido de simuladores (driver.js) con los colores del sitio */
+.driver-popover.tour-popover {
+  background: rgb(var(--surface));
+  color: rgb(var(--ink));
+  border: 1px solid rgb(var(--warm) / 0.4);
+  border-radius: 1rem;
+  max-width: 340px;
+}
+.tour-popover .driver-popover-title {
+  font-family: var(--font-display);
+  font-size: 1.05rem;
+}
+.tour-popover .driver-popover-description,
+.tour-popover .driver-popover-progress-text {
+  color: rgb(var(--muted));
+}
+.tour-popover .driver-popover-footer button {
+  font-size: 12px;
+  background: transparent;
+  color: rgb(var(--ink));
+  border: 1px solid rgb(var(--line));
+  border-radius: 9999px;
+  padding: 4px 12px;
+  text-shadow: none;
+}
+.tour-popover .tour-try {
+  display: block;
+  width: 100%;
+  margin-top: 12px;
+  padding: 8px 12px;
+  border-radius: 9999px;
+  background: rgb(var(--warm));
+  color: rgb(var(--bg));
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+}
+.tour-popover .tour-try:hover {
+  filter: brightness(1.1);
+}
+.tour-popover .driver-popover-footer button {
+  white-space: nowrap;
+}
+.tour-popover .driver-popover-close-btn {
+  color: rgb(var(--muted));
+}
+.tour-popover .driver-popover-arrow-side-top.driver-popover-arrow {
+  border-top-color: rgb(var(--surface));
+}
+.tour-popover .driver-popover-arrow-side-bottom.driver-popover-arrow {
+  border-bottom-color: rgb(var(--surface));
+}

@@ -8,6 +8,7 @@
     "start": "next start -p 4321"
   },
   "dependencies": {
+    "driver.js": "^1.3.6",
     "next": "15.5.4",
     "nodemailer": "^6.10.1",
     "react": "19.1.1",

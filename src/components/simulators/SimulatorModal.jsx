@@ -25,6 +25,7 @@ export default function SimulatorModal({ simulator }) {
   return (
     <>
       <button
+        data-tour={`sim-${simulator.id}`}
         onClick={() => setOpen(true)}
         className="group/sim mt-5 inline-flex items-center gap-2 self-start rounded-full border border-warm/50 bg-warm/10 px-4 py-2 text-sm font-semibold text-warm transition hover:border-warm hover:bg-warm hover:text-bg"
       >
