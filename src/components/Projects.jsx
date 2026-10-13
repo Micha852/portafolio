@@ -57,12 +57,19 @@ const cardClass =
   "group flex flex-col overflow-hidden rounded-3xl border border-line bg-surface transition duration-300 hover:-translate-y-1 hover:border-accent/60 hover:shadow-2xl hover:shadow-accent/10";
 
 function ProjectCard({ project, index }) {
-  const { title, description, highlights, image, tags, links, featured, gallery } = project;
+  const { title, description, highlights, image, imageMobile, tags, links, featured, gallery } = project;
 
   return (
     <Reveal delay={(index % 3) * 120} className={`${cardClass} ${featured ? "md:col-span-2 md:flex-row" : ""}`}>
-      <div className={`relative aspect-video overflow-hidden bg-bg ${featured ? "md:aspect-auto md:w-2/5 md:shrink-0" : ""}`}>
-        {image ? (
+      <div className={`relative overflow-hidden bg-bg ${imageMobile ? "h-80" : "aspect-video"} ${featured ? "md:aspect-auto md:h-auto md:min-h-[440px] md:w-2/5 md:shrink-0" : ""}`}>
+        {imageMobile ? (
+          // Captura de celular dentro de un marco de teléfono, sobre un degradado
+          <div className="absolute inset-0 flex items-center justify-center overflow-hidden bg-gradient-to-br from-accent/25 via-bg to-warm/20 py-6">
+            <div className="relative h-full max-h-[420px] aspect-[9/19.5] overflow-hidden rounded-[1.8rem] border-[6px] border-[#1f2328] bg-[#1f2328] shadow-2xl transition duration-500 group-hover:-translate-y-1 group-hover:rotate-[-1deg]">
+              <Image src={imageMobile} alt={title} fill sizes="240px" className="object-cover object-top" />
+            </div>
+          </div>
+        ) : image ? (
           <Image
             src={image}
             alt={title}

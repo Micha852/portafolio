@@ -207,6 +207,8 @@ export const projects = [
       "Planes y suscripciones, anticipos, PILA y conciliación bancaria",
     ],
     image: "/projects/facturafacil.webp",
+    // Se muestra en un marco de celular para que no se corte
+    imageMobile: "/projects/facturafacil-movil.webp",
     tags: ["Laravel", "PHP", "Vue.js", "Element UI", "MySQL", "IA"],
     links: [{ label: "facturafacil.com.co", href: "https://facturafacil.com.co", icon: "external" }],
     featured: true,
