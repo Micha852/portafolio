@@ -2,6 +2,7 @@ import Image from "next/image";
 import SectionHeading from "./SectionHeading";
 import Reveal from "./Reveal";
 import { Icon } from "./Icons";
+import GalleryModal from "./GalleryModal";
 import { contagracia, projects } from "@/data/profile";
 
 function Highlights({ items = [] }) {
@@ -55,7 +56,7 @@ const cardClass =
   "group flex flex-col overflow-hidden rounded-3xl border border-line bg-surface transition duration-300 hover:-translate-y-1 hover:border-accent/60 hover:shadow-2xl hover:shadow-accent/10";
 
 function ProjectCard({ project, index }) {
-  const { title, description, highlights, image, tags, links, featured } = project;
+  const { title, description, highlights, image, tags, links, featured, gallery } = project;
 
   return (
     <Reveal delay={(index % 3) * 120} className={`${cardClass} ${featured ? "md:col-span-2 md:flex-row" : ""}`}>
@@ -68,6 +69,21 @@ function ProjectCard({ project, index }) {
             sizes="(max-width: 768px) 100vw, 60vw"
             className="object-cover transition duration-500 group-hover:scale-105"
           />
+        ) : gallery ? (
+          // Mosaico con las primeras capturas de la galería
+          <div className="absolute inset-0 grid grid-cols-2 grid-rows-2 gap-1 p-1">
+            {gallery.sites.slice(0, 4).map((site) => (
+              <div key={site.href} className="relative overflow-hidden rounded-lg">
+                <Image
+                  src={site.image}
+                  alt=""
+                  fill
+                  sizes="(max-width: 768px) 50vw, 25vw"
+                  className="object-cover object-top transition duration-500 group-hover:scale-105"
+                />
+              </div>
+            ))}
+          </div>
         ) : (
           <div className="absolute inset-0 grid place-items-center bg-gradient-to-br from-accent/20 via-bg to-warm/15">
             <span className="font-display text-4xl font-bold text-ink/20 text-center px-4">{title}</span>
@@ -83,6 +99,7 @@ function ProjectCard({ project, index }) {
         <div className="flex-1" />
         <Tags items={tags} />
         <Links items={links} />
+        {gallery && <GalleryModal gallery={gallery} />}
       </div>
     </Reveal>
   );
@@ -98,6 +115,7 @@ function ModuleCard({ module, index }) {
       <div className="flex-1" />
       <Tags items={module.tags} />
       <Links items={module.links} />
+      {module.gallery && <GalleryModal gallery={module.gallery} />}
     </Reveal>
   );
 }
@@ -121,60 +139,6 @@ function ContagraciaShowcase() {
   );
 }
 
-function Showcase() {
-  const sites = contagracia.showcase ?? [];
-  if (sites.length === 0) return null;
-
-  return (
-    <div className="mt-16">
-      <Reveal className="mb-8 max-w-2xl">
-        <p className="text-xs font-semibold uppercase tracking-widest text-warm">Resultados reales</p>
-        <h3 className="font-display mt-2 text-2xl sm:text-3xl font-bold">Sitios creados con el CMS de Contagracia</h3>
-        <p className="mt-3 text-muted">
-          Negocios de distintos sectores que publican su sitio y su tienda en línea con el CMS que desarrollé.
-        </p>
-      </Reveal>
-
-      <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-        {sites.map((site, i) => (
-          <Reveal key={site.href} delay={(i % 3) * 100}>
-            <a
-              href={site.href}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="group block overflow-hidden rounded-2xl border border-line bg-surface transition duration-300 hover:-translate-y-1 hover:border-accent/60 hover:shadow-2xl hover:shadow-accent/10"
-            >
-              {/* Barra de navegador para que se lea como un sitio web */}
-              <div className="flex items-center gap-1.5 border-b border-line px-3 py-2">
-                <span className="h-2 w-2 rounded-full bg-line" />
-                <span className="h-2 w-2 rounded-full bg-line" />
-                <span className="h-2 w-2 rounded-full bg-line" />
-                <span className="ml-2 truncate text-[11px] text-muted">{site.href.replace(/^https?:\/\/|\/$/g, "")}</span>
-              </div>
-              <div className="relative aspect-[16/10] overflow-hidden">
-                <Image
-                  src={site.image}
-                  alt={`Sitio web de ${site.name}`}
-                  fill
-                  sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
-                  className="object-cover object-top transition duration-500 group-hover:scale-105"
-                />
-              </div>
-              <div className="flex items-center justify-between gap-3 px-4 py-3">
-                <div className="min-w-0">
-                  <p className="truncate font-semibold">{site.name}</p>
-                  <p className="text-xs text-muted">{site.category}</p>
-                </div>
-                <Icon name="external" className="w-4 h-4 shrink-0 text-muted transition group-hover:text-accent" />
-              </div>
-            </a>
-          </Reveal>
-        ))}
-      </div>
-    </div>
-  );
-}
-
 export default function Projects() {
   return (
     <section id="proyectos" className="py-24">
@@ -182,7 +146,6 @@ export default function Projects() {
         <SectionHeading number="02" title="Proyectos" subtitle="Productos en los que he trabajado de punta a punta." />
 
         <ContagraciaShowcase />
-        <Showcase />
 
         <Reveal className="mt-20 mb-8">
           <h3 className="font-display text-2xl sm:text-3xl font-bold">Otros proyectos</h3>

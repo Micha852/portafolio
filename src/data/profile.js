@@ -122,25 +122,29 @@ export const contagracia = {
       description: "Gestor de contenido propio para editar las landings de cada producto, el blog y las pantallas de acceso sin tocar código.",
       highlights: [
         "Landings de ERP, PH, restaurantes y contadores editables desde el CMS",
-        "Negocios reales publican su propio sitio con él (ver galería abajo)",
+        "Negocios reales publican su propio sitio y tienda con él",
         "Tienda en línea con plantillas, filtros, scroll infinito y SEO con JSON-LD",
         "Integración con Tiendanube: OAuth, webhooks firmados y recepción de pedidos",
       ],
       tags: ["Tiptap"],
       links: [],
+      // Sitios reales de clientes hechos con el CMS (se abren en un modal)
+      gallery: {
+        title: "Sitios creados con el CMS de Contagracia",
+        subtitle: "Negocios de distintos sectores que publican su sitio y su tienda en línea con el CMS que desarrollé.",
+        sites: [
+          { name: "NovaTech", category: "Tecnología y accesorios", href: "https://novatech.contagracia.com/", image: "/showcase/novatech.webp" },
+          { name: "CS Supplements", category: "Suplementos naturales", href: "https://cssupplements.contagracia.com/", image: "/showcase/cssupplements.webp" },
+          { name: "Restaurante de Charles", category: "Restaurante", href: "https://restaurantedecharles.contagracia.com/", image: "/showcase/restaurantedecharles.webp" },
+          { name: "Ferrocafé Hermanos Java", category: "Ferretería", href: "https://ferrocafe.contagracia.com/", image: "/showcase/ferrocafe.webp" },
+          { name: "Kany Hernández", category: "Salud y bienestar", href: "https://kany-hernandez.contagracia.com/", image: "/showcase/kany-hernandez.webp" },
+          { name: "Maili Spa Cosmetics", category: "Belleza y cosmética", href: "https://meili.contagracia.com/", image: "/showcase/meili.webp" },
+          { name: "Melissa Zarene", category: "Vestidos de novia", href: "https://vestidosdenoviamz.contagracia.com/", image: "/showcase/vestidosdenoviamz.webp" },
+          { name: "Prieto & Asociadas SAS", category: "Asesoría contable", href: "https://priasas.contagracia.com/", image: "/showcase/priasas.webp" },
+          { name: "DAH Solar Colombia", category: "Energía solar", href: "https://dahsolar.contagracia.com/", image: "/showcase/dahsolar.webp" },
+        ],
+      },
     },
-  ],
-  // Sitios reales de clientes hechos con el CMS y la tienda de Contagracia
-  showcase: [
-    { name: "NovaTech", category: "Tecnología y accesorios", href: "https://novatech.contagracia.com/", image: "/showcase/novatech.webp" },
-    { name: "CS Supplements", category: "Suplementos naturales", href: "https://cssupplements.contagracia.com/", image: "/showcase/cssupplements.webp" },
-    { name: "Restaurante de Charles", category: "Restaurante", href: "https://restaurantedecharles.contagracia.com/", image: "/showcase/restaurantedecharles.webp" },
-    { name: "Ferrocafé Hermanos Java", category: "Ferretería", href: "https://ferrocafe.contagracia.com/", image: "/showcase/ferrocafe.webp" },
-    { name: "Kany Hernández", category: "Salud y bienestar", href: "https://kany-hernandez.contagracia.com/", image: "/showcase/kany-hernandez.webp" },
-    { name: "Maili Spa Cosmetics", category: "Belleza y cosmética", href: "https://meili.contagracia.com/", image: "/showcase/meili.webp" },
-    { name: "Melissa Zarene", category: "Vestidos de novia", href: "https://vestidosdenoviamz.contagracia.com/", image: "/showcase/vestidosdenoviamz.webp" },
-    { name: "Prieto & Asociadas SAS", category: "Asesoría contable", href: "https://priasas.contagracia.com/", image: "/showcase/priasas.webp" },
-    { name: "DAH Solar Colombia", category: "Energía solar", href: "https://dahsolar.contagracia.com/", image: "/showcase/dahsolar.webp" },
   ],
 };
 
@@ -174,14 +178,19 @@ export const projects = [
       "Sitios corporativos, landing pages y plataformas para empresas de marketing, salud, noticias y entretenimiento.",
     image: "",
     tags: ["Next.js", "React", "Tailwind CSS", "SEO"],
-    links: [
-      { label: "arawanahomestudio.com", href: "https://arawanahomestudio.com", icon: "external" },
-      { label: "prometeondev.com", href: "https://prometeondev.com", icon: "external" },
-      { label: "reddigitalnoticias.co", href: "https://reddigitalnoticias.co", icon: "external" },
-      { label: "globalplayzone.com", href: "https://globalplayzone.com", icon: "external" },
-      { label: "dalujo-front.prometeondev.com", href: "https://dalujo-front.prometeondev.com", icon: "external" },
-      { label: "gilberto-landing.vercel.app", href: "https://gilberto-landing.vercel.app", icon: "external" },
-    ],
+    links: [],
+    gallery: {
+      title: "Desarrollo Web",
+      subtitle: "Sitios corporativos, landing pages y plataformas que he construido.",
+      sites: [
+        { name: "Arawana Studio", category: "Agencia de marketing digital", href: "https://arawanahomestudio.com", image: "/web/arawana.webp" },
+        { name: "PrometeonDev", category: "Desarrollo de software", href: "https://prometeondev.com", image: "/web/prometeon.webp" },
+        { name: "Red Digital Noticias", category: "Portal de noticias", href: "https://reddigitalnoticias.co", image: "/web/reddigital.webp" },
+        { name: "Global Play Zone", category: "Juego de billar en línea", href: "https://globalplayzone.com", image: "/web/globalplayzone.webp" },
+        { name: "Dalujo CRM", category: "CRM de ventas y conversaciones", href: "https://dalujo-front.prometeondev.com", image: "/web/dalujo.webp" },
+        { name: "Dr. Gilberto Rincón", category: "Psiquiatría · landing", href: "https://gilberto-landing.vercel.app", image: "/web/gilberto.webp" },
+      ],
+    },
   },
 ];
 
