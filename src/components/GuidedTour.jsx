@@ -15,45 +15,41 @@ const TOUR_TEXT = {
   ai: "Configura proveedores con respaldo, pregúntale al chat que detecta el módulo y procesa extractos bancarios.",
 };
 
-// Invitación opcional que aparece cada vez que se está en #inicio, y recorrido por los simuladores con driver.js
+// Invitación al recorrido por los simuladores (driver.js).
+// mode: "hidden" (aún no aparece) → "card" (invitación completa) → "pill" (botón pequeño «Demos» tras cerrarla)
 export default function GuidedTour() {
-  const [show, setShow] = useState(false);
-  const inHero = useRef(false);
+  const [mode, setMode] = useState("hidden");
+  const [touringNow, setTouringNow] = useState(false);
+  const [modalOpen, setModalOpen] = useState(false);
   const touring = useRef(false);
-  const firstTime = useRef(true);
   const cleanup = useRef(null);
 
+  const setTouring = (v) => {
+    touring.current = v;
+    setTouringNow(v);
+    // Al terminar el recorrido queda el botón «Demos» para repetirlo
+    if (!v) setMode("pill");
+  };
+
   useEffect(() => {
-    const hero = document.getElementById("inicio");
-    if (!hero) return;
-    let timer;
-    const observer = new IntersectionObserver(
-      ([entry]) => {
-        inHero.current = entry.isIntersecting;
-        clearTimeout(timer);
-        if (entry.isIntersecting) {
-          // La primera vez espera a que carguen las animaciones del inicio
-          timer = setTimeout(() => !touring.current && inHero.current && setShow(true), firstTime.current ? 1500 : 600);
-          firstTime.current = false;
-        } else {
-          // Al salir de #inicio se oculta; "Ahora no" solo dura hasta que vuelva a subir
-          setShow(false);
-        }
-      },
-      { threshold: 0.5 }
-    );
-    observer.observe(hero);
+    const t = setTimeout(() => setMode((m) => (m === "hidden" ? "card" : m)), 800);
+    // Se oculta mientras haya un simulador abierto, para no tapar su guía
+    const onOpen = () => setModalOpen(true);
+    const onClose = () => setModalOpen(false);
+    window.addEventListener("simulator:opened", onOpen);
+    window.addEventListener("simulator:closed", onClose);
     return () => {
-      clearTimeout(timer);
-      observer.disconnect();
+      clearTimeout(t);
+      window.removeEventListener("simulator:opened", onOpen);
+      window.removeEventListener("simulator:closed", onClose);
     };
   }, []);
 
-  const dismiss = () => setShow(false);
+  const dismiss = () => setMode("pill");
 
   // Arranca (o retoma) el recorrido en el paso indicado
   const runTour = (startIndex = 0) => {
-    touring.current = true;
+    setTouring(true);
     const modules = contagracia.modules.filter((m) => m.simulator);
     const card = (id) => () => document.querySelector(`[data-tour="sim-${id}"]`)?.closest(".rounded-3xl");
     let resumeAt = null; // se fija al abrir un simulador desde el recorrido
@@ -69,7 +65,7 @@ export default function GuidedTour() {
       stageRadius: 24,
       onDestroyed: () => {
         cleanup.current?.();
-        if (resumeAt == null) touring.current = false;
+        if (resumeAt == null) setTouring(false);
       },
       steps: modules.map((m) => ({
         element: card(m.simulator.id),
@@ -103,7 +99,7 @@ export default function GuidedTour() {
         "simulator:closed",
         () => {
           if (resumeAt < modules.length) setTimeout(() => runTour(resumeAt), 250);
-          else touring.current = false;
+          else setTouring(false);
         },
         { once: true }
       );
@@ -114,12 +110,22 @@ export default function GuidedTour() {
     tour.drive(startIndex);
   };
 
-  const start = () => {
-    dismiss();
-    runTour(0);
-  };
+  const start = () => runTour(0);
 
-  if (!show) return null;
+  if (mode === "hidden" || touringNow || modalOpen) return null;
+
+  if (mode === "pill") {
+    return (
+      <button
+        onClick={() => setMode("card")}
+        className="fixed bottom-5 right-5 z-40 inline-flex animate-pop items-center gap-2 rounded-full border border-warm/60 bg-surface px-4 py-2.5 text-sm font-semibold text-warm shadow-xl shadow-black/40 transition hover:-translate-y-0.5 hover:bg-warm hover:text-bg"
+        aria-label="Ver los simuladores interactivos"
+      >
+        <Icon name="play" className="h-4 w-4" />
+        Demos
+      </button>
+    );
+  }
 
   return (
     <div className="fixed bottom-5 right-5 z-40 w-[min(92vw,360px)] animate-heartbeat hover:[animation-play-state:paused] rounded-2xl border border-warm/60 bg-surface p-4 shadow-2xl shadow-black/40">
