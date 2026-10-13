@@ -10,6 +10,7 @@ const loading = () => <p className="grid h-full place-items-center text-sm text-
 // Cada simulador se descarga solo cuando alguien lo abre
 const simulators = {
   crm: dynamic(() => import("./CrmSimulator"), { ssr: false, loading }),
+  restaurant: dynamic(() => import("./RestaurantSimulator"), { ssr: false, loading }),
 };
 
 export default function SimulatorModal({ simulator }) {

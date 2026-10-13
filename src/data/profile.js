@@ -100,6 +100,12 @@ export const contagracia = {
         "Domicilios y reporte de ventas con permisos",
       ],
       links: [{ label: "contagracia.com/restaurant", href: "https://contagracia.com/restaurant", icon: "external" }],
+      simulator: {
+        id: "restaurant",
+        title: "Simulador de restaurante y POS",
+        subtitle:
+          "Atiende una mesa de punta a punta: arma platos con variantes, adiciones y notas, haz de cocina y cobra en el POS. Mira cuándo se mueve el inventario y la contabilidad.",
+      },
     },
     {
       title: "CRM",
