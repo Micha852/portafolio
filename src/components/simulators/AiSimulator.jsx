@@ -38,6 +38,16 @@ const initialState = () => ({
     automatizaciones: { provider: "deepseek", model: "deepseek-flash", fallback: "", fallbackModel: "" },
   },
   quotaOut: false, // simula "cuota agotada" en el proveedor principal
+  identity: {
+    name: "Gracia",
+    role: "Asistente contable especializado",
+    welcome: "¿En qué le puedo ayudar hoy?",
+    avatar: "✨",
+    tone: "profesional",
+    detail: "mixto",
+    emojis: true,
+    proactive: true,
+  },
   keyTests: {},
   showRecs: false,
   // Chat
@@ -85,7 +95,7 @@ export default function AiSimulator() {
             className={`inline-flex shrink-0 items-center gap-1.5 rounded-full px-3.5 py-1.5 text-xs font-semibold transition ${tab === k ? "bg-accent/15 text-accent" : "text-muted hover:text-ink"}`}
           >
             <Icon name={icon} className="h-3.5 w-3.5" />
-            {label}
+            {k === "chat" ? `Chat · ${sim.st.identity.name || "Asistente"}` : label}
           </button>
         ))}
         {sim.st.quotaOut && <Badge color="#EF4444">Cuota agotada en el principal</Badge>}
@@ -281,6 +291,12 @@ function Config({ sim, log }) {
         </section>
 
         <section>
+          <p className="font-display font-bold">Identidad y Personalidad</p>
+          <p className="mb-3 text-xs text-muted">Cómo se presenta y responde el asistente. Pruébelo en la pestaña del chat.</p>
+          <Identity st={st} update={update} log={log} />
+        </section>
+
+        <section>
           <p className="font-display font-bold">API Keys de Modelos de IA</p>
           <p className="mb-3 text-xs text-muted">Configura las claves de API para los diferentes proveedores.</p>
           <div className="grid gap-2 sm:grid-cols-2">
@@ -309,6 +325,90 @@ function Config({ sim, log }) {
         </section>
       </div>
     </Shell>
+  );
+}
+
+function Identity({ st, update, log }) {
+  const id = st.identity;
+  const set = (field, value) => update((x) => (x.identity[field] = value));
+  const input = "w-full rounded-lg border border-line bg-bg px-2 py-1.5 text-xs outline-none focus:border-accent";
+  const chip = (on) => `rounded-full border px-2.5 py-1 text-[11px] transition ${on ? "border-accent bg-accent/15 text-accent" : "border-line text-muted hover:text-ink"}`;
+
+  return (
+    <div className="grid gap-4 rounded-xl border border-line p-4 md:grid-cols-2">
+      <div className="space-y-3">
+        <label className="block text-[11px]">
+          <span className="mb-1 block text-muted">Nombre del Asistente</span>
+          <input value={id.name} maxLength={24} onChange={(e) => set("name", e.target.value)} onBlur={() => log(`Nombre del asistente: ${id.name || "(vacío)"}`)} className={input} />
+        </label>
+        <label className="block text-[11px]">
+          <span className="mb-1 block text-muted">Rol/Profesión</span>
+          <input value={id.role} maxLength={60} onChange={(e) => set("role", e.target.value)} className={input} />
+        </label>
+        <label className="block text-[11px]">
+          <span className="mb-1 block text-muted">Mensaje de Bienvenida</span>
+          <input value={id.welcome} maxLength={90} onChange={(e) => set("welcome", e.target.value)} className={input} />
+        </label>
+        <div>
+          <p className="mb-1 text-[11px] text-muted">Avatar/Emoji</p>
+          <div className="flex flex-wrap gap-1">
+            {AVATARS.map((a) => (
+              <button key={a} onClick={() => set("avatar", a)} className={`grid h-8 w-8 place-items-center rounded-lg border text-base transition ${id.avatar === a ? "border-accent bg-accent/15" : "border-line"}`}>
+                {a}
+              </button>
+            ))}
+          </div>
+        </div>
+      </div>
+      <div className="space-y-3">
+        <div>
+          <p className="mb-1 text-[11px] text-muted">Tono de Conversación</p>
+          <div className="grid grid-cols-2 gap-1.5">
+            {Object.entries(TONES).map(([k, [label, desc]]) => (
+              <button
+                key={k}
+                onClick={() => {
+                  set("tone", k);
+                  log(`Tono de conversación: ${label}`);
+                }}
+                className={`rounded-lg border p-2 text-left transition ${id.tone === k ? "border-accent bg-accent/10" : "border-line hover:border-accent/50"}`}
+              >
+                <p className="text-xs font-semibold">{label}</p>
+                <p className="text-[10px] text-muted">{desc}</p>
+              </button>
+            ))}
+          </div>
+        </div>
+        <div>
+          <p className="mb-1 text-[11px] text-muted">Nivel de Detalle</p>
+          <div className="flex flex-wrap gap-1.5">
+            {Object.entries(DETAILS).map(([k, label]) => (
+              <button key={k} onClick={() => set("detail", k)} className={chip(id.detail === k)}>
+                {label}
+              </button>
+            ))}
+          </div>
+        </div>
+        <label className="flex cursor-pointer items-center gap-2 text-xs">
+          <input type="checkbox" checked={id.emojis} onChange={(e) => set("emojis", e.target.checked)} className="accent-[rgb(var(--accent))]" />
+          Usar Emojis
+        </label>
+        <label className="flex cursor-pointer items-center gap-2 text-xs">
+          <input type="checkbox" checked={id.proactive} onChange={(e) => set("proactive", e.target.checked)} className="accent-[rgb(var(--accent))]" />
+          Sugerencias Proactivas
+        </label>
+        <div className="rounded-lg bg-bg/70 p-2 text-xs">
+          <p className="text-[10px] uppercase tracking-widest text-muted">Vista previa</p>
+          <p className="mt-1">
+            <span className="mr-1">{id.avatar}</span>
+            <span className="font-semibold">{id.name || "Asistente"}</span> <span className="text-muted">· {id.role}</span>
+          </p>
+          <p className="mt-0.5">
+            ¡Hola! Soy {id.name || "su asistente"}. {id.welcome}
+          </p>
+        </div>
+      </div>
+    </div>
   );
 }
 
@@ -345,6 +445,34 @@ const CHAT_MODULES = {
   nomina: ["Nómina", "👥"],
 };
 
+// Opciones de "Identidad y Personalidad"
+const AVATARS = ["🤖", "💼", "📊", "💰", "🧠", "💬", "🎯", "✨", "🚀", "💡"];
+const TONES = {
+  profesional: ["💼 Profesional", "Claro y directo"],
+  amigable: ["😊 Amigable", "Cálido y cercano"],
+  casual: ["🗣️ Casual", "Relajado y conversacional"],
+  tecnico: ["🤓 Técnico", "Preciso y detallado"],
+};
+const DETAILS = { conciso: "📝 Conciso", mixto: "📊 Mixto", detallado: "📖 Detallado" };
+const TONE_OPENERS = {
+  profesional: ["", ""],
+  amigable: ["¡Con mucho gusto! ", "¡Con mucho gusto! 😊 "],
+  casual: ["¡Listo! Mira: ", "¡Listo! 👌 Mira: "],
+  tecnico: ["Según los datos del módulo: ", "📐 Según los datos del módulo: "],
+};
+
+// Aplica la personalidad configurada a la respuesta del modelo
+function styleAnswer(item, id) {
+  let blocks = item.answer.split("\n\n");
+  if (id.detail === "conciso") blocks = blocks.slice(0, 2);
+  let text = blocks.join("\n\n");
+  if (!id.emojis) text = text.replace(/\p{Extended_Pictographic}️?\s?/gu, "");
+  text = TONE_OPENERS[id.tone][id.emojis ? 1 : 0] + text;
+  if (id.detail === "detallado") text += "\n\nFuente: datos del módulo consultados en este momento; los valores incluyen todas las sedes de la empresa.";
+  if (id.proactive && item.followUp) text += `\n\n${id.emojis ? "💡 " : ""}${item.followUp}`;
+  return text;
+}
+
 const QUESTIONS = [
   {
     q: "¿Cuánto tengo en el banco?",
@@ -353,6 +481,7 @@ const QUESTIONS = [
     answer:
       "Así están sus cuentas hoy:\n\n| Cuenta | Saldo |\n|---|---|\n| Bancolombia Ahorros ****4821 | $48.250.300 |\n| Davivienda Corriente ****1190 | $12.904.100 |\n| Nequi ****7765 | $1.320.000 |\n| **Total** | **$62.474.400** |\n\nTiene **2 conciliaciones pendientes** (octubre en Bancolombia y Nequi).",
     tokens: 2840,
+    followUp: "¿Quiere que le muestre los movimientos de esta semana?",
   },
   {
     q: "¿Cuántos morosos tenemos?",
@@ -361,6 +490,7 @@ const QUESTIONS = [
     answer:
       "Hay **7 clientes en mora** por **$18.430.000**. Los tres mayores:\n\n| Cliente | Vencido | Días |\n|---|---|---|\n| Distribuidora Andes | $6.200.000 | 47 |\n| Ferretería El Tornillo | $4.150.000 | 33 |\n| Café La Montaña | $2.900.000 | 21 |",
     tokens: 3120,
+    followUp: "¿Le preparo un correo de cobro para los tres mayores?",
   },
   {
     q: "¿Cómo va el pipeline?",
@@ -369,6 +499,7 @@ const QUESTIONS = [
     answer:
       "El pipeline tiene **22 oportunidades abiertas** por **$186.400.000**:\n\n| Etapa | Cantidad | Valor |\n|---|---|---|\n| Prospección | 12 | $54.000.000 |\n| Negociación | 6 | $78.400.000 |\n| Cotizando | 4 | $54.000.000 |\n\nEste mes se ganaron **3** por $21.600.000.",
     tokens: 2975,
+    followUp: "¿Quiere ver cuáles oportunidades llevan más de 15 días quietas?",
   },
   {
     q: "¿Quién es el copropietario del parqueadero 12?",
@@ -376,6 +507,7 @@ const QUESTIONS = [
     reason: "Pregunta por una unidad de la copropiedad.",
     answer: "El **parqueadero P-12** está asociado al **Apto 302 de la Torre B** (Conjunto La Finca). La propietaria y responsable de pagos es **Laura Gómez**, y la unidad está **al día**.",
     tokens: 1980,
+    followUp: "¿Quiere ver el estado de cuenta de la unidad?",
   },
   {
     q: "¿Cuánto debo pagar de nómina este mes?",
@@ -416,7 +548,7 @@ function Chat({ sim, log }) {
         x.thinking = null;
         x.messages.push({
           from: "ai",
-          text: item.answer,
+          text: styleAnswer(item, st.identity),
           module,
           how,
           usage: `${PROVIDERS[r.provider].label} · ${item.tokens.toLocaleString("es-CO")} tokens · ${ms}ms${r.fallbackUsed ? " · (respaldo activo)" : ""}`,
@@ -526,10 +658,19 @@ function Chat({ sim, log }) {
         </div>
 
         <div className="space-y-3">
-          {st.messages.length === 0 && <p className="py-4 text-center text-sm">¡Hola! Soy Gracia, su asistente. ¿En qué le puedo ayudar?</p>}
+          {st.messages.length === 0 && (
+            <p className="py-4 text-center text-sm">
+              {st.identity.avatar} ¡Hola! Soy {st.identity.name || "su asistente"}. {st.identity.welcome}
+            </p>
+          )}
           {st.messages.map((m, i) => (
             <div key={i} className={`flex ${m.from === "user" ? "justify-end" : "justify-start"}`}>
               <div className="max-w-[92%]">
+                {m.from === "ai" && (
+                  <p className="mb-0.5 text-[11px] font-semibold">
+                    {st.identity.avatar} {st.identity.name || "Asistente"}
+                  </p>
+                )}
                 {m.module && (
                   <p className="mb-1 text-[11px] text-muted">
                     Responde con: <span className="rounded-full border border-line px-1.5">{CHAT_MODULES[m.module][1]} {CHAT_MODULES[m.module][0]}</span> · {m.how}
