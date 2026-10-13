@@ -90,6 +90,12 @@ export const contagracia = {
         "Minuta de portería con trazabilidad",
       ],
       links: [{ label: "contagracia.com/ph", href: "https://contagracia.com/ph", icon: "external" }],
+      simulator: {
+        id: "ph",
+        title: "Simulador de propiedad horizontal",
+        subtitle:
+          "Cinco escenarios del día a día de una copropiedad: facturación por coeficiente, mora y pronto pago, portería, asamblea con quórum y PQRS con flujos automáticos.",
+      },
     },
     {
       title: "Restaurantes",
