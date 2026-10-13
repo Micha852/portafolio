@@ -140,6 +140,12 @@ export const contagracia = {
       ],
       tags: ["React Flow"],
       links: [],
+      simulator: {
+        id: "automations",
+        title: "Simulador del hub de automatizaciones",
+        subtitle:
+          "Pídale un flujo al asistente de IA para CRM, propiedad horizontal o restaurante: mírelo dibujarse en el lienzo, acéptelo, simúlelo y préndalo. Lo que aún no existe queda como petición para el equipo.",
+      },
     },
     {
       title: "Inteligencia artificial",

@@ -12,6 +12,7 @@ const simulators = {
   crm: dynamic(() => import("./CrmSimulator"), { ssr: false, loading }),
   restaurant: dynamic(() => import("./RestaurantSimulator"), { ssr: false, loading }),
   ph: dynamic(() => import("./PhSimulator"), { ssr: false, loading }),
+  automations: dynamic(() => import("./AutomationsSimulator"), { ssr: false, loading }),
 };
 
 export default function SimulatorModal({ simulator }) {
