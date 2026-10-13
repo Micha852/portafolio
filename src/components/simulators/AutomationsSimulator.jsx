@@ -78,6 +78,18 @@ const EXAMPLES = {
           "Puedo arrancar con **«Oportunidad ganada»**, pero el módulo de Contabilidad todavía no tiene acciones para registrar asientos desde un flujo.\n\nLo más cercano que existe es avisarle al equipo contable con una notificación para que lo registre a mano.",
         falta: "Una acción de Contabilidad para registrar asientos desde un flujo",
         alternativa: "Notificar al equipo contable cuando se gane la oportunidad",
+        // Lo que la IA arma cuando la petición ya está Disponible
+        resolved: {
+          reply:
+            "¡Ya se puede! Contabilidad ahora tiene la acción **«Registrar asiento contable»**. Le propongo arrancar con **«Oportunidad ganada»** y registrar el asiento de la comisión del asesor.\n\nRevíselo y pulse **Aceptar**.",
+          flow: {
+            name: "Asiento de comisión al ganar una oportunidad",
+            description: "Registra el asiento de la comisión del asesor cuando se gana una oportunidad.",
+            does: ["Se dispara cuando una oportunidad pasa a Ganada.", "Registra el asiento contable de la comisión del responsable."],
+            nodes: [T("t", "Oportunidad ganada", "bolt", 0), { ...A("a1", "Registrar asiento contable", "grid", 1), isNew: true }],
+            edges: [["t", "a1"]],
+          },
+        },
       },
     },
   ],
@@ -135,6 +147,17 @@ const EXAMPLES = {
           "Revisé el catálogo de Propiedad horizontal: hay disparadores cuando una póliza se crea, se edita o se borra, pero **no uno por vencimiento**. Por eso no le puedo armar este flujo todavía.\n\nMientras tanto, existen flujos parecidos por fecha, como el aviso de cuota por vencer.",
         falta: "Un disparador por vencimiento de póliza (días antes de la fecha)",
         alternativa: "Flujos por fecha que ya existen, como «La cuota de una unidad está por vencer»",
+        resolved: {
+          reply:
+            "¡Ya se puede! Ahora existe el disparador **«Póliza por vencer»**. Lo configuré **15 días antes** del vencimiento, con dos pasos en paralelo: una notificación para usted y un **WhatsApp** al revisor fiscal.\n\nRevíselo y pulse **Aceptar**.",
+          flow: {
+            name: "Aviso de vencimiento de póliza",
+            description: "Aviso interno y WhatsApp al revisor fiscal 15 días antes de que venza la póliza.",
+            does: ["Se dispara 15 días antes del vencimiento de la póliza de áreas comunes.", "Le avisa a la administración con una notificación.", "Le envía un WhatsApp al revisor fiscal."],
+            nodes: [{ ...T("t", "Póliza por vencer · 15 días", "calendar", 0), isNew: true }, A("a1", "Enviar notificación", "bell", 1, -0.6), A("a2", "Enviar WhatsApp", "whatsapp", 1, 0.6)],
+            edges: [["t", "a1"], ["t", "a2"]],
+          },
+        },
       },
     },
   ],
@@ -196,6 +219,17 @@ const EXAMPLES = {
           "El cierre de caja y las propinas existen en el sistema, pero **Contabilidad todavía no tiene acciones** para registrar asientos desde un flujo, así que no puedo armarlo.\n\nComo alternativa, puedo enviarle cada noche un correo con el resumen para que lo registre usted.",
         falta: "Una acción de Contabilidad para registrar asientos desde un flujo",
         alternativa: "Un correo diario con el resumen del cierre",
+        resolved: {
+          reply:
+            "¡Ya se puede! Contabilidad ahora tiene la acción **«Registrar asiento contable»**. Le propongo arrancar con el **cierre de caja** y registrar el asiento de las propinas del día.\n\nRevíselo y pulse **Aceptar**.",
+          flow: {
+            name: "Asiento de propinas al cerrar la caja",
+            description: "Registra el asiento contable de las propinas del día al cerrar la caja.",
+            does: ["Se dispara cuando se cierra la caja del turno.", "Registra el asiento contable con las propinas del día."],
+            nodes: [T("t", "Cierre de caja", "calendar", 0), { ...A("a1", "Registrar asiento contable", "grid", 1), isNew: true }],
+            edges: [["t", "a1"]],
+          },
+        },
       },
     },
   ],
@@ -228,11 +262,24 @@ const initialState = () => ({
       pedido: "Cuando se pague un pedido de la tienda, mándele un WhatsApp de agradecimiento al cliente.",
       falta: "El disparador «Pedido de tienda pagado» no trae el teléfono del cliente",
       alternativa: "Una notificación interna cuando se pague el pedido",
+      moduleKey: null, // Facturación: el asistente lo detecta automáticamente
+      resolved: {
+        reply:
+          "¡Ya se puede! El disparador **«Pedido de tienda pagado»** ahora trae el teléfono del cliente. Le propongo un **WhatsApp** de agradecimiento apenas se pague el pedido.\n\nSe guarda en: **Facturación** · detectado automáticamente. Pulse **Aceptar** para crearlo.",
+        flow: {
+          name: "Agradecimiento por WhatsApp al pagar un pedido",
+          description: "WhatsApp de agradecimiento al cliente cuando paga un pedido de la tienda.",
+          does: ["Se dispara cuando se paga un pedido de la tienda.", "Le envía un WhatsApp de agradecimiento al cliente."],
+          nodes: [{ ...T("t", "Pedido de tienda pagado", "bolt", 0), isNew: true }, A("a1", "Enviar WhatsApp", "whatsapp", 1)],
+          edges: [["t", "a1"]],
+        },
+      },
       estado: "en_revision",
       nota: "",
     },
   ],
   userNotices: [],
+  prefill: null,
   log: [],
 });
 
@@ -258,6 +305,10 @@ export default function AutomationsSimulator() {
     });
     log(`Módulo del flujo: ${MODULES[m].label} · nueva conversación`);
   };
+
+  // Si lo que se pidió ya pasó a Disponible, la IA usa el flujo resuelto
+  const available = (ex) => ex.impossible && st.peticiones.some((p) => p.pedido === ex.prompt && p.estado === "disponible");
+  const resolve = (ex) => (available(ex) ? { id: ex.id, prompt: ex.prompt, reply: ex.impossible.resolved.reply, flow: ex.impossible.resolved.flow } : ex);
 
   const ask = (ex) =>
     sequence(async (wait) => {
@@ -285,7 +336,7 @@ export default function AutomationsSimulator() {
       }
       update((x) => {
         x.thinking = false;
-        x.messages.push({ from: "ai", text: ex.reply, usage, proposalOf: ex.id });
+        x.messages.push({ from: "ai", text: ex.reply, usage, proposalName: ex.flow.name });
         x.proposal = { ex, accepted: false, flowId: null };
       });
       log(`Propuesta: ${ex.flow.name}`, "ok");
@@ -366,6 +417,8 @@ export default function AutomationsSimulator() {
           pedido: ex.prompt,
           falta: ex.impossible.falta,
           alternativa: ex.impossible.alternativa,
+          moduleKey: x.module,
+          resolved: ex.impossible.resolved,
           estado: "pendiente",
           nota: "",
         });
@@ -386,6 +439,7 @@ export default function AutomationsSimulator() {
           title: "Ya se puede crear el flujo que pidió",
           body: `Lo que pidió ya está disponible: "${p.pedido}". Ábralo en el asistente y envíelo de nuevo.`,
           pedido: p.pedido,
+          peticionId: p.id,
         });
       if (review.estado === "descartada")
         x.userNotices.unshift({
@@ -396,6 +450,29 @@ export default function AutomationsSimulator() {
     });
     log(`Petición #${p.id} → ${PETICION_STATUS[review.estado][0]}${["disponible", "descartada"].includes(review.estado) ? " · se avisó al usuario" : ""}`, "ok");
     setReview(null);
+  };
+
+  // Desde el aviso: abre el asistente con el pedido precargado, sin enviarlo
+  const openInAssistant = (peticionId) => {
+    const p = st.peticiones.find((y) => y.id === peticionId);
+    update((x) => {
+      if (p.moduleKey && p.moduleKey !== x.module) {
+        x.module = p.moduleKey;
+        x.messages = [];
+        x.proposal = null;
+        x.simStatus = {};
+        x.showDraft = false;
+      }
+      x.prefill = { pedido: p.pedido, resolved: p.resolved, moduleLabel: p.module, id: p.id };
+    });
+    setView("asistente");
+    log(`Se abrió el asistente con el pedido precargado (${p.module})`);
+  };
+
+  const sendPrefill = () => {
+    const { pedido, resolved, id } = st.prefill;
+    update((x) => (x.prefill = null));
+    ask({ id: `resuelta-${id}`, prompt: pedido, reply: resolved.reply, flow: resolved.flow });
   };
 
   const examples = EXAMPLES[st.module];
@@ -472,7 +549,7 @@ export default function AutomationsSimulator() {
                       </button>
                     </div>
                   )}
-                  {m.proposalOf && <p className="mt-1 text-[11px] text-[#A5B4FC]">Propuesta: {EXAMPLES[st.module].find((e) => e.id === m.proposalOf)?.flow.name} (a la derecha)</p>}
+                  {m.proposalName && <p className="mt-1 text-[11px] text-[#A5B4FC]">Propuesta: {m.proposalName} (a la derecha)</p>}
                   {m.usage && <p className="mt-1 text-[10px] text-muted">{m.usage}</p>}
                 </div>
               </div>
@@ -482,16 +559,28 @@ export default function AutomationsSimulator() {
           </div>
 
           <div className="shrink-0 border-t border-line p-3">
+            {/* Pedido que llega desde el aviso «Ya se puede crear el flujo que pidió» */}
+            {st.prefill && (
+              <div className="mb-2 animate-pop rounded-xl border border-accent/50 bg-accent/10 p-3 text-xs">
+                <p className="font-semibold text-accent">Pedido precargado · {st.prefill.moduleLabel} (no se ha enviado)</p>
+                <p className="mt-1">{st.prefill.pedido}</p>
+                <button onClick={sendPrefill} disabled={busy} className="mt-2 inline-flex items-center gap-1.5 rounded-full bg-accent px-3 py-1 text-[11px] font-semibold text-bg transition hover:brightness-110 disabled:opacity-40">
+                  <Icon name="send" className="h-3 w-3" />
+                  Enviar
+                </button>
+              </div>
+            )}
             <div className="flex flex-col gap-1.5">
               {examples.map((ex) => (
                 <button
                   key={ex.id}
                   disabled={busy}
-                  onClick={() => ask(ex)}
+                  onClick={() => ask(resolve(ex))}
                   className="rounded-xl border border-[#6366F1]/40 px-3 py-1.5 text-left text-xs text-[#A5B4FC] transition hover:bg-[#6366F1]/10 disabled:opacity-40"
                 >
                   {ex.prompt}
-                  {ex.impossible && <span className="ml-1 text-[10px] text-[#F59E0B]">(no existe aún)</span>}
+                  {ex.impossible && !available(ex) && <span className="ml-1 text-[10px] text-[#F59E0B]">(no existe aún)</span>}
+                  {available(ex) && <span className="ml-1 text-[10px] text-accent">(ya disponible)</span>}
                 </button>
               ))}
             </div>
@@ -650,7 +739,7 @@ export default function AutomationsSimulator() {
                   <p className="font-semibold">{n.title}</p>
                   <p className="mt-0.5 text-muted">{n.body}</p>
                   {n.pedido && (
-                    <button onClick={() => setView("asistente")} className="mt-1 text-[11px] text-accent hover:underline">
+                    <button onClick={() => openInAssistant(n.peticionId)} className="mt-1 text-[11px] text-accent hover:underline">
                       Abrir en el asistente →
                     </button>
                   )}
@@ -820,6 +909,7 @@ function Canvas({ proposal, drawn, simStatus }) {
                 style={{ width: SIZE, height: SIZE, borderColor: k.border }}
               >
                 {n.kind === "trigger" && <span className="absolute -left-5 text-sm">⚡</span>}
+                {n.isNew && <span className="absolute -right-3 -top-2 rounded-full bg-accent px-1.5 text-[8px] font-bold uppercase text-bg">nuevo</span>}
                 <span style={{ color: k.icon }}>
                   <Icon name={n.icon} className="h-7 w-7" />
                 </span>
