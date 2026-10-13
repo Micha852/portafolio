@@ -44,18 +44,20 @@ const visible = (key) => [...document.querySelectorAll(`[role="dialog"] [data-gu
 
 // Invitación dentro del modal del simulador + guía paso a paso con driver.js
 export default function SimulatorGuide({ id }) {
-  const [show, setShow] = useState(false);
+  // mode: "hidden" → "card" (invitación) → "pill" (botón «Guía» tras cerrarla o terminar); "touring" mientras corre
+  const [mode, setMode] = useState("hidden");
 
   useEffect(() => {
-    const t = setTimeout(() => setShow(true), 900);
+    const t = setTimeout(() => setMode((m) => (m === "hidden" ? "card" : m)), 900);
     return () => clearTimeout(t);
   }, []);
 
-  if (!GUIDES[id] || !show) return null;
+  if (!GUIDES[id] || mode === "hidden" || mode === "touring") return null;
 
   const start = () => {
-    setShow(false);
+    setMode("touring");
     driver({
+      onDestroyed: () => setMode("pill"),
       showProgress: true,
       progressText: "{{current}} de {{total}}",
       nextBtnText: "Siguiente →",
@@ -72,6 +74,19 @@ export default function SimulatorGuide({ id }) {
     }).drive();
   };
 
+  if (mode === "pill") {
+    return (
+      <button
+        onClick={() => setMode("card")}
+        aria-label="Abrir la guía del simulador"
+        className="fixed bottom-6 right-6 z-[60] inline-flex animate-pop items-center gap-2 rounded-full border border-warm/60 bg-surface px-4 py-2.5 text-sm font-semibold text-warm shadow-xl shadow-black/50 transition hover:-translate-y-0.5 hover:bg-warm hover:text-bg"
+      >
+        <Icon name="sparkles" className="h-4 w-4" />
+        Guía
+      </button>
+    );
+  }
+
   return (
     <div className="fixed bottom-6 right-6 z-[60] w-[min(88vw,320px)] animate-heartbeat rounded-2xl border border-warm/60 bg-surface p-4 shadow-2xl shadow-black/50 hover:[animation-play-state:paused]">
       <div className="flex items-start gap-3">
@@ -83,7 +98,7 @@ export default function SimulatorGuide({ id }) {
           <p className="text-sm font-semibold">¿Te guío en el simulador?</p>
           <p className="mt-0.5 text-xs text-muted">Te muestro por dónde empezar y qué mirar en cada parte.</p>
         </div>
-        <button onClick={() => setShow(false)} aria-label="Cerrar" className="-mr-1 -mt-1 shrink-0 text-muted transition hover:text-ink">
+        <button onClick={() => setMode("pill")} aria-label="Cerrar" className="-mr-1 -mt-1 shrink-0 text-muted transition hover:text-ink">
           <Icon name="close" className="h-4 w-4" />
         </button>
       </div>
@@ -91,7 +106,7 @@ export default function SimulatorGuide({ id }) {
         <button onClick={start} className="flex-1 rounded-full bg-warm px-4 py-2 text-xs font-semibold text-bg transition hover:brightness-110">
           Sí, guíame
         </button>
-        <button onClick={() => setShow(false)} className="rounded-full border border-line px-4 py-2 text-xs transition hover:border-accent hover:text-accent">
+        <button onClick={() => setMode("pill")} className="rounded-full border border-line px-4 py-2 text-xs transition hover:border-accent hover:text-accent">
           Ahora no
         </button>
       </div>
