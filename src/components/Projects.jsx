@@ -103,16 +103,7 @@ function ProjectCard({ project, index }) {
 
 function ModuleCard({ module, index }) {
   return (
-    <Reveal
-      delay={(index % 3) * 100}
-      className={`${cardClass} relative p-6 ${module.simulator ? "border-warm/40 shadow-lg shadow-warm/5" : ""}`}
-    >
-      {module.simulator && (
-        <span className="absolute right-4 top-4 inline-flex items-center gap-1.5 rounded-full bg-warm/15 px-2.5 py-1 text-[10px] font-bold uppercase tracking-wider text-warm">
-          <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-warm" />
-          Interactivo
-        </span>
-      )}
+    <Reveal delay={(index % 3) * 100} className={`${cardClass} p-6`}>
       <p className="font-display text-sm font-semibold text-warm">{String(index + 1).padStart(2, "0")}</p>
       <h4 className="font-display mt-1 text-xl font-bold">{module.title}</h4>
       <p className="mt-2 text-sm text-muted leading-relaxed">{module.description}</p>
@@ -126,8 +117,6 @@ function ModuleCard({ module, index }) {
   );
 }
 
-const simulators = contagracia.modules.filter((m) => m.simulator);
-
 function ContagraciaShowcase() {
   return (
     <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
@@ -138,23 +127,6 @@ function ContagraciaShowcase() {
         <p className="mt-4 max-w-2xl text-muted leading-relaxed">{contagracia.description}</p>
         <Tags items={contagracia.tags} />
         <Links items={contagracia.links} />
-
-        {/* Acceso directo a los simuladores: lo más valioso no debe pasar desapercibido */}
-        <div id="demos" className="mt-6 scroll-mt-32 rounded-2xl border border-warm/40 bg-warm/5 p-4">
-          <p className="flex items-center gap-2 text-sm font-semibold">
-            <span className="relative flex h-2.5 w-2.5">
-              <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-warm opacity-75" />
-              <span className="relative inline-flex h-2.5 w-2.5 rounded-full bg-warm" />
-            </span>
-            Pruébalo en vivo: {simulators.length} simuladores interactivos
-          </p>
-          <p className="mt-1 text-xs text-muted">No son capturas: úsalos como si fueras el cliente, el mesero o el administrador.</p>
-          <div className="mt-3 flex flex-wrap gap-2">
-            {simulators.map((m) => (
-              <SimulatorModal key={m.simulator.id} simulator={m.simulator} variant="chip" label={m.short ?? m.title} />
-            ))}
-          </div>
-        </div>
       </Reveal>
 
       {contagracia.modules.map((m, i) => (

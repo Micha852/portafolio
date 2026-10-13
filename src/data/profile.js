@@ -84,7 +84,6 @@ export const contagracia = {
     },
     {
       title: "Propiedad horizontal",
-      short: "Propiedad horizontal",
       description: "Administración de copropiedades bajo la Ley 675: cartera, cuotas, portería y comunicación con residentes.",
       highlights: [
         "Facturación de cuotas con mora y pronto pago configurables",
@@ -101,7 +100,6 @@ export const contagracia = {
     },
     {
       title: "Restaurantes",
-      short: "Restaurante y POS",
       description: "Operación completa de restaurante: comandas desde la mesa, cocina sincronizada, domicilios y cierre de caja.",
       highlights: [
         "Comandas para cocina en carta y POS, imprimibles o en PDF",
@@ -118,7 +116,6 @@ export const contagracia = {
     },
     {
       title: "CRM",
-      short: "CRM y ventas",
       description: "Gestión comercial con embudo de oportunidades, fichas de contacto y campañas conectadas a Meta y WhatsApp.",
       highlights: [
         "Conversaciones de WhatsApp dentro del CRM",
@@ -136,7 +133,6 @@ export const contagracia = {
     },
     {
       title: "Automatizaciones tipo n8n",
-      short: "Automatizaciones con IA",
       description: "Editor visual de flujos con disparadores, condiciones y acciones que conectan todos los módulos de la plataforma.",
       highlights: [
         "Lienzo de nodos con notas, vista previa y validación antes de activar",
@@ -154,7 +150,6 @@ export const contagracia = {
     },
     {
       title: "Inteligencia artificial",
-      short: "Chat IA y extractos",
       description: "Capa de IA con cuatro proveedores intercambiables —OpenAI, Anthropic, Gemini y DeepSeek— usada en varios frentes.",
       highlights: [
         "Asistente que genera flujos de automatización a partir de lenguaje natural",

@@ -36,16 +36,6 @@ export default function Hero() {
               Ver proyectos
               <Icon name="arrow" className="w-4 h-4" />
             </a>
-            <a
-              href="#demos"
-              className="group inline-flex items-center gap-2 rounded-full border-2 border-warm bg-warm/10 px-6 py-3 font-semibold text-warm transition hover:-translate-y-0.5 hover:bg-warm hover:text-bg"
-            >
-              <span className="relative flex h-2.5 w-2.5">
-                <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-warm opacity-75 group-hover:bg-bg" />
-                <span className="relative inline-flex h-2.5 w-2.5 rounded-full bg-warm group-hover:bg-bg" />
-              </span>
-              Probar demos en vivo
-            </a>
             <a href="#contacto" className="btn-outline">
               Hablemos
             </a>
