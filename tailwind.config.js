@@ -27,6 +27,14 @@ module.exports = {
           "0%, 49%": { opacity: 1 },
           "50%, 100%": { opacity: 0 },
         },
+        // Latido: crece un poco y emite un halo ámbar
+        heartbeat: {
+          "0%, 100%": { transform: "scale(1)", boxShadow: "0 0 0 0 rgb(var(--warm) / 0.45)" },
+          "15%": { transform: "scale(1.025)" },
+          "30%": { transform: "scale(1)" },
+          "45%": { transform: "scale(1.02)" },
+          "70%": { boxShadow: "0 0 0 14px rgb(var(--warm) / 0)" },
+        },
         pop: {
           "0%": { opacity: 0, transform: "scale(0.9) translateY(6px)" },
           "100%": { opacity: 1, transform: "none" },
@@ -34,6 +42,7 @@ module.exports = {
       },
       animation: {
         pop: "pop 0.45s ease-out",
+        heartbeat: "heartbeat 1.8s ease-in-out infinite",
         float: "float 7s ease-in-out infinite",
         blink: "blink 1s step-end infinite",
       },

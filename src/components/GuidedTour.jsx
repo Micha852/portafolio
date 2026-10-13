@@ -1,12 +1,10 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { driver } from "driver.js";
 import "driver.js/dist/driver.css";
 import { Icon } from "./Icons";
 import { contagracia } from "@/data/profile";
-
-const STORAGE_KEY = "tour-simuladores";
 
 // Qué se dice de cada simulador en el recorrido
 const TOUR_TEXT = {
@@ -17,36 +15,44 @@ const TOUR_TEXT = {
   ai: "Configura proveedores con respaldo, pregúntale al chat que detecta el módulo y procesa extractos bancarios.",
 };
 
-const read = () => {
-  try {
-    return localStorage.getItem(STORAGE_KEY);
-  } catch {
-    return null;
-  }
-};
-const save = (v) => {
-  try {
-    localStorage.setItem(STORAGE_KEY, v);
-  } catch {}
-};
-
-// Invitación opcional al entrar y recorrido por los simuladores con driver.js
+// Invitación opcional que aparece cada vez que se está en #inicio, y recorrido por los simuladores con driver.js
 export default function GuidedTour() {
   const [show, setShow] = useState(false);
+  const inHero = useRef(false);
+  const touring = useRef(false);
+  const firstTime = useRef(true);
 
   useEffect(() => {
-    if (read()) return;
-    const t = setTimeout(() => setShow(true), 2500);
-    return () => clearTimeout(t);
+    const hero = document.getElementById("inicio");
+    if (!hero) return;
+    let timer;
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        inHero.current = entry.isIntersecting;
+        clearTimeout(timer);
+        if (entry.isIntersecting) {
+          // La primera vez espera a que carguen las animaciones del inicio
+          timer = setTimeout(() => !touring.current && inHero.current && setShow(true), firstTime.current ? 2500 : 600);
+          firstTime.current = false;
+        } else {
+          // Al salir de #inicio se oculta; "Ahora no" solo dura hasta que vuelva a subir
+          setShow(false);
+        }
+      },
+      { threshold: 0.5 }
+    );
+    observer.observe(hero);
+    return () => {
+      clearTimeout(timer);
+      observer.disconnect();
+    };
   }, []);
 
-  const dismiss = () => {
-    save("visto");
-    setShow(false);
-  };
+  const dismiss = () => setShow(false);
 
   const start = () => {
     dismiss();
+    touring.current = true;
     const modules = contagracia.modules.filter((m) => m.simulator);
     const card = (id) => () => document.querySelector(`[data-tour="sim-${id}"]`)?.closest(".rounded-3xl");
 
@@ -59,6 +65,9 @@ export default function GuidedTour() {
       popoverClass: "tour-popover",
       stagePadding: 6,
       stageRadius: 24,
+      onDestroyed: () => {
+        touring.current = false;
+      },
       steps: modules.map((m) => ({
         element: card(m.simulator.id),
         popover: {
@@ -87,9 +96,10 @@ export default function GuidedTour() {
   if (!show) return null;
 
   return (
-    <div className="fixed bottom-5 right-5 z-40 w-[min(92vw,360px)] animate-pop rounded-2xl border border-warm/40 bg-surface p-4 shadow-2xl shadow-black/40">
+    <div className="fixed bottom-5 right-5 z-40 w-[min(92vw,360px)] animate-heartbeat hover:[animation-play-state:paused] rounded-2xl border border-warm/60 bg-surface p-4 shadow-2xl shadow-black/40">
       <div className="flex items-start gap-3">
-        <span className="grid h-10 w-10 shrink-0 place-items-center rounded-xl bg-warm/15 text-warm">
+        <span className="relative grid h-10 w-10 shrink-0 place-items-center rounded-xl bg-warm/15 text-warm">
+          <span className="absolute inset-0 animate-ping rounded-xl bg-warm/25" />
           <Icon name="play" className="h-5 w-5" />
         </span>
         <div className="min-w-0">
