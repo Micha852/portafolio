@@ -31,7 +31,11 @@ export default function SimulatorModal({ simulator }) {
     <>
       <button
         data-tour={`sim-${simulator.id}`}
-        onClick={() => setOpen(true)}
+        onClick={() => {
+          setOpen(true);
+          // Avisa al recorrido guiado para que se pause mientras el simulador está abierto
+          window.dispatchEvent(new CustomEvent("simulator:opened", { detail: simulator.id }));
+        }}
         className="group/sim mt-5 inline-flex items-center gap-2 self-start rounded-full border border-warm/50 bg-warm/10 px-4 py-2 text-sm font-semibold text-warm transition hover:border-warm hover:bg-warm hover:text-bg"
       >
         <span className="relative flex h-2 w-2">

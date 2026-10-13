@@ -21,6 +21,7 @@ export default function GuidedTour() {
   const inHero = useRef(false);
   const touring = useRef(false);
   const firstTime = useRef(true);
+  const cleanup = useRef(null);
 
   useEffect(() => {
     const hero = document.getElementById("inicio");
@@ -67,6 +68,7 @@ export default function GuidedTour() {
       stagePadding: 6,
       stageRadius: 24,
       onDestroyed: () => {
+        cleanup.current?.();
         if (resumeAt == null) touring.current = false;
       },
       steps: modules.map((m) => ({
@@ -85,22 +87,30 @@ export default function GuidedTour() {
         const btn = document.createElement("button");
         btn.innerText = "▶ Probar ahora";
         btn.className = "tour-try";
-        btn.onclick = () => {
-          resumeAt = index + 1;
-          tour.destroy();
-          window.addEventListener(
-            "simulator:closed",
-            () => {
-              if (resumeAt < modules.length) setTimeout(() => runTour(resumeAt), 250);
-              else touring.current = false;
-            },
-            { once: true }
-          );
-          document.querySelector(`[data-tour="sim-${id}"]`)?.click();
-        };
+        // Abre el simulador; el aviso "simulator:opened" se encarga de pausar el recorrido
+        btn.onclick = () => document.querySelector(`[data-tour="sim-${id}"]`)?.click();
         popover.footer.before(btn);
       },
     });
+
+    // Si se abre cualquier simulador con el recorrido activo (por "Probar ahora" o desde la tarjeta),
+    // el recorrido se cierra y, al salir del simulador, sigue con el siguiente
+    const onOpened = (e) => {
+      const index = modules.findIndex((m) => m.simulator.id === e.detail);
+      resumeAt = (index >= 0 ? index : tour.getActiveIndex() ?? 0) + 1;
+      tour.destroy();
+      window.addEventListener(
+        "simulator:closed",
+        () => {
+          if (resumeAt < modules.length) setTimeout(() => runTour(resumeAt), 250);
+          else touring.current = false;
+        },
+        { once: true }
+      );
+    };
+    window.addEventListener("simulator:opened", onOpened);
+    cleanup.current = () => window.removeEventListener("simulator:opened", onOpened);
+
     tour.drive(startIndex);
   };
 
