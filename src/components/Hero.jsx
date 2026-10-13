@@ -63,7 +63,7 @@ export default function Hero() {
 
         <div className="relative mx-auto w-full max-w-sm">
           <div className="absolute -inset-3 rounded-[2.5rem] border border-dashed border-accent/40 animate-float" aria-hidden="true" />
-          <Avatar name={profile.name} photo={profile.photo} position={profile.photoPosition} className="aspect-[4/5] w-full" />
+          <Avatar name={profile.name} photos={profile.photos} className="aspect-[4/5] w-full" />
           <div className="absolute -bottom-5 -left-5 rounded-2xl border border-line bg-surface px-4 py-3 shadow-xl">
             <p className="font-display text-2xl font-bold text-warm">{profile.heroBadge.value}</p>
             <p className="text-xs text-muted">{profile.heroBadge.label}</p>

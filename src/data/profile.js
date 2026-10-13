@@ -13,10 +13,11 @@ export const profile = {
   ],
   location: "Florencia, Caquetá, Colombia",
   available: true,
-  // Pon tu foto en /public (ej: /public/foto.webp) y escribe "/foto.webp". Si queda vacío se muestran tus iniciales.
-  photo: "/michael.jpeg",
-  // Qué parte de la foto se ve al recortarla (CSS object-position)
-  photoPosition: "18% center",
+  // Fotos del inicio: rotan con un fundido cada 5 s. position = qué parte se ve al recortar (CSS object-position)
+  photos: [
+    { src: "/michael.jpeg", position: "18% center" },
+    { src: "/michael-2.webp", position: "center 30%" },
+  ],
   cv: "/cv-michael-martinez.pdf",
   about: [
     "Soy Ingeniero de Sistemas y desarrollador Full Stack. Trabajo en todo el ciclo del software: desde levantar requerimientos con los usuarios hasta desplegar, mantener y mejorar plataformas en producción.",
