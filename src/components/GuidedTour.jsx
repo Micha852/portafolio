@@ -32,7 +32,7 @@ export default function GuidedTour() {
         clearTimeout(timer);
         if (entry.isIntersecting) {
           // La primera vez espera a que carguen las animaciones del inicio
-          timer = setTimeout(() => !touring.current && inHero.current && setShow(true), firstTime.current ? 2500 : 600);
+          timer = setTimeout(() => !touring.current && inHero.current && setShow(true), firstTime.current ? 1500 : 600);
           firstTime.current = false;
         } else {
           // Al salir de #inicio se oculta; "Ahora no" solo dura hasta que vuelva a subir
@@ -50,11 +50,12 @@ export default function GuidedTour() {
 
   const dismiss = () => setShow(false);
 
-  const start = () => {
-    dismiss();
+  // Arranca (o retoma) el recorrido en el paso indicado
+  const runTour = (startIndex = 0) => {
     touring.current = true;
     const modules = contagracia.modules.filter((m) => m.simulator);
     const card = (id) => () => document.querySelector(`[data-tour="sim-${id}"]`)?.closest(".rounded-3xl");
+    let resumeAt = null; // se fija al abrir un simulador desde el recorrido
 
     const tour = driver({
       showProgress: true,
@@ -66,7 +67,7 @@ export default function GuidedTour() {
       stagePadding: 6,
       stageRadius: 24,
       onDestroyed: () => {
-        touring.current = false;
+        if (resumeAt == null) touring.current = false;
       },
       steps: modules.map((m) => ({
         element: card(m.simulator.id),
@@ -77,20 +78,35 @@ export default function GuidedTour() {
           align: "center",
         },
       })),
-      // Botón extra para abrir el simulador del paso actual
+      // Botón extra: abre el simulador y, al cerrarlo, el recorrido sigue con el siguiente
       onPopoverRender: (popover, { state }) => {
-        const id = modules[state.activeIndex]?.simulator.id;
+        const index = state.activeIndex;
+        const id = modules[index]?.simulator.id;
         const btn = document.createElement("button");
         btn.innerText = "▶ Probar ahora";
         btn.className = "tour-try";
         btn.onclick = () => {
+          resumeAt = index + 1;
           tour.destroy();
+          window.addEventListener(
+            "simulator:closed",
+            () => {
+              if (resumeAt < modules.length) setTimeout(() => runTour(resumeAt), 250);
+              else touring.current = false;
+            },
+            { once: true }
+          );
           document.querySelector(`[data-tour="sim-${id}"]`)?.click();
         };
         popover.footer.before(btn);
       },
     });
-    tour.drive();
+    tour.drive(startIndex);
+  };
+
+  const start = () => {
+    dismiss();
+    runTour(0);
   };
 
   if (!show) return null;

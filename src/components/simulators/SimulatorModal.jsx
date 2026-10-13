@@ -18,7 +18,11 @@ const simulators = {
 
 export default function SimulatorModal({ simulator }) {
   const [open, setOpen] = useState(false);
-  const close = useCallback(() => setOpen(false), []);
+  const close = useCallback(() => {
+    setOpen(false);
+    // Avisa al recorrido guiado para que siga con el siguiente simulador
+    window.dispatchEvent(new Event("simulator:closed"));
+  }, []);
   const Simulator = simulators[simulator.id];
   if (!Simulator) return null;
 
