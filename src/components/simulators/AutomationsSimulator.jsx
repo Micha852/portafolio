@@ -479,7 +479,7 @@ export default function AutomationsSimulator() {
 
   return (
     <div className="flex h-full flex-col">
-      <div className="flex shrink-0 items-center gap-1 overflow-x-auto border-b border-line px-3 py-2">
+      <div data-guide="auto-tabs" className="flex shrink-0 items-center gap-1 overflow-x-auto border-b border-line px-3 py-2">
         {[
           ["asistente", "Crear con IA", "sparkles"],
           ["flujos", `Flujos (${st.flows.length})`, "bolt"],
@@ -504,7 +504,7 @@ export default function AutomationsSimulator() {
       {/* ───── Asistente ───── */}
       <div className={view === "asistente" ? "min-h-0 flex-1 overflow-y-auto lg:grid lg:grid-cols-[380px_1fr] lg:overflow-hidden" : "hidden"}>
         <section className="flex flex-col border-line lg:min-h-0 lg:border-r">
-          <div className="shrink-0 space-y-2 border-b border-line p-4">
+          <div data-guide="auto-module" className="shrink-0 space-y-2 border-b border-line p-4">
             <p className="text-[11px] font-semibold uppercase tracking-widest text-muted">Módulo del flujo</p>
             <div className="flex flex-wrap gap-1.5">
               {Object.entries(MODULES).map(([k, m]) => (
@@ -570,7 +570,7 @@ export default function AutomationsSimulator() {
                 </button>
               </div>
             )}
-            <div className="flex flex-col gap-1.5">
+            <div data-guide="auto-examples" className="flex flex-col gap-1.5">
               {examples.map((ex) => (
                 <button
                   key={ex.id}
@@ -589,7 +589,7 @@ export default function AutomationsSimulator() {
         </section>
 
         <section className="flex flex-col lg:min-h-0">
-          <div className="relative min-h-[360px] border-b border-line lg:flex-1">
+          <div data-guide="auto-canvas" className="relative min-h-[360px] border-b border-line lg:flex-1">
             <Canvas proposal={st.proposal} drawn={st.drawn} simStatus={st.simStatus} />
           </div>
           <div className="shrink-0 p-4 lg:max-h-[34%] lg:overflow-y-auto">

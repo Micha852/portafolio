@@ -102,9 +102,9 @@ export function ProdLink({ href, title, description }) {
   );
 }
 
-export function Panel({ title, icon, children, className = "" }) {
+export function Panel({ title, icon, children, className = "", guide }) {
   return (
-    <div className={`rounded-2xl border border-line bg-bg/40 p-3 ${className}`}>
+    <div data-guide={guide} className={`rounded-2xl border border-line bg-bg/40 p-3 ${className}`}>
       <p className="mb-2 flex items-center gap-1.5 text-[11px] font-semibold uppercase tracking-widest text-muted">
         {icon && <Icon name={icon} className="h-3.5 w-3.5" />}
         {title}

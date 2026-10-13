@@ -14,7 +14,8 @@ const sizes = {
 export default function Modal({ open, onClose, title, subtitle, size = "md", bodyClassName = "overflow-y-auto p-6", children }) {
   useEffect(() => {
     if (!open) return;
-    const onKey = (e) => e.key === "Escape" && onClose();
+    // Si hay una guía de driver.js activa, Esc la cierra a ella y no al modal
+    const onKey = (e) => e.key === "Escape" && !document.body.classList.contains("driver-active") && onClose();
     document.addEventListener("keydown", onKey);
     document.body.style.overflow = "hidden";
     return () => {

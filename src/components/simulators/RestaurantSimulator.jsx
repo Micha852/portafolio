@@ -400,8 +400,8 @@ function TableService() {
 
       <div className="grid min-h-0 flex-1 lg:grid-cols-[380px_1fr_300px]">
         {/* Mesero y POS */}
-        <section className={`${pane("mesero")} min-h-0 flex-col border-line lg:border-r`}>
-          <div className="shrink-0 border-b border-line bg-warm/10 px-4 py-2.5 text-xs font-medium text-warm">{hint}</div>
+        <section data-guide="rest-mesero" className={`${pane("mesero")} min-h-0 flex-col border-line lg:border-r`}>
+          <div data-guide="rest-hint" className="shrink-0 border-b border-line bg-warm/10 px-4 py-2.5 text-xs font-medium text-warm">{hint}</div>
 
           <div className="min-h-0 flex-1 overflow-y-auto p-4">
             {st.phase === "mesa" && (
@@ -500,7 +500,7 @@ function TableService() {
         </section>
 
         {/* Pantalla de cocina (KDS) */}
-        <section className={`${pane("cocina")} min-h-0 flex-col`}>
+        <section data-guide="rest-cocina" className={`${pane("cocina")} min-h-0 flex-col`}>
           <div className="flex shrink-0 flex-wrap items-center gap-1 border-b border-line px-4 py-2">
             <p className="mr-2 text-xs font-semibold uppercase tracking-widest text-muted">Cocina</p>
             {[
@@ -544,7 +544,7 @@ function TableService() {
         </section>
 
         {/* Lo que pasa por dentro */}
-        <section className={`${pane("sistema")} min-h-0 flex-col gap-3 overflow-y-auto border-line p-4 lg:border-l`}>
+        <section data-guide="rest-sistema" className={`${pane("sistema")} min-h-0 flex-col gap-3 overflow-y-auto border-line p-4 lg:border-l`}>
           <Panel title="Mesa y cuenta">
             <Row k="Mesa" v={st.table ?? <span className="text-muted">—</span>} />
             <Row k="Cuenta" v={st.sessionOpen ? <span className="text-warm">Abierta</span> : st.invoice ? "Cerrada" : <span className="text-muted">—</span>} />
@@ -880,7 +880,7 @@ export default function RestaurantSimulator() {
   const [view, setView] = useState("mesa");
   return (
     <div className="flex h-full flex-col">
-      <div className="flex shrink-0 gap-1 overflow-x-auto border-b border-line px-3 py-2">
+      <div data-guide="rest-views" className="flex shrink-0 gap-1 overflow-x-auto border-b border-line px-3 py-2">
         {[
           ["mesa", "Atender una mesa", "user"],
           ["sedes", "Sedes y menú público", "grid"],

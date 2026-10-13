@@ -4,6 +4,7 @@ import { useCallback, useState } from "react";
 import dynamic from "next/dynamic";
 import Modal from "../Modal";
 import { Icon } from "../Icons";
+import SimulatorGuide from "./SimulatorGuide";
 
 const loading = () => <p className="grid h-full place-items-center text-sm text-muted">Cargando simulador…</p>;
 
@@ -43,6 +44,7 @@ export default function SimulatorModal({ simulator }) {
 
       <Modal open={open} onClose={close} title={simulator.title} subtitle={simulator.subtitle} size="lg" bodyClassName="overflow-hidden">
         <Simulator />
+        <SimulatorGuide id={simulator.id} />
       </Modal>
     </>
   );

@@ -87,7 +87,7 @@ export default function AiSimulator() {
 
   return (
     <div className="flex h-full flex-col">
-      <div className="flex shrink-0 items-center gap-1 overflow-x-auto border-b border-line px-3 py-2">
+      <div data-guide="ai-tabs" className="flex shrink-0 items-center gap-1 overflow-x-auto border-b border-line px-3 py-2">
         {TABS.map(([k, label, icon]) => (
           <button
             key={k}
@@ -172,7 +172,7 @@ function Config({ sim, log }) {
       log={st.log}
       side={
         <>
-          <Panel title="Quién responde hoy">
+          <Panel guide="ai-who" title="Quién responde hoy">
             {Object.entries(FEATURES).map(([k, label]) => {
               const r = resolveProvider(st, k);
               return (
@@ -185,7 +185,7 @@ function Config({ sim, log }) {
               );
             })}
           </Panel>
-          <Panel title="Simular falla del proveedor">
+          <Panel guide="ai-quota" title="Simular falla del proveedor">
             <label className="flex cursor-pointer items-start gap-2 text-xs">
               <input
                 type="checkbox"

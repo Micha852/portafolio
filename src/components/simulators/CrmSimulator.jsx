@@ -458,7 +458,7 @@ export default function CrmSimulator() {
           </div>
 
           {/* Respuestas guiadas */}
-          <div className="shrink-0 border-t border-line px-3 py-2.5">
+          <div data-guide="crm-choices" className="shrink-0 border-t border-line px-3 py-2.5">
             {choices.length > 0 && (
               <div className="flex flex-wrap gap-2">
                 {choices.map((c) => (
@@ -507,8 +507,8 @@ export default function CrmSimulator() {
         </section>
 
         {/* Proceso: flujo de WhatsApp o embudo de ventas */}
-        <section className={`${pane("flujo")} min-h-0 flex-col`}>
-          <div className="flex shrink-0 gap-1 border-b border-line px-4 py-2">
+        <section data-guide="crm-flow" className={`${pane("flujo")} min-h-0 flex-col`}>
+          <div data-guide="crm-views" className="flex shrink-0 gap-1 border-b border-line px-4 py-2">
             {[
               ["flujo", "Flujo de WhatsApp"],
               ["embudo", "Embudo de ventas"],
@@ -538,7 +538,7 @@ export default function CrmSimulator() {
         </section>
 
         {/* Lo que queda guardado en el CRM */}
-        <section className={`${pane("crm")} min-h-0 flex-col gap-3 overflow-y-auto border-line p-4 lg:border-l`}>
+        <section data-guide="crm-panel" className={`${pane("crm")} min-h-0 flex-col gap-3 overflow-y-auto border-line p-4 lg:border-l`}>
           <Panel title="Contacto">
             {st.contact ? (
               <>

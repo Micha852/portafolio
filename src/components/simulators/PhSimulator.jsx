@@ -23,7 +23,7 @@ export default function PhSimulator() {
   const [scenario, setScenario] = useState("billing");
   return (
     <div className="flex h-full flex-col">
-      <div className="flex shrink-0 gap-1 overflow-x-auto border-b border-line px-3 py-2">
+      <div data-guide="ph-tabs" className="flex shrink-0 gap-1 overflow-x-auto border-b border-line px-3 py-2">
         {SCENARIOS.map(([k, label, icon]) => (
           <button
             key={k}
@@ -64,11 +64,11 @@ function Layout({ hint, main, side, log }) {
   return (
     <div className="h-full overflow-y-auto lg:grid lg:min-h-0 lg:grid-cols-[1fr_300px] lg:overflow-hidden">
       <section className="flex flex-col lg:min-h-0">
-        <div className="shrink-0 border-b border-line bg-warm/10 px-5 py-2.5 text-xs font-medium text-warm">{hint}</div>
-        <div className="p-5 lg:min-h-0 lg:flex-1 lg:overflow-y-auto">{main}</div>
+        <div data-guide="ph-hint" className="shrink-0 border-b border-line bg-warm/10 px-5 py-2.5 text-xs font-medium text-warm">{hint}</div>
+        <div data-guide="ph-main" className="p-5 lg:min-h-0 lg:flex-1 lg:overflow-y-auto">{main}</div>
         <ExecLog log={log} className="h-32" />
       </section>
-      <aside className="flex flex-col gap-3 border-t border-line p-4 lg:min-h-0 lg:overflow-y-auto lg:border-l lg:border-t-0">{side}</aside>
+      <aside data-guide="ph-side" className="flex flex-col gap-3 border-t border-line p-4 lg:min-h-0 lg:overflow-y-auto lg:border-l lg:border-t-0">{side}</aside>
     </div>
   );
 }
