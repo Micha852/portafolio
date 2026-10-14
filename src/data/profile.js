@@ -237,6 +237,7 @@ export const projects = [
         { name: "PrometeonDev", category: "Desarrollo de software", href: "https://prometeondev.com", image: "/web/prometeon.webp" },
         { name: "Red Digital Noticias", category: "Portal de noticias", href: "https://reddigitalnoticias.co", image: "/web/reddigital-caqueta.webp" },
         { name: "Global Play Zone", category: "Juego de billar en línea", href: "https://globalplayzone.com", image: "/web/globalplayzone.webp" },
+        { name: "Trajes Típicos", category: "Alquiler y venta de trajes · reservas en línea", href: "https://trajestipicos.com.co/", image: "/web/trajestipicos.webp" },
         { name: "Dalujo", category: "CRM y finanzas para negocios", href: "https://dalujo.com.co/", image: "/web/dalujo-sitio.webp" },
         { name: "Intergool", category: "Juego en línea por turnos", href: "https://intergooladmin.globalplayzone.com/", image: "/web/intergool.webp" },
         { name: "Dr. Gilberto Rincón", category: "Psiquiatría · landing", href: "https://gilberto-landing.vercel.app", image: "/web/gilberto.webp" },
