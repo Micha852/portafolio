@@ -25,6 +25,7 @@ export default function Contact() {
       });
       if (!res.ok) throw new Error();
       setStatus("sent");
+      window.dispatchEvent(new Event("contact:sent"));
       setForm(initialForm);
     } catch {
       setStatus("error");

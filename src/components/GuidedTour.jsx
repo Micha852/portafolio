@@ -110,7 +110,10 @@ export default function GuidedTour() {
     tour.drive(startIndex);
   };
 
-  const start = () => runTour(0);
+  const start = () => {
+    window.dispatchEvent(new Event("tour:started"));
+    runTour(0);
+  };
 
   if (mode === "hidden" || touringNow || modalOpen) return null;
 
