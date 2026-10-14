@@ -245,15 +245,40 @@ export const projects = [
   },
 ];
 
+// wide: columnas que ocupa en escritorio. steps: se muestra como proceso por etapas
 export const skills = [
-  { group: "Lenguajes", items: ["JavaScript", "TypeScript", "C#", "PHP", "Python"] },
+  { group: "Lenguajes", items: ["JavaScript", "TypeScript", "C#", "PHP", "Python", "SQL"] },
   { group: "Backend", items: ["Node.js", "Express", "NestJS", "Microservicios", ".NET Core", "Laravel", "APIs REST", "Redis · BullMQ"] },
-  { group: "Frontend", items: ["React", "Next.js", "Vue.js", "React Flow", "HTML5", "CSS3", "Tailwind CSS", "Bootstrap"] },
+  { group: "Frontend", items: ["React", "Next.js", "Vue.js", "React Flow", "Tailwind CSS", "Bootstrap", "HTML5", "CSS3"] },
   { group: "Bases de datos", items: ["PostgreSQL", "MySQL", "MongoDB", "Supabase", "Prisma", "PostGIS"] },
-  { group: "Infraestructura y herramientas", items: ["Linux", "Contabo", "DigitalOcean", "Docker", "Git y GitHub", "Postman", "Apidog"] },
-  { group: "IA y automatización", items: ["OpenAI", "Anthropic", "Gemini", "DeepSeek", "Flujos tipo n8n", "Python"] },
-  { group: "Integraciones", items: ["Facturación electrónica DIAN", "Meta Ads y Lead Forms", "WhatsApp", "Tiendanube", "Webhooks y OAuth"] },
-  { group: "Otros", items: ["Análisis funcional", "UI/UX", "Documentación técnica"] },
+  { group: "Infraestructura y nube", items: ["Linux", "Docker", "Contabo", "DigitalOcean", "MongoDB Atlas", "Git y GitHub", "Postman", "Apidog"] },
+  { group: "IA y automatización", items: ["OpenAI", "Anthropic", "Gemini", "DeepSeek", "Agentes con herramientas", "Flujos tipo n8n", "OCR"] },
+  {
+    group: "Integraciones",
+    wide: 2,
+    items: [
+      "Facturación electrónica DIAN",
+      "Nómina electrónica y PILA (SuAporte)",
+      "Calendario tributario DIAN",
+      "Proveedores de IA",
+      "WhatsApp (Meta, Twilio, Evolution)",
+      "Meta Ads y Lead Forms",
+      "Tiendanube",
+      "Webhooks y OAuth",
+    ],
+  },
+  {
+    group: "Análisis, documentación y capacitación",
+    wide: 4,
+    note: "El ciclo completo, desde la primera entrevista hasta que el usuario final usa el sistema.",
+    steps: [
+      { title: "Levantamiento", items: ["Entrevistas con usuarios", "Catálogo de requisitos"] },
+      { title: "Análisis", items: ["ERS (IEEE 830)", "Requisitos funcionales y no funcionales", "Casos de uso"] },
+      { title: "Diseño", items: ["Diagramas UML", "Modelo relacional", "Mockups y grafo de navegación", "UI/UX y pruebas de usabilidad"] },
+      { title: "Documentación", items: ["Manuales de usuario", "Documentación técnica"] },
+      { title: "Capacitación", items: ["Capacitación a usuarios finales", "Soporte funcional"] },
+    ],
+  },
 ];
 
 export const experience = [
