@@ -59,9 +59,8 @@ export default function About() {
                         sizes="(max-width: 768px) 100vw, 420px"
                         className="object-cover transition duration-700 group-hover:scale-105"
                       />
-                      <figcaption className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/85 via-black/50 to-transparent px-4 pb-3 pt-10">
+                      <figcaption className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/80 to-transparent px-4 pb-3 pt-8">
                         <p className="font-display text-sm font-bold text-white">{s.title}</p>
-                        <p className="text-xs text-white/75">{s.caption}</p>
                       </figcaption>
                     </figure>
                   ))}

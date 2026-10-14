@@ -24,7 +24,14 @@ export default function Hero() {
 
           <h1 className="font-display mt-6 text-5xl sm:text-6xl lg:text-7xl font-bold tracking-tight leading-[1.05]">
             Hola, soy <span className="text-accent">{profile.shortName}</span>
-            <span className="block text-muted text-3xl sm:text-4xl lg:text-5xl mt-3">{profile.role}</span>
+            <span className="block text-muted text-3xl sm:text-4xl lg:text-5xl mt-3">
+              {profile.role}
+              {profile.degree && (
+                <span className="mt-3 block font-sans text-lg font-semibold tracking-normal text-warm sm:text-xl">
+                  {profile.degree}
+                </span>
+              )}
+            </span>
           </h1>
 
           <p className="mt-6 text-xl sm:text-2xl min-h-[2.5em] font-display">

@@ -4,9 +4,9 @@ export const profile = {
   name: "Michael Andrés Martínez Guzmán",
   shortName: "Michael",
   role: "Desarrollador Full Stack",
+  degree: "Ingeniero de Sistemas",
   // Frases que se escriben en el hero, una tras otra
   taglines: [
-    "Ingeniero de Sistemas.",
     "Construyo plataformas ERP y de facturación electrónica.",
     "Diseño APIs REST y bases de datos.",
     "Convierto requerimientos en software que funciona.",
@@ -15,8 +15,10 @@ export const profile = {
   available: true,
   // Fotos del inicio: rotan con un fundido cada 5 s. position = qué parte se ve al recortar (CSS object-position)
   photos: [
-    { src: "/michael.jpeg", position: "18% center" },
+    { src: "/michael-diploma.webp", position: "center 72%" },
     { src: "/michael-2.webp", position: "center 30%" },
+    { src: "/michael.jpeg", position: "18% center" },
+    { src: "/michael-buso-blanco.webp", position: "center 78%" },
   ],
   cv: "/cv-michael-martinez.pdf",
   about: [
@@ -34,12 +36,10 @@ export const profile = {
   setups: [
     {
       title: "Estación principal",
-      caption: "Monitor con el editor de automatizaciones de Contagracia y la laptop con el código.",
       image: "/setup/estacion-principal.webp",
     },
     {
       title: "Segundo puesto",
-      caption: "Doble pantalla: código a la izquierda y este portafolio a la derecha.",
       image: "/setup/segundo-puesto.webp",
     },
   ],
