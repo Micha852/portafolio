@@ -295,7 +295,7 @@ export const experience = [
     title: "Analista Funcional / Desarrollador UX",
     place: "Fundación Música, Danza y Teatro del Caquetá (FUNMUDATE)",
     description:
-      "Levantamiento y documentación de requerimientos, diseño de prototipos y flujos de navegación, pruebas de usabilidad y enlace entre usuarios, directivos y el equipo de desarrollo. Soporte funcional y capacitación a usuarios finales.",
+      "Levantamiento y documentación de requerimientos, diseño de prototipos y flujos de navegación, pruebas de usabilidad y enlace entre usuarios, directivos y el equipo de desarrollo. Mejora continua de plataformas y sitios institucionales, soporte funcional y capacitación a usuarios finales. Desempeño certificado como sobresaliente.",
   },
   {
     period: "Jul 2019 — Dic 2025",
