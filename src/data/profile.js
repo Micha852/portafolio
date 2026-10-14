@@ -20,7 +20,7 @@ export const profile = {
     { src: "/michael.jpeg", position: "18% center", alt: "Michael sonriendo en su puesto de trabajo, con código en la pantalla" },
     { src: "/michael-buso-blanco.webp", position: "center 78%", alt: "Michael programando con audífonos en su habitación" },
   ],
-  cv: "/cv-michael-martinez.pdf",
+  cv: "/cv-michael-martinez-2026-10.pdf",
   about: [
     "Soy Ingeniero de Sistemas y desarrollador Full Stack. Trabajo en todo el ciclo del software: desde levantar requerimientos con los usuarios hasta desplegar, mantener y mejorar plataformas en producción.",
     "Me especializo en aplicaciones web, integración de APIs REST, automatización de procesos y bases de datos relacionales y NoSQL. Mi experiencia como analista funcional y en UX me ayuda a construir herramientas que la gente realmente entiende y usa.",
