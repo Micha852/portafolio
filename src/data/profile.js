@@ -15,10 +15,10 @@ export const profile = {
   available: true,
   // Fotos del inicio: rotan con un fundido cada 5 s. position = qué parte se ve al recortar (CSS object-position)
   photos: [
-    { src: "/michael-diploma.webp", position: "center 72%" },
-    { src: "/michael-2.webp", position: "center 30%" },
-    { src: "/michael.jpeg", position: "18% center" },
-    { src: "/michael-buso-blanco.webp", position: "center 78%" },
+    { src: "/michael-diploma.webp", position: "center 72%", alt: "Michael en su grado de Ingeniería de Sistemas en la Universidad de la Amazonia, con su diploma" },
+    { src: "/michael-2.webp", position: "center 30%", alt: "Michael programando en su escritorio con su pato en las piernas" },
+    { src: "/michael.jpeg", position: "18% center", alt: "Michael sonriendo en su puesto de trabajo, con código en la pantalla" },
+    { src: "/michael-buso-blanco.webp", position: "center 78%", alt: "Michael programando con audífonos en su habitación" },
   ],
   cv: "/cv-michael-martinez.pdf",
   about: [

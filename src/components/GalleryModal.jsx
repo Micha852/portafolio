@@ -59,7 +59,7 @@ function ThumbsTrigger({ gallery, onOpen }) {
             }`}
             style={{ zIndex: shown.length - i }}
           >
-            <Image src={site.image} alt="" fill sizes="64px" className="object-cover object-top" />
+            <Image src={site.image} alt={`Captura del sitio de ${site.name}`} fill sizes="64px" className="object-cover object-top" />
           </div>
         ))}
         {rest > 0 && (
@@ -85,7 +85,7 @@ function MosaicTrigger({ gallery, onOpen }) {
     <button onClick={onOpen} aria-label={`Ver ${gallery.sites.length} sitios`} className="group/mosaic absolute inset-0 grid grid-cols-2 grid-rows-2 gap-1 p-1">
       {gallery.sites.slice(0, 4).map((site) => (
         <span key={site.href} className="relative overflow-hidden rounded-lg">
-          <Image src={site.image} alt="" fill sizes="(max-width: 768px) 50vw, 25vw" className="object-cover object-top transition duration-500 group-hover/mosaic:scale-105" />
+          <Image src={site.image} alt={`Captura del sitio de ${site.name}`} fill sizes="(max-width: 768px) 50vw, 25vw" className="object-cover object-top transition duration-500 group-hover/mosaic:scale-105" />
         </span>
       ))}
       <span className="absolute inset-0 grid place-items-center bg-bg/0 transition group-hover/mosaic:bg-bg/60">

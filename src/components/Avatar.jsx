@@ -37,7 +37,8 @@ export default function Avatar({ name, photos = [], interval = 5000, className =
             <Image
               key={p.src}
               src={p.src}
-              alt={i === index ? name : ""}
+              alt={p.alt ?? name}
+              aria-hidden={i !== index}
               fill
               sizes="(max-width: 768px) 80vw, 400px"
               className={`object-cover transition-opacity duration-1000 ${i === index ? "opacity-100" : "opacity-0"}`}
