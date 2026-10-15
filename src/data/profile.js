@@ -224,7 +224,6 @@ export const projects = [
     imageMobile: "/projects/facturafacil-movil.webp",
     tags: ["Laravel", "PHP", "Vue.js", "Element UI", "MySQL", "IA"],
     links: [{ label: "facturafacil.com.co", href: "https://facturafacil.com.co", icon: "external" }],
-    featured: true,
   },
   {
     title: "Herbario Digital HUAZ 2.0",
@@ -265,8 +264,16 @@ export const projects = [
     owner: "PrometeOnDev · emprendimiento de Johan Ramírez y amigos",
     mine: "Colaboré en el sitio del estudio y en la landing de Dalujo.",
     description: "Sitios de PrometeOnDev, un estudio de desarrollo de Florencia, y de Dalujo, su CRM con finanzas para negocios.",
-    image: "/web/prometeon.webp",
+    image: "",
     tags: ["Next.js", "React", "Tailwind CSS"],
+    gallery: {
+      title: "Colaboraciones con PrometeOnDev",
+      subtitle: "Sitios de PrometeOnDev en los que colaboré.",
+      sites: [
+        { name: "PrometeOnDev", category: "Estudio de desarrollo", href: "https://prometeondev.com", image: "/web/prometeon.webp" },
+        { name: "Dalujo", category: "CRM con finanzas · landing", href: "https://dalujo.com.co/", image: "/web/dalujo-sitio.webp" },
+      ],
+    },
     links: [
       { label: "prometeondev.com", href: "https://prometeondev.com", icon: "external" },
       { label: "dalujo.com.co", href: "https://dalujo.com.co/", icon: "external" },

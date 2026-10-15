@@ -82,7 +82,7 @@ function ThumbsTrigger({ gallery, onOpen }) {
 // Mosaico 2×2 que ocupa el área de imagen de la tarjeta
 function MosaicTrigger({ gallery, onOpen }) {
   return (
-    <button onClick={onOpen} aria-label={`Ver ${gallery.sites.length} sitios`} className="group/mosaic absolute inset-0 grid grid-cols-2 grid-rows-2 gap-1 p-1">
+    <button onClick={onOpen} aria-label={`Ver ${gallery.sites.length} sitios`} className={`group/mosaic absolute inset-0 grid grid-rows-2 gap-1 p-1 ${gallery.sites.length > 2 ? "grid-cols-2" : "grid-cols-1"}`}>
       {gallery.sites.slice(0, 4).map((site) => (
         <span key={site.href} className="relative overflow-hidden rounded-lg">
           <Image src={site.image} alt={`Captura del sitio de ${site.name}`} fill sizes="(max-width: 768px) 50vw, 25vw" className="object-cover object-top transition duration-500 group-hover/mosaic:scale-105" />
