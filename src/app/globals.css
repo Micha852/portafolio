@@ -177,3 +177,26 @@ body {
 .tour-popover .driver-popover-arrow-side-bottom.driver-popover-arrow {
   border-bottom-color: rgb(var(--surface));
 }
+
+/* Llamado de atención breve: hace palpitar un elemento al llegar a él (WhatsApp, formulario de contacto) */
+@keyframes attention {
+  0%, 100% { transform: scale(1); box-shadow: 0 0 0 0 rgb(var(--attention) / 0.5); border-color: rgb(var(--attention)); }
+  20% { transform: scale(1.025); }
+  40% { transform: scale(1); }
+  60% { transform: scale(1.015); }
+  80% { box-shadow: 0 0 0 16px rgb(var(--attention) / 0); }
+}
+.attention {
+  --attention: var(--accent);
+  animation: attention 1s ease-in-out 3;
+  border-color: rgb(var(--attention));
+}
+.attention-warm {
+  --attention: var(--warm);
+}
+@media (prefers-reduced-motion: reduce) {
+  .attention {
+    animation: none;
+    box-shadow: 0 0 0 3px rgb(var(--attention) / 0.4);
+  }
+}

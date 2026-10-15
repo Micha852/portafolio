@@ -1,15 +1,53 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import SectionHeading from "./SectionHeading";
 import Reveal from "./Reveal";
 import { Icon } from "./Icons";
 import { contact } from "@/data/profile";
 
+// Al tocar un enlace con data-attention, espera a que el destino esté en pantalla y lo hace palpitar.
+// "Hablemos" del hero → botón de WhatsApp; la tarjeta de correo → formulario (además de abrir el correo).
+function useAttention() {
+  const refs = { whatsapp: useRef(null), form: useRef(null) };
+  const classes = { whatsapp: ["attention", "attention-warm"], form: ["attention"] };
+
+  useEffect(() => {
+    const flash = (key) => {
+      const el = refs[key]?.current;
+      if (!el) return;
+      const started = performance.now();
+      let lastTop = null;
+      // Espera a que termine el scroll suave y el elemento esté a la vista (máx. 2,5 s)
+      const wait = () => {
+        const r = el.getBoundingClientRect();
+        const settled = lastTop !== null && Math.abs(r.top - lastTop) < 1 && r.top < innerHeight && r.bottom > 0;
+        lastTop = r.top;
+        if (!settled && performance.now() - started < 2500) return requestAnimationFrame(wait);
+        el.classList.remove(...classes[key]);
+        void el.offsetWidth; // reinicia la animación si se vuelve a tocar
+        el.classList.add(...classes[key]);
+        setTimeout(() => el.classList.remove(...classes[key]), 3200);
+      };
+      requestAnimationFrame(wait);
+    };
+    const onClick = (e) => {
+      const key = e.target.closest?.("[data-attention]")?.dataset.attention;
+      if (key) flash(key);
+    };
+    document.addEventListener("click", onClick);
+    return () => document.removeEventListener("click", onClick);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  return { refs };
+}
+
 const initialForm = { name: "", email: "", message: "", website: "" };
 
 export default function Contact() {
   const [form, setForm] = useState(initialForm);
+  const attention = useAttention();
   const [status, setStatus] = useState("idle"); // idle | sending | sent | error
 
   const update = (e) => setForm({ ...form, [e.target.name]: e.target.value });
@@ -44,6 +82,7 @@ export default function Contact() {
           <Reveal className="space-y-4">
             <a
               href={`mailto:${contact.email}`}
+              data-attention="form"
               className="flex items-center gap-4 rounded-2xl border border-line bg-surface p-5 transition hover:border-accent"
             >
               <span className="grid h-12 w-12 place-items-center rounded-xl bg-accent/10 text-accent">
@@ -58,6 +97,7 @@ export default function Contact() {
               href={`https://wa.me/${contact.whatsapp}?text=${encodeURIComponent(contact.whatsappText)}`}
               target="_blank"
               rel="noopener noreferrer"
+              ref={attention.refs.whatsapp}
               className="flex items-center gap-4 rounded-2xl border border-line bg-surface p-5 transition hover:border-accent"
             >
               <span className="grid h-12 w-12 place-items-center rounded-xl bg-warm/10 text-warm">
@@ -85,7 +125,7 @@ export default function Contact() {
           </Reveal>
 
           <Reveal delay={120}>
-            <form onSubmit={submit} className="space-y-4 rounded-3xl border border-line bg-surface p-6 sm:p-8">
+            <form ref={attention.refs.form} onSubmit={submit} className="space-y-4 rounded-3xl border border-line bg-surface p-6 sm:p-8">
               <div className="grid gap-4 sm:grid-cols-2">
                 <label className="block">
                   <span className="mb-1.5 block text-sm font-medium">Nombre</span>

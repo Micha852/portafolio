@@ -43,7 +43,7 @@ export default function Hero() {
               Ver proyectos
               <Icon name="arrow" className="w-4 h-4" />
             </a>
-            <a href="#contacto" className="btn-outline">
+            <a href="#contacto" data-attention="whatsapp" className="btn-outline">
               Hablemos
             </a>
             {profile.cv && (
