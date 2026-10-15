@@ -47,7 +47,16 @@ export default function SimulatorModal({ simulator }) {
       </button>
 
       <Modal open={open} onClose={close} title={simulator.title} subtitle={simulator.subtitle} size="lg" bodyClassName="overflow-hidden">
-        <Simulator />
+        <div className="flex h-full flex-col">
+          {/* Aclaración: demo propia, no el producto de Arawana */}
+          <p className="shrink-0 border-b border-line bg-bg/60 px-5 py-1.5 text-[11px] text-muted">
+            Demo ilustrativa con datos ficticios, hecha para este portafolio. Se inspira en funcionalidades en las que trabajé para Arawana Home
+            Studio; no usa su código, datos ni lógica interna.
+          </p>
+          <div className="min-h-0 flex-1">
+            <Simulator />
+          </div>
+        </div>
         <SimulatorGuide id={simulator.id} />
       </Modal>
     </>

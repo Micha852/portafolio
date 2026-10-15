@@ -3,44 +3,43 @@
 import { useEffect, useRef, useState } from "react";
 import { Icon } from "../Icons";
 
-// Réplica del flujo de biblioteca "Ventas por WhatsApp: campaña, equipo comercial e IA" de Contagracia
-// y del embudo de oportunidades por defecto. Nodos, ramas, etapas y etiquetas siguen el código real;
-// las respuestas están guionizadas y el chat es guiado (solo opciones).
+// Demo propia de un CRM con atención de leads por WhatsApp y asistente IA, con datos ficticios.
+// Flujo, etapas y textos son ilustrativos (no replican ningún producto); el chat es guiado (solo opciones).
 
-const ADVISORS = ["Laura Gómez", "Andrés Ruiz"];
-const CAMPAIGN = "Instagram · Lanzamiento octubre";
+const ADVISORS = ["Valentina Ríos", "Camilo Ortiz"];
+const CAMPAIGN = "Anuncio · Promo de temporada";
 const PHONE = "+57 300 123 4567";
 const SLOTS = ["Mañana 9:00 a. m.", "Mañana 3:00 p. m.", "Jueves 10:00 a. m."];
-const HANDOFF = "un asesor te escribirá en breve";
-const MEET = "meet.google.com/xkt-fqbv-nrp";
-const QUOTE = { id: "COT-0142", name: "Plan Empresa · 12 meses", value: "$4.800.000" };
+const HANDOFF = "te paso con una persona del equipo";
+const MEET = "meet.example.com/demo-ana";
+const QUOTE = { id: "PROP-0027", name: "Plan Empresa · 12 meses", value: "$4.800.000" };
 
 // Ritmo de la animación (ms)
 const T = { node: 1100, tool: 1000, think: 1200, beat: 900 };
 
 const NODES = {
   trigger: { kind: "Disparador", title: "WhatsApp: mensaje recibido", icon: "bolt" },
-  sinAsesor: { kind: "Si / entonces", title: "¿El lead no tiene asesor?", icon: "branch" },
-  dispersor: { kind: "Dispersor", title: "Repartir 50 / 50", icon: "users" },
-  asignar: { kind: "Acción", title: "Asignar lead a un usuario", icon: "user" },
-  agente: { kind: "Agente IA", title: "Sofía", icon: "sparkles" },
-  enviar: { kind: "Acción", title: "WhatsApp: enviar mensaje", icon: "whatsapp" },
-  traspaso: { kind: "Si / entonces", title: "¿Pidió un asesor?", icon: "branch" },
-  pausar: { kind: "Acción", title: "WhatsApp: apagar la IA", icon: "pause" },
+  sinAsesor: { kind: "Condición", title: "¿Ya tiene asesor asignado?", icon: "branch" },
+  dispersor: { kind: "Reparto", title: "Turno rotativo", icon: "users" },
+  asignar: { kind: "Acción", title: "Asignar asesor", icon: "user" },
+  agente: { kind: "Asistente IA", title: "Ana", icon: "sparkles" },
+  enviar: { kind: "Acción", title: "Responder por WhatsApp", icon: "whatsapp" },
+  traspaso: { kind: "Condición", title: "¿Quiere hablar con una persona?", icon: "branch" },
+  pausar: { kind: "Acción", title: "Pasar a un asesor", icon: "pause" },
 };
 
 const TOOLS = {
-  disponibilidad: "Agenda: ver disponibilidad",
-  agendar: "Agenda: agendar reunión",
+  disponibilidad: "Consultar agenda",
+  agendar: "Reservar cita",
 };
 
-// Etapas por defecto del embudo (seed crmOpportunityStages)
+// Etapas del embudo de la demo
 const STAGES = [
-  { name: "Prospección", color: "#3B82F6" },
-  { name: "Negociación", color: "#8B5CF6" },
-  { name: "Cotizando", color: "#F59E0B" },
-  { name: "Ganada", color: "#10B981" },
-  { name: "Perdida", color: "#6B7280" },
+  { name: "Nuevo", color: "#3B82F6" },
+  { name: "Calificado", color: "#8B5CF6" },
+  { name: "Propuesta", color: "#F59E0B" },
+  { name: "Ganado", color: "#10B981" },
+  { name: "Perdido", color: "#6B7280" },
 ];
 const stageColor = (name) => STAGES.find((s) => s.name === name)?.color ?? "#3B82F6";
 
@@ -57,7 +56,7 @@ const OPTIONS = {
   rechazar: "No por ahora, gracias",
 };
 
-// Respuesta guionizada de Sofía para cada opción
+// Respuesta guionizada de Ana para cada opción
 function sofia(option, s) {
   if (option.startsWith("slot")) {
     const slot = SLOTS[Number(option.slice(4))];
@@ -86,7 +85,7 @@ function sofia(option, s) {
       return {
         tools: [],
         awaitingOffer: true,
-        reply: "¡Hola! Soy Sofía, del equipo comercial. Qué bueno que nos escribes por la campaña. ¿Quieres que te agende 30 minutos con un asesor para contarte cómo funciona?",
+        reply: "¡Hola! Soy Ana, la asistente virtual del equipo. Qué bueno que nos escribes por la campaña. ¿Quieres que te agende 30 minutos con un asesor para contarte cómo funciona?",
       };
   }
 }
@@ -210,10 +209,10 @@ export default function CrmSimulator() {
         update((x) => (x.branches.sinAsesor = "si"));
         await step("dispersor");
         const advisor = ADVISORS[Math.floor(Math.random() * ADVISORS.length)];
-        log(`El dispersor eligió a ${advisor} (50 / 50 entre el equipo)`);
+        log(`Turno rotativo: le toca a ${advisor}`);
         await step("asignar");
         update((x) => (x.lead.assignedTo = advisor));
-        log(`Lead asignado a ${advisor}`);
+        log(`Asesor asignado: ${advisor}`);
         notify(`${advisor}: te asignaron un lead nuevo (en el sistema y por correo)`);
       } else {
         update((x) => (x.branches.sinAsesor = "no"));
@@ -224,18 +223,18 @@ export default function CrmSimulator() {
       const d = sofia(option, s.current);
       update((x) => {
         x.nodes.agente = "active";
-        x.typing = "Sofía";
+        x.typing = "Ana";
       });
       for (const tool of d.tools) {
         await wait(T.beat / 2);
         update((x) => (x.tools[tool] = "active"));
-        log(`Sofía usa la herramienta «${TOOLS[tool]}»`);
+        log(`Ana usa la herramienta «${TOOLS[tool]}»`);
         await wait(T.tool);
         update((x) => (x.tools[tool] = "done"));
       }
       await wait(T.think);
       update((x) => (x.nodes.agente = "done"));
-      log("Sofía redactó la respuesta");
+      log("Ana redactó la respuesta");
 
       await step("enviar", T.node * 0.7);
       update((x) => {
@@ -256,7 +255,7 @@ export default function CrmSimulator() {
         update((x) => (x.branches.traspaso = "si"));
         await step("pausar");
         update((x) => (x.aiActive = false));
-        log("IA apagada en la conversación: desde ahora responde el asesor", "warn");
+        log("La conversación pasa a un asesor: el asistente deja de responder", "warn");
         notify(`${s.current.lead.assignedTo}: el cliente pidió hablar con un asesor`);
       } else {
         update((x) => (x.branches.traspaso = "no"));
@@ -282,20 +281,20 @@ export default function CrmSimulator() {
       log(s.current.meeting ? `Pasa la reunión de ${s.current.meeting.toLowerCase()} con ${advisor}` : `${advisor} toma la conversación`, "ok");
       if (s.current.aiActive) {
         update((x) => (x.aiActive = false));
-        log("El asesor apaga la IA para atender él mismo (WhatsApp: apagar la IA)", "warn");
+        log("El asesor toma la conversación y el asistente deja de responder", "warn");
       }
       await wait(T.node);
 
       update((x) => {
         x.lead.stage = "Convertido";
-        x.opportunity = { name: QUOTE.name, value: QUOTE.value, stage: "Prospección", history: ["Prospección"] };
+        x.opportunity = { name: QUOTE.name, value: QUOTE.value, stage: "Nuevo", history: ["Nuevo"] };
       });
-      event("Lead convertido a oportunidad", QUOTE.name);
-      log(`Lead convertido en oportunidad: ${QUOTE.name} · ${QUOTE.value}`);
+      event("Lead → oportunidad", QUOTE.name);
+      log(`Nueva oportunidad: ${QUOTE.name} · ${QUOTE.value}`);
       await wait(T.node * 1.3);
 
-      await move("Negociación", "Oportunidad cambió de etapa", "Prospección → Negociación");
-      await move("Cotizando", "Oportunidad llegó a una etapa", "Cotizando");
+      await move("Calificado", "Cambio de etapa", "Nuevo → Calificado");
+      await move("Propuesta", "Cambio de etapa", "Calificado → Propuesta");
 
       update((x) => (x.typing = advisor));
       await wait(T.think);
@@ -320,14 +319,14 @@ export default function CrmSimulator() {
 
       if (option === "aceptar") {
         update((x) => {
-          x.opportunity.stage = "Ganada";
-          x.opportunity.history.push("Ganada");
+          x.opportunity.stage = "Ganado";
+          x.opportunity.history.push("Ganado");
         });
-        event("Oportunidad ganada", `${QUOTE.value}`);
-        log(`Oportunidad ganada: ${QUOTE.name} · ${QUOTE.value}`, "ok");
+        event("Venta ganada", `${QUOTE.value}`);
+        log(`Venta ganada: ${QUOTE.name} · ${QUOTE.value}`, "ok");
         await wait(T.node);
         update((x) => (x.contact.role = "Cliente"));
-        event("Contacto pasó a cliente", "Cliente demo");
+        event("Ahora es cliente", "Cliente demo");
         log("El contacto pasó a ser cliente", "ok");
         notify(`Líder del equipo: ${advisor} ganó una oportunidad por ${QUOTE.value}`);
         await wait(T.beat);
@@ -337,15 +336,15 @@ export default function CrmSimulator() {
         say("asesor", "¡Excelente, te damos la bienvenida! 🎉 En un momento te llegan la factura y el acceso a la plataforma.");
       } else {
         update((x) => {
-          x.opportunity.stage = "Perdida";
+          x.opportunity.stage = "Perdido";
           x.opportunity.lostReason = "Presupuesto";
-          x.opportunity.history.push("Perdida");
+          x.opportunity.history.push("Perdido");
         });
-        event("Oportunidad perdida", "motivo: Presupuesto");
-        log("Oportunidad perdida · motivo: Presupuesto", "warn");
+        event("Venta perdida", "motivo: Presupuesto");
+        log("Venta perdida · motivo: Presupuesto", "warn");
         await wait(T.node);
-        event("Flujo disparado", "Recuperar al cliente que no compró");
-        log("Se dispara el flujo «Recuperar al cliente que no compró»");
+        event("Seguimiento programado", "volver a escribirle en 30 días");
+        log("Se programa un seguimiento para escribirle de nuevo en 30 días");
         await wait(T.beat);
         update((x) => (x.typing = advisor));
         await wait(T.think);
@@ -378,8 +377,8 @@ export default function CrmSimulator() {
   const pick = (option) => (st.phase === "cotizacion" ? decide(option) : answer(option));
 
   const status = st.phase !== "chat" || !st.aiActive
-    ? { text: st.lead?.assignedTo ? `Te atiende ${st.lead.assignedTo}` : "IA apagada · te atiende un asesor", tone: "text-warm" }
-    : { text: "Agente IA activo", tone: "text-accent" };
+    ? { text: st.lead?.assignedTo ? `Te atiende ${st.lead.assignedTo}` : "Te atiende un asesor", tone: "text-warm" }
+    : { text: "Asistente virtual activo", tone: "text-accent" };
 
   const pane = (name) => (tab === name ? "flex" : "hidden lg:flex");
 
@@ -436,7 +435,7 @@ export default function CrmSimulator() {
                 <div className="max-w-[85%]">
                   {m.from !== "cliente" && (
                     <p className={`mb-0.5 px-1 text-[10px] font-semibold ${m.from === "sofia" ? "text-accent" : "text-warm"}`}>
-                      {m.from === "sofia" ? "Sofía · agente IA" : `${st.lead?.assignedTo} · asesor`}
+                      {m.from === "sofia" ? "Ana · asistente IA" : `${st.lead?.assignedTo} · asesor`}
                     </p>
                   )}
                   <p
@@ -578,7 +577,7 @@ export default function CrmSimulator() {
           </Panel>
 
           <Panel title="Conversación">
-            <Row k="Estado" v={st.aiActive ? <span className="text-accent">Agente IA activo</span> : <span className="text-warm">IA apagada</span>} />
+            <Row k="Estado" v={st.aiActive ? <span className="text-accent">Asistente activo</span> : <span className="text-warm">Con un asesor</span>} />
             <Row k="Reunión" v={st.meeting ?? <span className="text-muted">—</span>} />
           </Panel>
 
@@ -604,7 +603,7 @@ export default function CrmSimulator() {
 function FlowView({ st }) {
   return (
     <>
-      <p className="mb-4 text-xs font-semibold uppercase tracking-widest text-muted">Ventas por WhatsApp: campaña, equipo comercial e IA</p>
+      <p className="mb-4 text-xs font-semibold uppercase tracking-widest text-muted">Atención de leads por WhatsApp</p>
       <div className="mx-auto flex max-w-md flex-col items-stretch">
         <Node id="trigger" state={st.nodes.trigger} />
         <Line on={st.nodes.sinAsesor !== "idle"} />
@@ -618,7 +617,7 @@ function FlowView({ st }) {
           </div>
           <div className="flex flex-col">
             <BranchLabel label="No" active={st.branches.sinAsesor === "no"} />
-            <Placeholder active={st.branches.sinAsesor === "no"}>Sigue directo al agente</Placeholder>
+            <Placeholder active={st.branches.sinAsesor === "no"}>Sigue directo a la asistente</Placeholder>
           </div>
         </div>
         <Line on={st.nodes.agente !== "idle"} />
@@ -652,7 +651,7 @@ function FlowView({ st }) {
           </div>
           <div className="flex flex-col">
             <BranchLabel label="No" active={st.branches.traspaso === "no"} />
-            <Placeholder active={st.branches.traspaso === "no"}>Sofía sigue atendiendo</Placeholder>
+            <Placeholder active={st.branches.traspaso === "no"}>Ana sigue atendiendo</Placeholder>
           </div>
         </div>
       </div>

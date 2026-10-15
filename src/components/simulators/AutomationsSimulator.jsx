@@ -4,9 +4,8 @@ import { useEffect, useRef, useState } from "react";
 import { Icon } from "../Icons";
 import { useSim, ExecLog, Panel, Badge } from "./ui";
 
-// Réplica del hub de automatizaciones de Contagracia: asistente "Crear con IA" que propone un flujo
-// sobre el catálogo real, lienzo tipo n8n, borradores, simulación, encendido y peticiones de lo que no existe.
-// Prompts, nodos, etiquetas y reglas salen del código; las respuestas de la IA están guionizadas.
+// Demo propia de un hub de automatizaciones: un asistente con IA propone flujos, se dibujan en un lienzo
+// tipo n8n, se prueban y se activan; lo que no se puede hacer queda como solicitud. Todo es guionizado y ficticio.
 
 const MODULES = {
   crm: { label: "CRM", icon: "users" },
@@ -14,12 +13,12 @@ const MODULES = {
   restaurant: { label: "Restaurante", icon: "calendar" },
 };
 
-// Tipos de nodo: colores del lienzo real
+// Tipos de nodo y su color en el lienzo
 const KIND = {
-  trigger: { border: "#F59E0B", icon: "#F59E0B", role: "CUANDO" },
-  action: { border: "#64748B", icon: "#3B82F6", role: "ENTONCES" },
-  control: { border: "#8B5CF6", icon: "#8B5CF6", role: "SI" },
-  ai: { border: "#64748B", icon: "#3B82F6", role: "ENTONCES" },
+  trigger: { border: "#F59E0B", icon: "#F59E0B", role: "DISPARADOR" },
+  action: { border: "#64748B", icon: "#3B82F6", role: "ACCIÓN" },
+  control: { border: "#8B5CF6", icon: "#8B5CF6", role: "CONDICIÓN" },
+  ai: { border: "#64748B", icon: "#3B82F6", role: "IA" },
   sub: { border: "#10B981", icon: "#10B981", role: "" },
 };
 
@@ -27,66 +26,64 @@ const T = (id, label, icon, x, y = 0) => ({ id, kind: "trigger", label, icon, x,
 const A = (id, label, icon, x, y = 0, role) => ({ id, kind: "action", label, icon, x, y, role });
 const C = (id, label, icon, x, y = 0, role) => ({ id, kind: "control", label, icon, x, y, role });
 
-// Ejemplos por módulo: los posibles salen de los flujos de biblioteca; el último termina en petición
+// Ejemplos propios de la demo: tres que se pueden armar y uno que queda como solicitud, por módulo
 const EXAMPLES = {
   crm: [
     {
-      id: "crm-lead",
-      prompt: "Cuando llegue un lead nuevo, crear una tarea para el asesor y avisarle.",
+      id: "crm-form",
+      prompt: "Cuando llegue un lead desde el formulario web, enviarle un correo de bienvenida y crear una tarea de llamada.",
       reply:
-        "Le propongo un flujo que arranca con cada **lead creado** y, en paralelo, crea una tarea de llamada para el asesor responsable y le envía una notificación en el sistema.\n\nRevise la propuesta a la derecha; si le sirve, pulse **Aceptar**. Le recomiendo **Simular** antes de prenderlo.",
+        "Te propongo un flujo que arranca con cada **formulario recibido** y hace dos cosas en paralelo: le envía un **correo de bienvenida** al lead y crea una **tarea de llamada** para el equipo.\n\nRevísalo a la derecha y, si te sirve, crea el flujo. Antes de activarlo, pruébalo.",
       flow: {
-        name: "Primer contacto con un lead nuevo",
-        description: "Crea una tarea de llamada y avisa al asesor cuando entra un lead.",
-        does: ["Se dispara cuando se crea un lead (cualquier origen).", "Crea una actividad de llamada asignada al responsable.", "Le avisa al responsable con una notificación."],
-        nodes: [T("t", "Lead creado", "users", 0), A("a1", "Crear actividad", "calendar", 1, -0.6), A("a2", "Notificar en el sistema", "bell", 1, 0.6)],
+        name: "Bienvenida a leads del formulario web",
+        description: "Correo de bienvenida y tarea de llamada para cada lead nuevo del sitio web.",
+        does: ["Se dispara con cada formulario recibido.", "Envía un correo de bienvenida al lead.", "Crea una tarea de llamada para el equipo comercial."],
+        nodes: [T("t", "Formulario recibido", "mail", 0), A("a1", "Enviar correo", "mail", 1, -0.6), A("a2", "Crear tarea", "calendar", 1, 0.6)],
         edges: [["t", "a1"], ["t", "a2"]],
       },
     },
     {
-      id: "crm-stalled",
-      prompt: "Si una oportunidad lleva 15 días quieta, avisarle al responsable y al líder del equipo.",
+      id: "crm-quote",
+      prompt: "Si un cliente no responde una cotización en 7 días, recordársela por WhatsApp.",
       reply:
-        "Listo: el disparador **«Una oportunidad lleva días sin moverse»** con 15 días se activa una sola vez por oportunidad. De ahí salen dos avisos en paralelo: uno para el responsable y otro para el líder de su equipo.\n\nSi le sirve, pulse **Aceptar**.",
+        "Listo: el disparador **«Cotización sin respuesta»** configurado a **7 días** y un **WhatsApp** de recordatorio con el número de la cotización.\n\nSi te sirve, crea el flujo.",
       flow: {
-        name: "Avisar a responsable y líder si la oportunidad lleva 15 días quieta",
-        description: "Dos notificaciones en paralelo cuando una oportunidad no se mueve en 15 días.",
-        does: ["Cuenta como movimiento: etapa, responsable, valor o fecha de cierre.", "No aplica a oportunidades ganadas o perdidas.", "Avisa al responsable y al líder del equipo."],
-        nodes: [T("t", "Oportunidad quieta 15 días", "bolt", 0), A("a1", "Notificar al responsable", "bell", 1, -0.6), A("a2", "Notificar al líder", "bell", 1, 0.6)],
-        edges: [["t", "a1"], ["t", "a2"]],
-      },
-    },
-    {
-      id: "crm-birthday",
-      prompt: "El día del cumpleaños de un cliente, mandarle un correo de felicitación.",
-      reply:
-        "Le armé el flujo con el disparador **«Cumpleaños de un contacto»** y un correo al contacto. Falta elegir **qué plantilla** usar, así que se crea en **borrador**: puede guardarse, pero no prenderse hasta completarla.\n\nPulse **Aceptar** para crearlo.",
-      flow: {
-        name: "Felicitación de cumpleaños",
-        description: "Correo de felicitación el día del cumpleaños de cada contacto.",
-        does: ["Se dispara el día del cumpleaños del contacto.", "Le envía un correo con una plantilla del CRM."],
-        pending: [{ node: "Enviar email", field: "Plantilla", fix: "Feliz cumpleaños" }],
-        nodes: [T("t", "Cumpleaños de un contacto", "calendar", 0), A("a1", "Enviar email", "mail", 1)],
+        name: "Recordatorio de cotización a los 7 días",
+        description: "WhatsApp al cliente cuando una cotización lleva una semana sin respuesta.",
+        does: ["Se dispara 7 días después de enviar una cotización sin respuesta.", "Le recuerda la cotización al cliente por WhatsApp."],
+        nodes: [T("t", "Cotización sin respuesta · 7 días", "bolt", 0), A("a1", "Enviar WhatsApp", "whatsapp", 1)],
         edges: [["t", "a1"]],
       },
     },
     {
+      id: "crm-weekly",
+      prompt: "Cada lunes a las 8 a. m., enviarme por correo el resumen de ventas de la semana.",
+      reply:
+        "Armé un flujo **programado los lunes a las 8:00** que calcula el **resumen de ventas** de la semana y te lo envía por **correo**.\n\nFalta elegir la **plantilla del correo**, así que se guarda como **borrador**.",
+      flow: {
+        name: "Resumen semanal de ventas",
+        description: "Correo con las ventas de la semana, cada lunes a primera hora.",
+        does: ["Corre los lunes a las 8:00 a. m.", "Calcula las ventas de la semana anterior.", "Te envía el resumen por correo."],
+        pending: [{ node: "Enviar correo", field: "Plantilla", fix: "Resumen semanal" }],
+        nodes: [T("t", "Programado · lunes 8:00", "calendar", 0), A("a1", "Resumen de ventas", "filter", 1), A("a2", "Enviar correo", "mail", 2)],
+        edges: [["t", "a1"], ["a1", "a2"]],
+      },
+    },
+    {
       id: "crm-no",
-      prompt: "Cuando se gane una oportunidad, registrar el asiento contable de la comisión del asesor.",
+      prompt: "Cuando se gane una venta, emitir la factura electrónica automáticamente.",
       impossible: {
         reply:
-          "Puedo arrancar con **«Oportunidad ganada»**, pero el módulo de Contabilidad todavía no tiene acciones para registrar asientos desde un flujo.\n\nLo más cercano que existe es avisarle al equipo contable con una notificación para que lo registre a mano.",
-        falta: "Una acción de Contabilidad para registrar asientos desde un flujo",
-        alternativa: "Notificar al equipo contable cuando se gane la oportunidad",
-        // Lo que la IA arma cuando la petición ya está Disponible
+          "Puedo arrancar con **«Venta ganada»**, pero por ahora los flujos no tienen una acción para **emitir facturas**.\n\nLo más cercano es avisarle al equipo de facturación para que la emita.",
+        falta: "Una acción para emitir facturas desde un flujo",
+        alternativa: "Avisar al equipo de facturación cuando se gane la venta",
         resolved: {
-          reply:
-            "¡Ya se puede! Contabilidad ahora tiene la acción **«Registrar asiento contable»**. Le propongo arrancar con **«Oportunidad ganada»** y registrar el asiento de la comisión del asesor.\n\nRevíselo y pulse **Aceptar**.",
+          reply: "¡Ya se puede! Ahora existe la acción **«Emitir factura»**. Te propongo arrancar con **«Venta ganada»** y emitir la factura del cliente.\n\nRevísalo y crea el flujo.",
           flow: {
-            name: "Asiento de comisión al ganar una oportunidad",
-            description: "Registra el asiento de la comisión del asesor cuando se gana una oportunidad.",
-            does: ["Se dispara cuando una oportunidad pasa a Ganada.", "Registra el asiento contable de la comisión del responsable."],
-            nodes: [T("t", "Oportunidad ganada", "bolt", 0), { ...A("a1", "Registrar asiento contable", "grid", 1), isNew: true }],
+            name: "Factura automática al ganar una venta",
+            description: "Emite la factura en cuanto una venta pasa a ganada.",
+            does: ["Se dispara cuando una venta pasa a Ganado.", "Emite la factura con los datos del cliente."],
+            nodes: [T("t", "Venta ganada", "bolt", 0), { ...A("a1", "Emitir factura", "grid", 1), isNew: true }],
             edges: [["t", "a1"]],
           },
         },
@@ -95,67 +92,65 @@ const EXAMPLES = {
   ],
   ph: [
     {
-      id: "ph-reminder",
-      prompt: "A comienzo de mes, enviar a propietarios y arrendatarios un recordatorio de pago.",
-      reply:
-        "Le propongo un flujo **«En un horario»** el día 1 de cada mes a las 8:00 a. m., que envía un **comunicado** a propietarios y arrendatarios de la copropiedad recordando el pago de la administración.\n\nRevíselo a la derecha y pulse **Aceptar**.",
+      id: "ph-reserva",
+      prompt: "Cuando un residente reserve el salón social, avisarle a portería.",
+      reply: "Te propongo **«Reserva de zona común»** filtrada al **salón social**, con un **aviso a portería** que incluye la fecha y la unidad.\n\nSi te sirve, crea el flujo.",
       flow: {
-        name: "Recordatorio mensual de pago de administración",
-        description: "Comunicado el primer día de cada mes a propietarios y arrendatarios.",
-        does: ["Corre el día 1 de cada mes a las 8:00 a. m.", "Envía un comunicado por correo a propietarios y arrendatarios."],
-        nodes: [T("t", "En un horario · día 1", "calendar", 0), A("a1", "Enviar comunicado", "megaphone", 1)],
-        edges: [["t", "a1"]],
+        name: "Aviso a portería por reservas del salón",
+        description: "Portería se entera de cada reserva del salón social.",
+        does: ["Se dispara con cada reserva de una zona común.", "Sigue solo si es el salón social.", "Avisa a portería con la fecha y la unidad."],
+        nodes: [T("t", "Reserva de zona común", "calendar", 0), C("c1", "Solo salón social", "filter", 1, 0, "FILTRO"), A("a1", "Avisar a portería", "bell", 2)],
+        edges: [["t", "c1"], ["c1", "a1", { label: "Sí", color: "#10B981" }]],
+      },
+    },
+    {
+      id: "ph-morosos",
+      prompt: "Si un residente acumula dos cuotas vencidas, enviarle su estado de cuenta por correo.",
+      reply:
+        "Usé **«Cuota vencida»**, una **condición** para seguir solo si la unidad tiene **2 o más cuotas vencidas**, y un **correo** con el estado de cuenta.\n\nFalta elegir la **plantilla**, así que queda en **borrador**.",
+      flow: {
+        name: "Estado de cuenta a unidades con dos cuotas vencidas",
+        description: "Correo con el estado de cuenta cuando una unidad acumula dos cuotas vencidas.",
+        does: ["Se dispara cuando una cuota se vence.", "Sigue solo si la unidad ya tiene 2 o más vencidas.", "Envía el estado de cuenta al responsable de pagos."],
+        pending: [{ node: "Enviar correo", field: "Plantilla", fix: "Estado de cuenta" }],
+        nodes: [T("t", "Cuota vencida", "calendar", 0), C("c1", "¿2 o más vencidas?", "branch", 1, 0, "CONDICIÓN"), A("a1", "Enviar correo", "mail", 2)],
+        edges: [["t", "c1"], ["c1", "a1", { label: "Sí", color: "#10B981" }]],
       },
     },
     {
       id: "ph-ai",
-      prompt: "Cuando entre una PQRS nueva, que la IA me resuma en una línea de qué se trata y me lo mande por la campanita.",
+      prompt: "Cuando entre una PQRS, que la IA la clasifique por tema y la asigne al área encargada.",
       reply:
-        "Armé el flujo con **«PQRS radicada»**, un **Agente IA** con su Chat Model que resume la PQRS en una línea, y una **notificación** con ese resumen para usted.\n\nSi le sirve, pulse **Aceptar**.",
+        "Armé **«PQRS recibida»**, un **asistente IA** con su modelo que clasifica el tema (mantenimiento, convivencia, cartera…) y una acción que **asigna el responsable** según ese tema.\n\nSi te sirve, crea el flujo.",
       flow: {
-        name: "Resumen de PQRS nueva en la campanita",
-        description: "La IA resume cada PQRS nueva y la manda como notificación.",
-        does: ["Se dispara con cada PQRS radicada.", "El agente IA resume de qué se trata en una línea.", "Le llega como notificación en la campanita."],
+        name: "Clasificación de PQRS con IA",
+        description: "La IA clasifica cada PQRS y la asigna al área que corresponde.",
+        does: ["Se dispara con cada PQRS recibida.", "La IA identifica el tema.", "Asigna la PQRS al área encargada."],
         nodes: [
-          T("t", "PQRS radicada", "mail", 0),
-          { id: "ai", kind: "ai", label: "Agente IA", icon: "sparkles", x: 1 },
-          { id: "cm", kind: "sub", label: "Chat Model", icon: "sparkles", x: 1, y: 1.05 },
-          A("a1", "Enviar notificación", "bell", 2),
+          T("t", "PQRS recibida", "mail", 0),
+          { id: "ai", kind: "ai", label: "Asistente IA", icon: "sparkles", x: 1 },
+          { id: "cm", kind: "sub", label: "Modelo", icon: "sparkles", x: 1, y: 1.05 },
+          A("a1", "Asignar responsable", "user", 2),
         ],
         edges: [["t", "ai"], ["ai", "a1"], ["ai", "cm", { dashed: true }]],
       },
     },
     {
-      id: "ph-overdue",
-      prompt: "Cuando una cuota de administración lleve 5 días vencida, mandarle un correo al residente y avisarme a mí con una notificación.",
-      reply:
-        "Usé **«La cuota de una unidad está por vencer»** configurado **5 días después de vencida**, con dos pasos en paralelo: un correo al residente y una notificación para usted.\n\nFalta elegir la **plantilla del correo**, así que queda en **borrador**. Pulse **Aceptar** para crearlo.",
-      flow: {
-        name: "Aviso de cuota vencida a los 5 días",
-        description: "Correo al residente y aviso interno cuando la cuota lleva 5 días vencida.",
-        does: ["Se dispara 5 días después del vencimiento de la cuota.", "Envía un correo al responsable de pagos de la unidad.", "Le avisa a la administración con una notificación."],
-        pending: [{ node: "Enviar email", field: "Plantilla", fix: "Cuota vencida" }],
-        nodes: [T("t", "Cuota vencida +5 días", "calendar", 0), A("a1", "Enviar email", "mail", 1, -0.6), A("a2", "Enviar notificación", "bell", 1, 0.6)],
-        edges: [["t", "a1"], ["t", "a2"]],
-      },
-    },
-    {
       id: "ph-no",
-      prompt: "Avisarme 15 días antes de que se venza la póliza de áreas comunes y mandarle un WhatsApp al revisor fiscal.",
+      prompt: "Abrir la talanquera del parqueadero cuando llegue un visitante registrado.",
       impossible: {
         reply:
-          "Revisé el catálogo de Propiedad horizontal: hay disparadores cuando una póliza se crea, se edita o se borra, pero **no uno por vencimiento**. Por eso no le puedo armar este flujo todavía.\n\nMientras tanto, existen flujos parecidos por fecha, como el aviso de cuota por vencer.",
-        falta: "Un disparador por vencimiento de póliza (días antes de la fecha)",
-        alternativa: "Flujos por fecha que ya existen, como «La cuota de una unidad está por vencer»",
+          "El registro de visitantes existe, pero el sistema todavía **no se conecta con el control de acceso** del parqueadero, así que no puedo abrir la talanquera.\n\nComo alternativa, puedo avisarle a portería en cuanto llegue el visitante.",
+        falta: "Integración con el control de acceso del parqueadero",
+        alternativa: "Avisar a portería cuando llegue un visitante registrado",
         resolved: {
-          reply:
-            "¡Ya se puede! Ahora existe el disparador **«Póliza por vencer»**. Lo configuré **15 días antes** del vencimiento, con dos pasos en paralelo: una notificación para usted y un **WhatsApp** al revisor fiscal.\n\nRevíselo y pulse **Aceptar**.",
+          reply: "¡Ya se puede! Ahora existe la acción **«Abrir talanquera»**. Te propongo arrancar con **«Visitante registrado»** y abrir el acceso.\n\nRevísalo y crea el flujo.",
           flow: {
-            name: "Aviso de vencimiento de póliza",
-            description: "Aviso interno y WhatsApp al revisor fiscal 15 días antes de que venza la póliza.",
-            does: ["Se dispara 15 días antes del vencimiento de la póliza de áreas comunes.", "Le avisa a la administración con una notificación.", "Le envía un WhatsApp al revisor fiscal."],
-            nodes: [{ ...T("t", "Póliza por vencer · 15 días", "calendar", 0), isNew: true }, A("a1", "Enviar notificación", "bell", 1, -0.6), A("a2", "Enviar WhatsApp", "whatsapp", 1, 0.6)],
-            edges: [["t", "a1"], ["t", "a2"]],
+            name: "Acceso automático para visitantes registrados",
+            description: "Abre la talanquera cuando llega un visitante que ya estaba registrado.",
+            does: ["Se dispara cuando llega un visitante registrado.", "Abre la talanquera del parqueadero."],
+            nodes: [T("t", "Visitante registrado", "user", 0), { ...A("a1", "Abrir talanquera", "grid", 1), isNew: true }],
+            edges: [["t", "a1"]],
           },
         },
       },
@@ -163,70 +158,58 @@ const EXAMPLES = {
   ],
   restaurant: [
     {
-      id: "rest-reservation",
-      prompt: "Cuando se cree una reserva, enviarle un WhatsApp de confirmación al cliente.",
-      reply:
-        "Le propongo **«Reserva tomada»** y un **WhatsApp** de confirmación al cliente con la fecha, hora y número de personas.\n\nComo el flujo le escribe a clientes, ¿quiere que además le avise al equipo con una notificación interna? Por ahora pulse **Aceptar** para crearlo así.",
+      id: "rest-delivery",
+      prompt: "Cuando un pedido a domicilio salga de cocina, avisarle al cliente por WhatsApp.",
+      reply: "Te propongo **«Pedido listo»** filtrado a **domicilios**, con un **WhatsApp** al cliente avisando que su pedido va en camino.\n\nSi te sirve, crea el flujo.",
       flow: {
-        name: "Confirmación de reserva por WhatsApp",
-        description: "WhatsApp al cliente cada vez que se toma una reserva.",
-        does: ["Se dispara cuando se toma una reserva.", "Envía un WhatsApp de confirmación al cliente."],
-        nodes: [T("t", "Reserva tomada", "calendar", 0), A("a1", "Enviar WhatsApp", "whatsapp", 1)],
-        edges: [["t", "a1"]],
-      },
-    },
-    {
-      id: "rest-stuck",
-      prompt: "Cada 10 minutos, avisarme de las comandas que llevan más de 15 minutos sin marcarse listas, una sola vez por comanda.",
-      reply:
-        "Armé un flujo **«En un horario»** cada 10 minutos que **busca comandas atascadas** de más de 15 minutos y, **por cada una**, le envía una notificación con su consecutivo. Cada comanda se avisa una sola vez.\n\nSi le sirve, pulse **Aceptar**.",
-      flow: {
-        name: "Aviso de comandas atascadas",
-        description: "Revisa cada 10 minutos y avisa por cada comanda demorada.",
-        does: ["Corre cada 10 minutos.", "Busca comandas enviadas o en preparación hace más de 15 minutos.", "Envía una notificación por cada una: «Comanda atascada: {{consecutivo}}»."],
-        nodes: [
-          T("t", "En un horario · cada 10 min", "calendar", 0),
-          A("a1", "Buscar comandas atascadas", "filter", 1),
-          C("c1", "Por cada uno", "repeat", 2, 0, "POR CADA"),
-          A("a2", "Enviar notificación", "bell", 3),
-        ],
-        edges: [["t", "a1"], ["a1", "c1"], ["c1", "a2", { label: "cada", color: "#8B5CF6" }]],
-      },
-    },
-    {
-      id: "rest-upcoming",
-      prompt: "El día antes de una reserva, mandarle un recordatorio al cliente.",
-      reply:
-        "Usé **«Se acerca una reserva»** con 1 día de anticipación (solo reservas confirmadas), un **filtro** para seguir solo si el cliente tiene correo, y un **correo** de recordatorio.\n\nFalta elegir la **plantilla**, así que queda en **borrador**. Pulse **Aceptar** para crearlo.",
-      flow: {
-        name: "Recordatorio un día antes de la reserva",
-        description: "Correo al cliente el día antes de su reserva confirmada.",
-        does: ["Se dispara 1 día antes de cada reserva confirmada.", "Sigue solo si el cliente tiene correo.", "Le envía el recordatorio por correo."],
-        pending: [{ node: "Enviar email", field: "Plantilla", fix: "Recordatorio de reserva" }],
-        nodes: [
-          T("t", "Se acerca una reserva", "calendar", 0),
-          C("c1", "Filtrar: tiene correo", "filter", 1, 0, "FILTRAR"),
-          A("a1", "Enviar email", "mail", 2),
-        ],
+        name: "Aviso de domicilio en camino",
+        description: "WhatsApp al cliente cuando su domicilio sale de cocina.",
+        does: ["Se dispara cuando un pedido queda listo.", "Sigue solo si es a domicilio.", "Avisa al cliente por WhatsApp."],
+        nodes: [T("t", "Pedido listo", "bolt", 0), C("c1", "Solo domicilios", "filter", 1, 0, "FILTRO"), A("a1", "Enviar WhatsApp", "whatsapp", 2)],
         edges: [["t", "c1"], ["c1", "a1", { label: "Sí", color: "#10B981" }]],
       },
     },
     {
+      id: "rest-agotado",
+      prompt: "Si un plato se agota, ocultarlo del menú público y avisarme.",
+      reply: "Listo: **«Producto agotado»** con dos pasos en paralelo: **ocultarlo del menú público** y **avisarte** con una notificación.\n\nSi te sirve, crea el flujo.",
+      flow: {
+        name: "Ocultar platos agotados del menú",
+        description: "Saca del menú público lo que se agota y te avisa.",
+        does: ["Se dispara cuando un producto se agota.", "Lo oculta del menú público.", "Te envía una notificación."],
+        nodes: [T("t", "Producto agotado", "bolt", 0), A("a1", "Ocultar del menú", "grid", 1, -0.6), A("a2", "Notificarme", "bell", 1, 0.6)],
+        edges: [["t", "a1"], ["t", "a2"]],
+      },
+    },
+    {
+      id: "rest-daily",
+      prompt: "Todas las noches, enviarme por correo las ventas del día.",
+      reply:
+        "Armé un flujo **programado a las 11:00 p. m.** que calcula las **ventas del día** y te las envía por **correo**.\n\nFalta elegir la **plantilla**, así que queda en **borrador**.",
+      flow: {
+        name: "Cierre diario de ventas",
+        description: "Correo con las ventas del día, cada noche.",
+        does: ["Corre todos los días a las 11:00 p. m.", "Calcula las ventas del día.", "Te las envía por correo."],
+        pending: [{ node: "Enviar correo", field: "Plantilla", fix: "Cierre del día" }],
+        nodes: [T("t", "Programado · 11:00 p. m.", "calendar", 0), A("a1", "Ventas del día", "filter", 1), A("a2", "Enviar correo", "mail", 2)],
+        edges: [["t", "a1"], ["a1", "a2"]],
+      },
+    },
+    {
       id: "rest-no",
-      prompt: "Al cerrar la caja, registrar un asiento contable con las propinas del día.",
+      prompt: "Cuando se acabe un insumo, pedírselo al proveedor por WhatsApp.",
       impossible: {
         reply:
-          "El cierre de caja y las propinas existen en el sistema, pero **Contabilidad todavía no tiene acciones** para registrar asientos desde un flujo, así que no puedo armarlo.\n\nComo alternativa, puedo enviarle cada noche un correo con el resumen para que lo registre usted.",
-        falta: "Una acción de Contabilidad para registrar asientos desde un flujo",
-        alternativa: "Un correo diario con el resumen del cierre",
+          "Puedo detectar cuando un insumo se acaba, pero los flujos todavía **no tienen los datos de contacto de los proveedores**, así que no puedo escribirles.\n\nMientras tanto, puedo avisarte a ti para que hagas el pedido.",
+        falta: "Datos de contacto de los proveedores disponibles en los flujos",
+        alternativa: "Avisarte cuando un insumo se acabe",
         resolved: {
-          reply:
-            "¡Ya se puede! Contabilidad ahora tiene la acción **«Registrar asiento contable»**. Le propongo arrancar con el **cierre de caja** y registrar el asiento de las propinas del día.\n\nRevíselo y pulse **Aceptar**.",
+          reply: "¡Ya se puede! Los flujos ahora tienen el **contacto del proveedor** de cada insumo. Te propongo **«Insumo agotado»** y un **WhatsApp** al proveedor con el pedido.\n\nRevísalo y crea el flujo.",
           flow: {
-            name: "Asiento de propinas al cerrar la caja",
-            description: "Registra el asiento contable de las propinas del día al cerrar la caja.",
-            does: ["Se dispara cuando se cierra la caja del turno.", "Registra el asiento contable con las propinas del día."],
-            nodes: [T("t", "Cierre de caja", "calendar", 0), { ...A("a1", "Registrar asiento contable", "grid", 1), isNew: true }],
+            name: "Pedido automático de insumos",
+            description: "WhatsApp al proveedor cuando se acaba un insumo.",
+            does: ["Se dispara cuando un insumo llega a cero.", "Le escribe al proveedor por WhatsApp con el pedido."],
+            nodes: [{ ...T("t", "Insumo agotado", "bolt", 0), isNew: true }, A("a1", "WhatsApp al proveedor", "whatsapp", 1)],
             edges: [["t", "a1"]],
           },
         },
@@ -236,13 +219,13 @@ const EXAMPLES = {
 };
 
 const PETICION_STATUS = {
-  pendiente: ["Pendiente", "#F59E0B"],
-  en_revision: ["En revisión", "#0EA5E9"],
-  disponible: ["Disponible", "#10B981"],
-  descartada: ["Descartada", "#94A3B8"],
+  pendiente: ["Nueva", "#F59E0B"],
+  en_revision: ["En análisis", "#0EA5E9"],
+  disponible: ["Lista", "#10B981"],
+  descartada: ["No aplica", "#94A3B8"],
 };
 
-const SIM_STATUS = { trigger: "Llegó el evento", action: "Se ejecutaría", ai: "Se ejecutaría", control: "Se evaluó", sub: "Conectado" };
+const SIM_STATUS = { trigger: "Evento de prueba", action: "Correría", ai: "Correría", control: "Evaluada", sub: "Conectado" };
 
 const initialState = () => ({
   module: "crm",
@@ -256,21 +239,20 @@ const initialState = () => ({
   peticiones: [
     {
       id: 1,
-      module: "Facturación",
+      module: "Tienda",
       date: "08 oct",
       email: "admin@demo.co",
-      pedido: "Cuando se pague un pedido de la tienda, mándele un WhatsApp de agradecimiento al cliente.",
-      falta: "El disparador «Pedido de tienda pagado» no trae el teléfono del cliente",
-      alternativa: "Una notificación interna cuando se pague el pedido",
-      moduleKey: null, // Facturación: el asistente lo detecta automáticamente
+      pedido: "Cuando un cliente pague en la tienda en línea, enviarle un WhatsApp de agradecimiento.",
+      falta: "El pago de la tienda todavía no trae el teléfono del cliente",
+      alternativa: "Un aviso interno cuando se pague el pedido",
+      moduleKey: null,
       resolved: {
-        reply:
-          "¡Ya se puede! El disparador **«Pedido de tienda pagado»** ahora trae el teléfono del cliente. Le propongo un **WhatsApp** de agradecimiento apenas se pague el pedido.\n\nSe guarda en: **Facturación** · detectado automáticamente. Pulse **Aceptar** para crearlo.",
+        reply: "¡Ya se puede! El **pago de la tienda** ahora trae el teléfono del cliente. Te propongo un **WhatsApp** de agradecimiento apenas pague.\n\nRevísalo y crea el flujo.",
         flow: {
-          name: "Agradecimiento por WhatsApp al pagar un pedido",
-          description: "WhatsApp de agradecimiento al cliente cuando paga un pedido de la tienda.",
+          name: "Agradecimiento por WhatsApp al pagar en la tienda",
+          description: "WhatsApp de agradecimiento cuando un cliente paga en la tienda en línea.",
           does: ["Se dispara cuando se paga un pedido de la tienda.", "Le envía un WhatsApp de agradecimiento al cliente."],
-          nodes: [{ ...T("t", "Pedido de tienda pagado", "bolt", 0), isNew: true }, A("a1", "Enviar WhatsApp", "whatsapp", 1)],
+          nodes: [{ ...T("t", "Pago en la tienda", "bolt", 0), isNew: true }, A("a1", "Enviar WhatsApp", "whatsapp", 1)],
           edges: [["t", "a1"]],
         },
       },
@@ -320,18 +302,18 @@ export default function AutomationsSimulator() {
         x.showDraft = false;
         x.drawn = 0;
       });
-      for (const tool of ex.impossible ? ["listar_nodos", "ver_nodo"] : ["listar_nodos", "ver_nodo", "resolver_opciones", "proponer_flujo"]) {
+      for (const tool of ex.impossible ? ["Revisando los disparadores disponibles", "Revisando las acciones disponibles"] : ["Revisando los disparadores disponibles", "Revisando las acciones disponibles", "Completando los datos de cada paso", "Armando la propuesta"]) {
         await wait(650);
-        log(`La IA consulta el catálogo: ${tool}`);
+        log(`IA: ${tool}`);
       }
       await wait(500);
-      const usage = `DeepSeek · deepseek-chat · ${(2.4 + ex.prompt.length / 90).toFixed(1).replace(".", ",")}k tokens · ${(4 + ex.prompt.length / 60).toFixed(1).replace(".", ",")} s · ${ex.impossible ? 2 : 4} consultas al modelo`;
+      const usage = `Modelo de IA · ${(2.4 + ex.prompt.length / 90).toFixed(1).replace(".", ",")}k tokens · ${(4 + ex.prompt.length / 60).toFixed(1).replace(".", ",")} s · ${ex.impossible ? 2 : 4} pasos`;
       if (ex.impossible) {
         update((x) => {
           x.thinking = false;
           x.messages.push({ from: "ai", text: ex.impossible.reply, usage, peticion: { ex, sent: false } });
         });
-        log("No existe en el catálogo: la IA ofrece dejarlo como sugerencia", "warn");
+        log("No se puede automatizar todavía: la IA ofrece dejarlo como solicitud", "warn");
         return;
       }
       update((x) => {
@@ -362,8 +344,8 @@ export default function AutomationsSimulator() {
       x.proposal.accepted = true;
       x.proposal.flowId = id;
     });
-    log("Flujo creado. Queda apagado hasta que usted lo encienda.", "ok");
-    if (f.pending?.length) log(`Queda en Borrador: «${f.pending[0].node}»: falta completar «${f.pending[0].field}»`, "warn");
+    log("Flujo creado. Queda inactivo hasta que lo actives.", "ok");
+    if (f.pending?.length) log(`Queda como borrador: a «${f.pending[0].node}» le falta «${f.pending[0].field}»`, "warn");
   };
 
   const currentFlow = st.proposal?.flowId ? st.flows.find((f) => f.id === st.proposal.flowId) : null;
@@ -371,25 +353,25 @@ export default function AutomationsSimulator() {
   const simulate = () =>
     sequence(async (wait) => {
       update((x) => (x.simStatus = {}));
-      log(`Simulación de «${st.proposal.ex.flow.name}»: no pasa nada de verdad`);
+      log(`Prueba de «${st.proposal.ex.flow.name}» con datos de ejemplo: no se envía nada`);
       for (const n of st.proposal.ex.flow.nodes) {
         await wait(700);
         update((x) => (x.simStatus[n.id] = SIM_STATUS[n.kind]));
         if (n.kind !== "sub") log(`${n.label}: ${SIM_STATUS[n.kind]}`);
       }
       const pending = currentFlow?.pending.length ?? 0;
-      log(pending ? `Hay ${pending} cosa para revisar` : "Simulación completa sin advertencias", pending ? "warn" : "ok");
+      log(pending ? `Hay ${pending} cosa por configurar` : "Prueba completa sin advertencias", pending ? "warn" : "ok");
     });
 
   const turnOn = (flowId) => {
     const f = st.flows.find((y) => y.id === flowId);
     if (f.pending.length) {
       update((x) => (x.showDraft = true));
-      log("Este flujo todavía es un borrador y no se puede prender", "warn");
+      log("El flujo está incompleto y todavía no se puede activar", "warn");
       return;
     }
     update((x) => (x.flows.find((y) => y.id === flowId).active = !f.active));
-    log(f.active ? `Se apagó «${f.name}»` : `Se prendió «${f.name}»: sus acciones ya son reales`, f.active ? "warn" : "ok");
+    log(f.active ? `Se desactivó «${f.name}»` : `Se activó «${f.name}»`, f.active ? "warn" : "ok");
   };
 
   const completePending = (flowId) => {
@@ -422,9 +404,9 @@ export default function AutomationsSimulator() {
           estado: "pendiente",
           nota: "",
         });
-      x.messages.push({ from: "ai", text: "Gracias por su sugerencia. Contagracia la implementará en las próximas horas." });
+      x.messages.push({ from: "ai", text: "Listo, quedó registrada tu solicitud. Te aviso cuando esté disponible." });
     });
-    log("Petición de automatización creada (Pendiente)", "ok");
+    log("Solicitud registrada (Nueva)", "ok");
   };
 
   const saveReview = () => {
@@ -436,19 +418,19 @@ export default function AutomationsSimulator() {
       if (review.estado === "disponible")
         x.userNotices.unshift({
           id: Date.now(),
-          title: "Ya se puede crear el flujo que pidió",
-          body: `Lo que pidió ya está disponible: "${p.pedido}". Ábralo en el asistente y envíelo de nuevo.`,
+          title: "Tu solicitud ya está lista",
+          body: `Ya se puede automatizar: "${p.pedido}". Ábrelo en el asistente y envíalo de nuevo.`,
           pedido: p.pedido,
           peticionId: p.id,
         });
       if (review.estado === "descartada")
         x.userNotices.unshift({
           id: Date.now(),
-          title: "Su sugerencia de automatización fue revisada",
-          body: `Por ahora no se va a construir lo que pidió: "${p.pedido}". Motivo: ${review.nota || "no aplica por ahora"}.`,
+          title: "Revisamos tu solicitud",
+          body: `Por ahora no vamos a construir: "${p.pedido}". Motivo: ${review.nota || "no aplica por ahora"}.`,
         });
     });
-    log(`Petición #${p.id} → ${PETICION_STATUS[review.estado][0]}${["disponible", "descartada"].includes(review.estado) ? " · se avisó al usuario" : ""}`, "ok");
+    log(`Solicitud #${p.id} → ${PETICION_STATUS[review.estado][0]}${["disponible", "descartada"].includes(review.estado) ? " · se avisó al usuario" : ""}`, "ok");
     setReview(null);
   };
 
@@ -483,7 +465,7 @@ export default function AutomationsSimulator() {
         {[
           ["asistente", "Crear con IA", "sparkles"],
           ["flujos", `Flujos (${st.flows.length})`, "bolt"],
-          ["peticiones", `Peticiones · admin (${st.peticiones.filter((p) => p.estado === "pendiente").length})`, "mail"],
+          ["peticiones", `Solicitudes · admin (${st.peticiones.filter((p) => p.estado === "pendiente").length})`, "mail"],
         ].map(([k, label, icon]) => (
           <button
             key={k}
@@ -512,7 +494,7 @@ export default function AutomationsSimulator() {
                   key={k}
                   disabled={busy}
                   onClick={() => changeModule(k)}
-                  className={`rounded-full border px-3 py-1 text-xs transition disabled:opacity-50 ${st.module === k ? "border-[#6366F1] bg-[#6366F1]/15 text-[#A5B4FC]" : "border-line text-muted hover:text-ink"}`}
+                  className={`rounded-full border px-3 py-1 text-xs transition disabled:opacity-50 ${st.module === k ? "border-accent bg-accent/15 text-accent" : "border-line text-muted hover:text-ink"}`}
                 >
                   {m.label}
                 </button>
@@ -523,43 +505,43 @@ export default function AutomationsSimulator() {
           <div className="space-y-3 p-4 lg:min-h-0 lg:flex-1 lg:overflow-y-auto">
             {st.messages.length === 0 && (
               <div className="pt-2 text-center">
-                <p className="font-display font-bold">¿Qué quiere automatizar en {MODULES[st.module].label}?</p>
-                <p className="mt-1 text-xs text-muted">Cuéntele qué debe pasar y cuándo. Elija un ejemplo:</p>
+                <p className="font-display font-bold">¿Qué quieres automatizar en {MODULES[st.module].label}?</p>
+                <p className="mt-1 text-xs text-muted">Cuéntame qué debe pasar y cuándo. Elige un ejemplo:</p>
               </div>
             )}
             {st.messages.map((m, i) => (
               <div key={i} className={`flex ${m.from === "user" ? "justify-end" : "justify-start"}`}>
                 <div className="max-w-[92%]">
-                  <div className={`rounded-2xl px-3 py-2 text-sm ${m.from === "user" ? "rounded-br-sm bg-[#6366F1] text-white" : "rounded-bl-sm border border-line bg-bg/60"}`}>
+                  <div className={`rounded-2xl px-3 py-2 text-sm ${m.from === "user" ? "rounded-br-sm bg-accent text-bg" : "rounded-bl-sm border border-line bg-bg/60"}`}>
                     <Markdown text={m.text} />
                   </div>
                   {m.peticion && (
                     <div className="mt-2 rounded-xl border border-[#F59E0B]/50 bg-[#F59E0B]/10 p-3 text-xs">
-                      <p className="font-semibold text-[#F59E0B]">Esto todavía no existe en el sistema</p>
+                      <p className="font-semibold text-[#F59E0B]">Por ahora no se puede automatizar</p>
                       <p className="mt-1">
                         <span className="text-muted">Lo que falta:</span> {m.peticion.ex.impossible.falta}
                       </p>
-                      <p className="mt-1 text-muted">¿Quiere dejarlo como sugerencia para que Contagracia lo construya?</p>
+                      <p className="mt-1 text-muted">¿Lo dejo como solicitud para el equipo?</p>
                       <button
                         onClick={() => leaveSuggestion(i)}
                         disabled={m.peticion.sent}
                         className="mt-2 rounded-full bg-[#F59E0B] px-3 py-1 text-[11px] font-semibold text-bg transition hover:brightness-110 disabled:opacity-50"
                       >
-                        {m.peticion.sent ? "✓ Sugerencia enviada" : "Dejar como sugerencia"}
+                        {m.peticion.sent ? "✓ Solicitud enviada" : "Enviar solicitud"}
                       </button>
                     </div>
                   )}
-                  {m.proposalName && <p className="mt-1 text-[11px] text-[#A5B4FC]">Propuesta: {m.proposalName} (a la derecha)</p>}
+                  {m.proposalName && <p className="mt-1 text-[11px] text-accent">Propuesta: {m.proposalName} (a la derecha)</p>}
                   {m.usage && <p className="mt-1 text-[10px] text-muted">{m.usage}</p>}
                 </div>
               </div>
             ))}
-            {st.thinking && <p className="text-xs text-muted">Armando el flujo… puede tardar unos segundos.</p>}
+            {st.thinking && <p className="text-xs text-muted">Pensando el flujo…</p>}
             <div ref={chatEnd} />
           </div>
 
           <div className="shrink-0 border-t border-line p-3">
-            {/* Pedido que llega desde el aviso «Ya se puede crear el flujo que pidió» */}
+            {/* Pedido que llega desde el aviso «Tu solicitud ya está lista» */}
             {st.prefill && (
               <div className="mb-2 animate-pop rounded-xl border border-accent/50 bg-accent/10 p-3 text-xs">
                 <p className="font-semibold text-accent">Pedido precargado · {st.prefill.moduleLabel} (no se ha enviado)</p>
@@ -576,7 +558,7 @@ export default function AutomationsSimulator() {
                   key={ex.id}
                   disabled={busy}
                   onClick={() => ask(resolve(ex))}
-                  className="rounded-xl border border-[#6366F1]/40 px-3 py-1.5 text-left text-xs text-[#A5B4FC] transition hover:bg-[#6366F1]/10 disabled:opacity-40"
+                  className="rounded-xl border border-accent/40 px-3 py-1.5 text-left text-xs text-accent transition hover:bg-accent/10 disabled:opacity-40"
                 >
                   {ex.prompt}
                   {ex.impossible && !available(ex) && <span className="ml-1 text-[10px] text-[#F59E0B]">(no existe aún)</span>}
@@ -584,7 +566,7 @@ export default function AutomationsSimulator() {
                 </button>
               ))}
             </div>
-            <input disabled placeholder="Describa el flujo que necesita… (en la demo, elija un ejemplo)" className="mt-2 w-full cursor-not-allowed rounded-full border border-line bg-bg px-4 py-2 text-xs opacity-60" />
+            <input disabled placeholder="Describe el flujo que necesitas… (en la demo, elige un ejemplo)" className="mt-2 w-full cursor-not-allowed rounded-full border border-line bg-bg px-4 py-2 text-xs opacity-60" />
           </div>
         </section>
 
@@ -605,26 +587,26 @@ export default function AutomationsSimulator() {
                 onComplete={() => completePending(currentFlow.id)}
               />
             ) : (
-              <p className="text-center text-xs text-muted">Aquí se va a dibujar el flujo que proponga la IA, para que lo vea antes de aceptarlo.</p>
+              <p className="text-center text-xs text-muted">Aquí aparecerá el flujo que proponga la IA.</p>
             )}
           </div>
-          <ExecLog log={st.log} empty="Elija un ejemplo para empezar…" className="h-24" />
+          <ExecLog log={st.log} empty="Elige un ejemplo para empezar…" className="h-24" />
         </section>
       </div>
 
       {/* ───── Lista de flujos ───── */}
       <div className={view === "flujos" ? "min-h-0 flex-1 overflow-y-auto p-5" : "hidden"}>
-        <p className="font-display text-lg font-bold">Automatizaciones</p>
-        <p className="mb-4 text-xs text-muted">Motor de flujos. Los flujos nuevos arrancan apagados: pruébelos antes de prenderlos.</p>
+        <p className="font-display text-lg font-bold">Mis flujos</p>
+        <p className="mb-4 text-xs text-muted">Los flujos nuevos quedan inactivos hasta que los pruebes y actives.</p>
         {st.flows.length === 0 ? (
           <div className="rounded-2xl border border-dashed border-line p-8 text-center">
             <p className="font-semibold">Todavía no hay flujos</p>
-            <p className="mt-1 text-xs text-muted">Créelos con el asistente en «Crear con IA».</p>
+            <p className="mt-1 text-xs text-muted">Créalos con el asistente en «Crear con IA».</p>
           </div>
         ) : (
           <div className="grid gap-3 sm:grid-cols-2">
             {st.flows.map((f) => {
-              const badge = f.pending.length ? ["Borrador", "#F59E0B"] : f.active ? ["Activo", "#10B981"] : ["Apagado", "#94A3B8"];
+              const badge = f.pending.length ? ["Borrador", "#F59E0B"] : f.active ? ["Activo", "#10B981"] : ["Inactivo", "#94A3B8"];
               return (
                 <div key={f.id} className="animate-pop rounded-2xl border border-line p-4">
                   <div className="flex items-start justify-between gap-2">
@@ -646,7 +628,7 @@ export default function AutomationsSimulator() {
                       </button>
                     ) : (
                       <button onClick={() => turnOn(f.id)} className={`rounded-full px-3 py-1 text-[11px] font-semibold transition ${f.active ? "border border-line text-muted" : "bg-accent text-bg"}`}>
-                        {f.active ? "Apagar" : "Prender"}
+                        {f.active ? "Desactivar" : "Activar"}
                       </button>
                     )}
                   </div>
@@ -661,8 +643,8 @@ export default function AutomationsSimulator() {
       <div className={view === "peticiones" ? "min-h-0 flex-1 overflow-y-auto lg:grid lg:grid-cols-[1fr_320px] lg:overflow-hidden" : "hidden"}>
         <section className="space-y-3 p-5 lg:overflow-y-auto">
           <div>
-            <p className="font-display text-lg font-bold">Peticiones de automatización</p>
-            <p className="text-xs text-muted">Lo que los usuarios pidieron al asistente y todavía no existe. El equipo lo revisa y avisa cuando está disponible.</p>
+            <p className="font-display text-lg font-bold">Solicitudes de automatización</p>
+            <p className="text-xs text-muted">Lo que los usuarios pidieron y todavía no se puede hacer. El equipo lo analiza y les avisa.</p>
           </div>
           {st.peticiones.map((p) => {
             const [label, color] = PETICION_STATUS[p.estado];
@@ -673,7 +655,7 @@ export default function AutomationsSimulator() {
                   <Badge color={color}>{label}</Badge>
                   <Badge color="#6366F1">{p.module}</Badge>
                   <span className="text-muted">
-                    {p.date} · Empresa demo · {p.email}
+                    {p.date} · Empresa de ejemplo · {p.email}
                   </span>
                 </div>
                 <p className="mt-2 text-sm">{p.pedido}</p>
@@ -695,7 +677,7 @@ export default function AutomationsSimulator() {
                 )}
                 {editing && (
                   <div className="mt-3 space-y-2 rounded-xl border border-line bg-bg/60 p-3">
-                    <p className="font-semibold">Revisar petición</p>
+                    <p className="font-semibold">Revisar solicitud</p>
                     <div className="flex flex-wrap gap-1.5">
                       {["en_revision", "disponible", "descartada"].map((k) => (
                         <button
@@ -704,7 +686,7 @@ export default function AutomationsSimulator() {
                             setReview((r) => ({
                               ...r,
                               estado: k,
-                              nota: k === "disponible" ? "Ya agregamos lo que faltaba al catálogo." : k === "descartada" ? "Se sale del alcance del módulo." : "",
+                              nota: k === "disponible" ? "Ya está disponible." : k === "descartada" ? "No está dentro del alcance por ahora." : "",
                             }))
                           }
                           className="rounded-full border px-2.5 py-0.5 text-[11px]"
@@ -714,10 +696,10 @@ export default function AutomationsSimulator() {
                         </button>
                       ))}
                     </div>
-                    {review.nota && <p className="text-muted">Nota para el usuario: {review.nota}</p>}
+                    {review.nota && <p className="text-muted">Mensaje para el usuario: {review.nota}</p>}
                     <div className="flex gap-2">
                       <button onClick={saveReview} className="rounded-full bg-accent px-3 py-1 text-[11px] font-semibold text-bg">
-                        {["disponible", "descartada"].includes(review.estado) ? "Guardar y avisar" : "Guardar"}
+                        {["disponible", "descartada"].includes(review.estado) ? "Guardar y notificar" : "Guardar"}
                       </button>
                       <button onClick={() => setReview(null)} className="rounded-full border border-line px-3 py-1 text-[11px]">
                         Cancelar
@@ -732,7 +714,7 @@ export default function AutomationsSimulator() {
         <aside className="space-y-3 border-t border-line p-4 lg:overflow-y-auto lg:border-l lg:border-t-0">
           <Panel title="Avisos al usuario" icon="bell">
             {st.userNotices.length === 0 ? (
-              <p className="text-xs text-muted">Cuando una petición pasa a Disponible o Descartada, el usuario recibe un aviso.</p>
+              <p className="text-xs text-muted">Cuando una solicitud pasa a Lista o No aplica, el usuario recibe un aviso.</p>
             ) : (
               st.userNotices.map((n) => (
                 <div key={n.id} className="animate-pop rounded-lg bg-bg/70 p-2 text-xs">
@@ -766,8 +748,8 @@ function ProposalCard({ proposal, flow, busy, showDraft, onAccept, onSimulate, o
   const f = proposal.ex.flow;
   const pending = flow ? flow.pending : f.pending ?? [];
   return (
-    <div className="animate-pop space-y-2 rounded-2xl border border-[#6366F1]/40 bg-[#6366F1]/5 p-4 text-xs">
-      <p className="text-[11px] font-semibold uppercase tracking-widest text-[#A5B4FC]">Propuesta de flujo</p>
+    <div className="animate-pop space-y-2 rounded-2xl border border-accent/40 bg-accent/5 p-4 text-xs">
+      <p className="text-[11px] font-semibold uppercase tracking-widest text-accent">Flujo propuesto</p>
       <p className="text-sm font-semibold">{f.name}</p>
       <p className="text-muted">{f.description}</p>
       <div>
@@ -780,7 +762,7 @@ function ProposalCard({ proposal, flow, busy, showDraft, onAccept, onSimulate, o
       </div>
       {pending.length > 0 && (
         <div>
-          <p className="font-semibold text-[#F59E0B]">Queda por completar (se crea en borrador)</p>
+          <p className="font-semibold text-[#F59E0B]">Falta configurar (se guarda como borrador)</p>
           {pending.map((p) => (
             <p key={p.node} className="text-muted">
               «{p.node}»: falta completar «{p.field}».
@@ -790,7 +772,7 @@ function ProposalCard({ proposal, flow, busy, showDraft, onAccept, onSimulate, o
       )}
       {showDraft && pending.length > 0 && (
         <div className="rounded-lg border border-[#F59E0B]/50 bg-[#F59E0B]/10 p-2">
-          <p>Este flujo es un borrador: se guarda, pero no se puede prender.</p>
+          <p>El flujo está incompleto y no se puede activar todavía.</p>
           <p className="text-muted">
             · «{pending[0].node}»: falta completar «{pending[0].field}».
           </p>
@@ -801,21 +783,21 @@ function ProposalCard({ proposal, flow, busy, showDraft, onAccept, onSimulate, o
       )}
       {!proposal.accepted ? (
         <div className="flex flex-wrap items-center justify-between gap-2 border-t border-line pt-2">
-          <p className="text-muted">Se crea apagado: después lo revisa, lo simula y lo enciende desde la pantalla de flujos.</p>
-          <button onClick={onAccept} className="rounded-full bg-[#6366F1] px-4 py-1.5 text-[11px] font-semibold text-white transition hover:brightness-110">
-            Aceptar
+          <p className="text-muted">Se guarda inactivo; luego puedes probarlo y activarlo.</p>
+          <button onClick={onAccept} className="rounded-full bg-accent px-4 py-1.5 text-[11px] font-semibold text-white transition hover:brightness-110">
+            Crear flujo
           </button>
         </div>
       ) : (
         <div className="flex flex-wrap items-center gap-2 border-t border-line pt-2">
           <span className="text-accent">
-            ✓ Flujo creado, {flow?.active ? "activo" : pending.length ? "en borrador" : "apagado"}
+            ✓ Flujo creado, {flow?.active ? "activo" : pending.length ? "en borrador" : "inactivo"}
           </span>
           <button onClick={onSimulate} disabled={busy} className="ml-auto rounded-full border border-line px-3 py-1 text-[11px] transition hover:border-accent hover:text-accent disabled:opacity-40">
-            Simular
+            Probar
           </button>
           <button onClick={onTurnOn} disabled={busy} className={`rounded-full px-3 py-1 text-[11px] font-semibold transition disabled:opacity-40 ${flow?.active ? "border border-line" : "bg-accent text-bg"}`}>
-            {flow?.active ? "Apagar" : "Prender"}
+            {flow?.active ? "Desactivar" : "Activar"}
           </button>
         </div>
       )}
@@ -859,8 +841,7 @@ function Canvas({ proposal, drawn, simStatus }) {
       <div className="relative mx-auto" style={{ width: Math.max(width, 420), height }}>
         {/* Nota de origen (StickyNode) */}
         <div className="absolute left-3 top-3 hidden w-[230px] animate-pop rounded-md bg-[#FEF3C7] lg:block p-2.5 text-[10px] leading-snug text-[#78350F] shadow-md">
-          <p className="font-semibold">Armado con el asistente de IA.</p>
-          <p className="mt-1">Se pidió:</p>
+          <p className="font-semibold">Creado con IA a partir de:</p>
           <p className="italic">«{proposal.ex.prompt}»</p>
         </div>
 

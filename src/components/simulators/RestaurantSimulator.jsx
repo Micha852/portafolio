@@ -4,8 +4,8 @@ import { useEffect, useState } from "react";
 import { Icon } from "../Icons";
 import { useSim, MobileTabs, ExecLog, Panel, Row, Badge, ProdLink } from "./ui";
 
-// Réplica del módulo de restaurante + POS de Contagracia: mesas, platos con variantes y adiciones,
-// comandas por área, pantalla de cocina, cobro en POS con propina, factura FES y consumo de recetas.
+// Demo propia de restaurante + POS con datos ficticios: mesas, platos con variantes y adiciones,
+// pedidos por estación, pantalla de cocina, cobro con propina, factura y consumo de recetas.
 // Estados, etiquetas y el momento del descuento de inventario siguen el código real; el menú es de ejemplo.
 
 const cop = (n) => `$${Math.round(n).toLocaleString("es-CO")}`;
@@ -96,10 +96,10 @@ const MENU = [
 const NOTES = ["sin cebolla", "término medio", "extra picante", "sin hielo"];
 
 const TABLES = [
-  { id: "Mesa 1", status: "Ocupada" },
-  { id: "Mesa 3", status: "Disponible" },
-  { id: "Mesa 5", status: "Reservada" },
-  { id: "Barra 2", status: "Disponible" },
+  { id: "Mesa 2", status: "Ocupada" },
+  { id: "Mesa 4", status: "Disponible" },
+  { id: "Mesa 6", status: "Reservada" },
+  { id: "Terraza 1", status: "Disponible" },
 ];
 const TABLE_COLORS = { Disponible: "#10B981", Ocupada: "#F59E0B", Reservada: "#8B5CF6" };
 
@@ -113,7 +113,7 @@ const ITEM = {
   BILLED: { label: "Facturado", color: "#8B5CF6" },
 };
 // Estados de la orden de cocina (KitchenOrder)
-const OCO = { IN_PROGRESS: "En Preparación", READY: "Lista", DELIVERED: "Entregada", COMPLETED: "Facturada" };
+const OCO = { IN_PROGRESS: "En cocina", READY: "Lista", DELIVERED: "Servida", COMPLETED: "Cerrada" };
 
 const TIP_PERCENT = 10;
 const OPENING_CASH = 200000;
@@ -203,7 +203,7 @@ function TableService() {
     setDraft(null);
   };
 
-  // Enviar a preparación: una comanda por área, según el «Área por defecto» de cada producto
+  // Enviar a cocina: un pedido por estación, según la estación de cada producto
   const sendToKitchen = () =>
     sequence(async (wait) => {
       const pending = st.items.filter((i) => i.status === "PENDING");
@@ -214,7 +214,7 @@ function TableService() {
       await wait(500);
       for (const [area, uids] of Object.entries(byArea)) {
         const mains = st.items.filter((i) => uids.includes(i.uid) && !i.parent);
-        mains.forEach((m) => log(`${m.name} → ${AREAS[area]} (Área por defecto)`));
+        mains.forEach((m) => log(`${m.name} → estación ${AREAS[area]}`));
         let number;
         update((x) => {
           number = ++x.seq.comanda;
@@ -230,24 +230,24 @@ function TableService() {
           });
           x.printed = { number, area, table: x.table, lines: x.items.filter((i) => uids.includes(i.uid)) };
         });
-        log(`Comanda ${number}-${AREAS[area].toUpperCase()} impresa y en «Nuevas comandas»`, "ok");
+        log(`Pedido #${number} (${AREAS[area]}) impreso y en «Por preparar»`, "ok");
         await wait(700);
       }
     });
 
-  // La cocina marca «Preparando»: se crea la orden de cocina (OCO) con los consumos de la receta
+  // La cocina empieza a preparar: se registra el consumo previsto de la receta
   const startPreparing = (comandaId) => {
     update((x) => {
       const c = x.comandas.find((y) => y.id === comandaId);
       c.status = "preparando";
-      const ocoId = `OCO-${String(++x.seq.oco).padStart(4, "0")}`;
+      const ocoId = `REC-${String(++x.seq.oco).padStart(3, "0")}`;
       c.oco = ocoId;
       x.items.forEach((i) => c.uids.includes(i.uid) && (i.status = "PREPARING"));
       x.ocos.push({ id: ocoId, comanda: comandaId, status: "IN_PROGRESS", uids: c.uids });
     });
     const c = st.comandas.find((y) => y.id === comandaId);
-    log(`Iniciando preparación de la comanda ${comandaId}: se crea ${c.oco} con los consumos de la receta`);
-    log("El inventario todavía no se mueve: se descuenta al facturar", "warn");
+    log(`Pedido #${comandaId} en cocina: se registra el consumo de receta ${c.oco}`);
+    log("El inventario se descuenta al cobrar la cuenta", "warn");
   };
 
   const markReady = (comandaId) => {
@@ -258,7 +258,7 @@ function TableService() {
       x.ocos.find((o) => o.comanda === comandaId).status = "READY";
     });
     const c = st.comandas.find((y) => y.id === comandaId);
-    log(`¡Listo! Comanda ${comandaId} en ${c.elapsed} min (estimado ${c.est} min) · ${c.oco} Lista, sin impacto en inventario`, "ok");
+    log(`¡Listo! Pedido #${comandaId} en ${c.elapsed} min (estimado ${c.est} min)`, "ok");
   };
 
   const deliver = () => {
@@ -285,15 +285,15 @@ function TableService() {
     return { subtotal, tip, total: subtotal + tip };
   })();
 
-  // Procesar venta: factura FES, consumo de recetas, asiento y mesa libre
+  // Cobrar: factura, consumo de recetas, asientos y mesa libre
   const processSale = () =>
     sequence(async (wait) => {
-      const number = `FES-${1024 + (st.invoice ? 1 : 0)}`;
-      update((x) => (x.invoice = { number, ...totals, method: x.method, dian: "Enviando…" }));
+      const number = `FV-${120 + (st.invoice ? 1 : 0)}`;
+      update((x) => (x.invoice = { number, ...totals, method: x.method, dian: "Emitiendo…" }));
       log(`Procesar venta: factura electrónica ${number} por ${cop(totals.total)} (${st.method})`);
       await wait(1100);
-      update((x) => (x.invoice.dian = "Aceptada"));
-      log(`${number} enviada a la DIAN`, "ok");
+      update((x) => (x.invoice.dian = "Emitida"));
+      log(`Factura ${number} emitida`, "ok");
       await wait(900);
 
       update((x) => {
@@ -331,15 +331,15 @@ function TableService() {
 
       update((x) =>
         x.entries.push(
-          ...x.ocos.map((o) => ({ title: `Orden de producción ${o.id}`, debit: "Inventario de producto terminado", credit: "Inventario de materias primas" }))
+          ...x.ocos.map((o) => ({ title: `Consumo de receta ${o.id}`, debit: "Costo de ventas", credit: "Inventario de insumos" }))
         )
       );
       log("Asiento contable de cada orden de producción", "ok");
       await wait(800);
 
       if (totals.tip) {
-        update((x) => x.entries.push({ title: `Propina ${number}`, debit: "Caja", credit: "250510 · Propinas por pagar", amount: totals.tip }));
-        log(`Propina de ${cop(totals.tip)} a la cuenta 250510 (propinas por pagar)`);
+        update((x) => x.entries.push({ title: `Propina ${number}`, debit: "Caja", credit: "Propinas por pagar", amount: totals.tip }));
+        log(`Propina de ${cop(totals.tip)} registrada para el equipo`);
         await wait(700);
       }
 
@@ -406,7 +406,7 @@ function TableService() {
           <div className="min-h-0 flex-1 overflow-y-auto p-4">
             {st.phase === "mesa" && (
               <>
-                <p className="mb-3 text-xs font-semibold uppercase tracking-widest text-muted">Salón principal</p>
+                <p className="mb-3 text-xs font-semibold uppercase tracking-widest text-muted">Salón</p>
                 <div className="grid grid-cols-2 gap-3">
                   {st.tables.map((t) => {
                     const free = t.status === "Disponible";
@@ -463,7 +463,7 @@ function TableService() {
                 setMethod={(m) => update((x) => (x.method = m))}
                 onPreBill={() => {
                   update((x) => (x.preBill = true));
-                  log("Imprimir cuenta: PRE-CUENTA (no es comprobante de pago)");
+                  log("Cuenta previa impresa para la mesa");
                 }}
                 onProcess={processSale}
               />
@@ -519,9 +519,9 @@ function TableService() {
           </div>
           <div className="grid min-h-0 flex-1 grid-cols-1 gap-3 overflow-y-auto p-4 sm:grid-cols-3">
             {[
-              ["nuevas", "Nuevas comandas", "#3B82F6"],
-              ["preparando", "En preparación", "#F59E0B"],
-              ["listo", "Listo para servir", "#10B981"],
+              ["nuevas", "Por preparar", "#3B82F6"],
+              ["preparando", "En cocina", "#F59E0B"],
+              ["listo", "Para entregar", "#10B981"],
             ].map(([status, title, color]) => {
               const cards = st.comandas.filter((c) => c.status === status && (kdsFilter === "todas" || c.area === kdsFilter));
               return (
@@ -553,9 +553,9 @@ function TableService() {
 
           {st.printed && <ComandaTicket p={st.printed} />}
 
-          <Panel title="Órdenes de cocina">
+          <Panel title="Consumo de recetas">
             {st.ocos.length === 0 ? (
-              <p className="text-xs text-muted">Se crean cuando la cocina empieza a preparar.</p>
+              <p className="text-xs text-muted">Se registra cuando la cocina empieza a preparar.</p>
             ) : (
               st.ocos.map((o) => <Row key={o.id} k={o.id} v={<Badge color={o.status === "COMPLETED" ? "#8B5CF6" : o.status === "IN_PROGRESS" ? "#F59E0B" : "#10B981"}>{OCO[o.status]}</Badge>} />)
             )}
@@ -566,10 +566,10 @@ function TableService() {
               <>
                 <Row k="Número" v={st.invoice.number} />
                 <Row k="Total" v={cop(st.invoice.total)} />
-                <Row k="DIAN" v={<span className={st.invoice.dian === "Aceptada" ? "text-accent" : "text-warm"}>{st.invoice.dian}</span>} />
+                <Row k="Estado" v={<span className={st.invoice.dian === "Emitida" ? "text-accent" : "text-warm"}>{st.invoice.dian}</span>} />
               </>
             ) : (
-              <p className="text-xs text-muted">Se emite al procesar la venta en el POS.</p>
+              <p className="text-xs text-muted">Se emite al cobrar la cuenta.</p>
             )}
           </Panel>
 
@@ -753,7 +753,7 @@ function Checkout({ st, totals, busy, setTip, setMethod, onPreBill, onProcess })
     <div className="animate-pop space-y-4">
       <div>
         <p className="font-display text-xl font-bold">POS · {st.table}</p>
-        <p className="text-xs text-muted">Ítems entregados cargados desde la pestaña Mesas</p>
+        <p className="text-xs text-muted">Ítems entregados en la mesa</p>
       </div>
       <ul className="space-y-1 text-sm">
         {st.items.map((i) => (
@@ -799,14 +799,14 @@ function Checkout({ st, totals, busy, setTip, setMethod, onPreBill, onProcess })
         </div>
       </div>
       {st.preBill ? (
-        <p className="rounded-lg border border-dashed border-line p-2 text-center font-mono text-[11px] text-muted">PRE-CUENTA — No es comprobante de pago · {cop(totals.total)}</p>
+        <p className="rounded-lg border border-dashed border-line p-2 text-center font-mono text-[11px] text-muted">Cuenta previa · {cop(totals.total)}</p>
       ) : (
         <button onClick={onPreBill} disabled={busy} className="w-full rounded-full border border-line px-4 py-2 text-sm transition hover:border-accent hover:text-accent">
-          Imprimir pre-cuenta
+          Imprimir cuenta previa
         </button>
       )}
       <button onClick={onProcess} disabled={busy} className="w-full rounded-full bg-accent px-4 py-2.5 text-sm font-semibold text-bg transition hover:brightness-110 disabled:opacity-50">
-        {busy ? "Procesando…" : "Procesar Venta"}
+        {busy ? "Cobrando…" : "Cobrar"}
       </button>
     </div>
   );
@@ -857,10 +857,9 @@ function ComandaTicket({ p }) {
   return (
     <div className="animate-pop rounded-2xl border border-dashed border-line bg-[#fbfaf7] p-3 font-mono text-[11px] leading-relaxed text-[#1f2328]">
       <p className="text-center font-bold">
-        COMANDA: {p.number}-{AREAS[p.area].toUpperCase()}
+        PEDIDO #{p.number} · {AREAS[p.area]}
       </p>
-      <p>MESA: {p.table}</p>
-      <p>MESERO(A): Camila</p>
+      <p>{p.table} · Mesero: Julián</p>
       <p className="border-b border-dashed border-[#1f2328]/30 pb-1">-----------------------</p>
       {p.lines.map((i) => (
         <div key={i.uid}>
@@ -927,8 +926,8 @@ const CATALOG = [
 const SECTIONS = ["Platos", "Adiciones", "Productos"];
 
 const SEDES = [
-  { id: "centro", name: "Sede Centro", address: "Cra. 7 # 12-40", slug: "a1939a84" },
-  { id: "norte", name: "Sede Norte", address: "Av. 19 # 140-22", slug: "7c52e1f0" },
+  { id: "centro", name: "Sede Plaza", address: "Calle 10 # 5-20", slug: "sede-plaza" },
+  { id: "norte", name: "Sede Río", address: "Av. Circunvalar # 8-14", slug: "sede-rio" },
 ];
 const copMenu = (n) => `$ ${n.toLocaleString("es-CO")},00`;
 
@@ -1090,7 +1089,7 @@ function SedesMenu() {
         <ProdLink
           href={MENU_URL}
           title="Menú público de una sede"
-          description="Menú de una sede de prueba en producción: así se ve el enlace público por QR. El cliente lo consulta; el pedido lo toma el mesero."
+          description="Menú de una sede de prueba en el producto real, en el que trabajé: así se ve el enlace público por QR."
         />
       </aside>
     </div>

@@ -4,7 +4,7 @@ import { useState } from "react";
 import { Icon } from "../Icons";
 import { useSim, ExecLog, Panel, Row, Badge, ProdLink } from "./ui";
 
-// Réplica del módulo de Propiedad Horizontal de Contagracia (Ley 675): facturación por coeficiente,
+// Demo propia de propiedad horizontal (Ley 675) con datos ficticios: facturación por coeficiente,
 // mora y pronto pago por días del mes, portería, asambleas con quórum por coeficiente y PQRS con flujos.
 // Reglas, estados y etiquetas siguen el código real; la copropiedad y los valores son de ejemplo.
 
@@ -94,18 +94,18 @@ const addLog = (update) => (msg, tone = "info") => update((x) => x.log.push({ ms
 
 /* ───────────────────────────── 1. Facturación del mes ───────────────────────────── */
 
-const CONDO = "Conjunto La Finca";
+const CONDO = "Conjunto Los Cedros";
 const UNITS = [
   { tower: "Torre A", apt: "101", coef: 1.1, payer: "Carlos Pérez" },
   { tower: "Torre A", apt: "102", coef: 1.1, payer: "Ana Ríos" },
   { tower: "Torre A", apt: "201", coef: 1.18, payer: null },
   { tower: "Torre B", apt: "301", coef: 1.25, payer: "Jorge Díaz" },
-  { tower: "Torre B", apt: "302", coef: 1.25, payer: "Laura Gómez" },
+  { tower: "Torre B", apt: "302", coef: 1.25, payer: "Paula Méndez" },
   { tower: "Torre B", apt: "401", coef: 1.32, payer: "Marta León" },
 ];
 // Conceptos: "coefficient" = valor por cada 1 % de coeficiente; "fixed" = valor fijo por unidad
 const CONCEPTS = [
-  { id: "ord", name: "Cuota ordinaria de administración", mode: "coefficient", value: 148000, on: true },
+  { id: "ord", name: "Cuota ordinaria de administración", mode: "coefficient", value: 152000, on: true },
   { id: "fondo", name: "Fondo de imprevistos", mode: "coefficient", value: 1480, on: true },
   { id: "extra", name: "Cuota extraordinaria", mode: "fixed", value: 50000, on: false },
 ];
@@ -134,7 +134,7 @@ function Billing() {
   };
   const preview = () => {
     update((x) => (x.step = "preview"));
-    log(`Previsualizar la facturación: ${UNITS.length} unidades, ${UNITS.filter((u) => !u.payer).length} sin responsable de pagos`);
+    log(`Vista previa: ${UNITS.length} unidades, ${UNITS.filter((u) => !u.payer).length} sin responsable de pagos`);
   };
   const generate = () =>
     sequence(async (wait) => {
@@ -145,7 +145,7 @@ function Billing() {
         await wait(220);
       }
       update((x) => (x.step = "generated"));
-      log(`Generar Cuotas: ${included.length} cuotas en estado Pendiente`, "ok");
+      log(`Cuotas generadas: ${included.length} cuotas en estado Pendiente`, "ok");
     });
   const send = () =>
     sequence(async (wait) => {
@@ -169,10 +169,10 @@ function Billing() {
       }));
       await wait(600);
       update((x) => {
-        x.entry = { number: "JEPH-0031", total: caused.reduce((a, f) => a + f.total, 0), lines: byConcept, ararp: caused.length };
+        x.entry = { number: "AS-0031", total: caused.reduce((a, f) => a + f.total, 0), lines: byConcept, ararp: caused.length };
         x.step = "closed";
       });
-      log(`Cerrar Período: asiento JEPH-0031 «Facturación PH» y ${caused.length} cuentas por cobrar`, "ok");
+      log(`Mes cerrado: asiento AS-0031 de causación y ${caused.length} cuentas por cobrar`, "ok");
       if (st.fees.some((f) => !f.payer)) log("Las unidades sin responsable no se causan", "warn");
     });
 
@@ -270,17 +270,17 @@ function Billing() {
                 </tbody>
               </table>
               <p className="mt-2 text-[11px] text-muted">
-                Cuota ordinaria del Apto 302: {cop(148000)} × 1,25 = {cop(185000)}
+                Cuota ordinaria del Apto 302: {cop(152000)} × 1,25 = {cop(190000)}
               </p>
             </div>
           )}
 
           <div className="flex flex-wrap gap-2">
             {idx === -1 && <Btn onClick={createPeriod}>Nuevo período</Btn>}
-            {idx === 0 && <Btn onClick={preview}>Previsualizar la facturación</Btn>}
+            {idx === 0 && <Btn onClick={preview}>Vista previa</Btn>}
             {idx === 1 && (
               <Btn onClick={generate} disabled={busy || included.length === 0}>
-                Generar Cuotas
+                Generar cuotas
               </Btn>
             )}
             {idx === 2 && (
@@ -290,7 +290,7 @@ function Billing() {
             )}
             {idx === 3 && (
               <Btn onClick={close} disabled={busy} tone="warm">
-                Cerrar Período
+                Cerrar mes
               </Btn>
             )}
             {idx === 4 && (
@@ -337,8 +337,8 @@ function Billing() {
 
 /* ───────────────────────────── 2. Mora y pronto pago ───────────────────────────── */
 
-const FEE = 185000;
-const DISCOUNT = { pct: 5, from: 1, to: 5 };
+const FEE = 190000;
+const DISCOUNT = { pct: 4, from: 1, to: 5 };
 const INTEREST = { pct: 1.5, cutoff: 10 };
 const dayLabel = (d) => (d < 31 ? `${d + 1} oct` : `${d - 30} nov`);
 
@@ -359,17 +359,17 @@ function Mora() {
   const cartera = st.paid ? "a paz y salvo" : d >= 10 ? "en mora" : "al día, con saldo pendiente";
 
   const timeline = [
-    { at: 0, text: "Flujo «Recordatorio mensual de pago de administración» (día 1, 8:00 a. m.)" },
-    { at: 6, text: "Flujo «Recordatorio de administración 3 días antes»" },
+    { at: 0, text: "Recordatorio de pago a inicio de mes" },
+    { at: 6, text: "Recordatorio 3 días antes del vencimiento" },
     { at: 9, text: "Vence la cuota (10 oct)" },
-    { at: 10, text: `Calcular mora: interés de ${cop(Math.round(FEE * 0.015))} + correo «Aviso de Interés por mora»` },
-    { at: 14, text: "Flujo «Aviso de cuota vencida a los 5 días»" },
+    { at: 10, text: `Se causa interés de ${cop(Math.round(FEE * 0.015))} y se avisa al residente` },
+    { at: 14, text: "Aviso de cuota con 5 días de atraso" },
     { at: 41, text: "Segundo interés de mora (noviembre)" },
   ];
 
   const pay = () => {
     update((x) => (x.paid = { day: x.day, amount: due, discount, interests: activeInterest.length }));
-    log(`Registrar pago el ${dayLabel(d)}: recibo de caja RC-0218 por ${cop(due)}`, "ok");
+    log(`Registrar pago el ${dayLabel(d)}: recibo de caja RC-104 por ${cop(due)}`, "ok");
     if (discount) log(`Línea de descuento por pronto pago: ${cop(discount)} (${DISCOUNT.pct} %)`);
     if (activeInterest.length) log(`Se pagan también ${activeInterest.length} cargo(s) de interés`);
     log("Cuota Pagada · la unidad queda a paz y salvo", "ok");
@@ -384,7 +384,7 @@ function Mora() {
           <div className="flex flex-wrap items-start justify-between gap-3">
             <div>
               <p className="font-display text-lg font-bold">Torre B · Apto 302</p>
-              <p className="text-xs text-muted">Laura Gómez · Cuota ordinaria octubre {cop(FEE)} · vence 10 oct</p>
+              <p className="text-xs text-muted">Paula Méndez · Cuota ordinaria octubre {cop(FEE)} · vence 10 oct</p>
             </div>
             <Badge color={state[1]}>{state[0]}</Badge>
           </div>
@@ -458,10 +458,10 @@ function Mora() {
                 tone="ghost"
                 onClick={() => {
                   update((x) => x.forgiven.push(...activeInterest.map((i) => i.id)));
-                  log("Perdonar interés de mora: el cargo queda anulado", "warn");
+                  log("Interés condonado: el cargo queda anulado", "warn");
                 }}
               >
-                Perdonar interés de mora
+                Condonar interés
               </Btn>
             )}
             {!st.paid && <Btn onClick={pay}>Registrar pago · {cop(due)}</Btn>}
@@ -501,7 +501,7 @@ function Mora() {
           <Panel title="Recibo de caja">
             {st.paid ? (
               <div className="animate-pop space-y-0.5 text-[11px]">
-                <p className="font-semibold">RC-0218 · {dayLabel(st.paid.day)}</p>
+                <p className="font-semibold">RC-104 · {dayLabel(st.paid.day)}</p>
                 <div className="flex justify-between">
                   <span className="text-muted">Banco</span>
                   <span>{cop(st.paid.amount)}</span>
@@ -522,7 +522,7 @@ function Mora() {
             <ul className="space-y-1 text-xs">
               {d >= 0 && <li>Recordatorio mensual de pago</li>}
               {d >= 6 && <li>Tu administración vence en 3 días</li>}
-              {d >= 10 && <li>Aviso de Interés por mora</li>}
+              {d >= 10 && <li>Aviso de interés por atraso</li>}
               {d >= 14 && <li>Tu cuota lleva 5 días vencida</li>}
             </ul>
           </Panel>
@@ -551,36 +551,36 @@ function Porteria() {
 
   const registerVisit = () => {
     const at = time();
-    update((x) => x.visits.push({ id: x.visits.length, name: "Andrés Molina", doc: "CC 1.020.333.444", to: "Torre B · Apto 302", type: "Visitante", in: at, out: null }));
-    log(`Ingreso ${at}: Visitante Andrés Molina → Torre B · Apto 302`);
+    update((x) => x.visits.push({ id: x.visits.length, name: "Sergio Lara", doc: "CC 1.020.333.444", to: "Torre B · Apto 302", type: "Visitante", in: at, out: null }));
+    log(`Ingreso ${at}: Visitante Sergio Lara → Torre B · Apto 302`);
   };
   const exit = (id) => {
     const at = time();
     update((x) => (x.visits.find((v) => v.id === id).out = at));
-    log(`Registrar salida ${at}: Andrés Molina`);
+    log(`Registrar salida ${at}: Sergio Lara`);
   };
   const receivePackage = () =>
     sequence(async (wait) => {
       const at = time();
       const id = st.packages.length;
-      update((x) => x.packages.push({ id, carrier: "Servientrega", desc: "Caja mediana", to: "Torre B · Apto 302", status: "Pendiente", at, deliveredTo: null }));
-      log(`Paquete recibido ${at}: Servientrega para Torre B · Apto 302`);
+      update((x) => x.packages.push({ id, carrier: "Mensajería", desc: "Caja mediana", to: "Torre B · Apto 302", status: "Pendiente", at, deliveredTo: null }));
+      log(`Paquete recibido ${at}: mensajería para Torre B · Apto 302`);
       await wait(1200);
       update((x) => {
         x.packages.find((p) => p.id === id).status = "Notificado";
-        x.emails.unshift("📦 Paquete recibido en portería → Laura Gómez");
+        x.emails.unshift("📦 Tienes un paquete en portería → Paula Méndez");
       });
-      log("Correo y notificación al residente: «📦 Paquete recibido en portería»", "ok");
+      log("Aviso al residente por correo y en la plataforma", "ok");
     });
   const deliver = (id) => {
     const at = time();
     update((x) => {
       const p = x.packages.find((y) => y.id === id);
       p.status = "Entregado";
-      p.deliveredTo = "Laura Gómez";
+      p.deliveredTo = "Paula Méndez";
       p.deliveredAt = at;
     });
-    log(`Entregado ${at} a Laura Gómez (entregó: portero de turno)`);
+    log(`Entregado ${at} a Paula Méndez (entregó: portero de turno)`);
   };
   const addMinuta = (preset) => {
     const at = time();
@@ -734,7 +734,7 @@ const OWNERS = [
   ["Apto 201", "Pedro Silva", 11.2],
   ["Apto 202", "Lucía Torres", 10.6],
   ["Apto 301", "Jorge Díaz", 10.1],
-  ["Apto 302", "Laura Gómez", 9.7],
+  ["Apto 302", "Paula Méndez", 9.7],
   ["Apto 401", "Marta León", 9.4],
   ["Apto 402", "Felipe Rojas", 8.9],
   ["Apto 501", "Sara Méndez", 8.3],
@@ -784,7 +784,7 @@ function Asamblea() {
         <div className="space-y-5">
           <div className="flex flex-wrap items-start justify-between gap-3">
             <div>
-              <p className="font-display text-lg font-bold">Asamblea ordinaria · Edificio Las Palmas</p>
+              <p className="font-display text-lg font-bold">Asamblea ordinaria · Edificio Mirador</p>
               <p className="text-xs text-muted">Quórum por coeficiente de los propietarios presentes</p>
             </div>
             <Badge color={statusColor}>{st.status}</Badge>
@@ -909,7 +909,7 @@ function Asamblea() {
           </Panel>
           <Panel title="Cómo cuenta el sistema">
             <p className="text-xs text-muted">
-              El quórum suma el coeficiente de los propietarios presentes. En los resultados, cada propietario presente cuenta como un voto. Solo los propietarios votan.
+              El quórum se calcula con el coeficiente de los propietarios presentes, y solo los propietarios votan.
             </p>
           </Panel>
         </>
@@ -930,23 +930,23 @@ function Pqrs() {
   const file = () =>
     sequence(async (wait) => {
       update((x) => {
-        x.ticket = { number: 42, type: "Queja", priority: "Alta", subject: "Filtración en el parqueadero", status: "Abierto" };
+        x.ticket = { number: 17, type: "Queja", priority: "Alta", subject: "Humedad en el cuarto de basuras", status: "Abierto" };
         x.messages.push({ from: "Residente (QR público)", text: "Hay una filtración de agua en el sótano 1, cerca del parqueadero P-12." });
       });
-      log("PQRS #42 radicada desde el formulario público (QR)");
+      log("PQRS #17 radicada desde el formulario público (QR)");
       await wait(900);
-      update((x) => x.flows.push({ trigger: "PQRS radicada", flow: "Acuse de recibo automático de PQRS" }));
+      update((x) => x.flows.push({ trigger: "PQRS radicada", flow: "Acuse de recibo" }));
       update((x) => {
-        x.messages.push({ from: "Contagracia (automático)", text: "Recibimos tu PQRS #42. Te mantendremos al tanto por este medio." });
-        x.emails.unshift("Acuse de recibo de la PQRS #42 → residente");
+        x.messages.push({ from: "Sistema (automático)", text: "Recibimos tu PQRS #17. Te contaremos cada avance por este medio." });
+        x.emails.unshift("Acuse de recibo de la PQRS #17 → residente");
       });
-      log("Flujo «Acuse de recibo automático de PQRS»: mensaje y correo al residente", "ok");
+      log("Flujo «Acuse de recibo»: mensaje y correo al residente", "ok");
       await wait(900);
       update((x) => {
-        x.flows.push({ trigger: "PQRS radicada", flow: "Resumen de PQRS nueva en la campanita" });
-        x.emails.unshift("🔔 Nueva PQRS #42 · Queja · Alta → administración");
+        x.flows.push({ trigger: "PQRS radicada", flow: "Aviso a la administración" });
+        x.emails.unshift("🔔 Nueva PQRS #17 · Queja · Alta → administración");
       });
-      log("Flujo «Resumen de PQRS nueva en la campanita»: aviso a la administración");
+      log("Flujo «Aviso a la administración»: notificación interna");
     });
 
   const skip = () =>
@@ -955,27 +955,27 @@ function Pqrs() {
       log("Pasan 3 días sin respuesta de la administración", "warn");
       await wait(900);
       update((x) => {
-        x.flows.push({ trigger: "Una PQRS lleva días sin respuesta", flow: "Escalar PQRS sin respuesta a los 3 días" });
+        x.flows.push({ trigger: "PQRS sin respuesta", flow: "Escalamiento a los 3 días" });
         x.ticket.status = "En Proceso";
-        x.emails.unshift("⚠️ PQRS #42 sin respuesta hace 3 días → administrador");
+        x.emails.unshift("⚠️ PQRS #17 sin respuesta hace 3 días → administrador");
       });
-      log("Flujo «Escalar PQRS sin respuesta a los 3 días»: pasa a En Proceso y avisa al administrador", "ok");
+      log("Flujo «Escalamiento a los 3 días»: pasa a En Proceso y avisa al administrador", "ok");
     });
 
   const answer = () => {
     update((x) => {
       x.messages.push({ from: "Administración", text: "Ya vino el plomero y reparó la tubería. Gracias por avisar." });
       x.ticket.status = "Resuelto";
-      x.emails.unshift("Tu PQRS #42 cambió a Resuelto → residente");
+      x.emails.unshift("Tu PQRS #17 cambió a Resuelto → residente");
     });
     log("La administración responde: PQRS Resuelto (correo al residente)");
   };
   const closeTicket = () => {
     update((x) => {
       x.ticket.status = "Cerrado";
-      x.emails.unshift("Tu PQRS #42 fue cerrada → residente");
+      x.emails.unshift("Tu PQRS #17 fue cerrada → residente");
     });
-    log("PQRS #42 Cerrado", "ok");
+    log("PQRS #17 Cerrado", "ok");
   };
 
   return (
@@ -1000,7 +1000,7 @@ function Pqrs() {
               <div className="grid gap-2 text-xs sm:grid-cols-2">
                 <Row k="Tipo" v="Queja" />
                 <Row k="Prioridad" v="Alta" />
-                <Row k="Asunto" v="Filtración en el parqueadero" />
+                <Row k="Asunto" v="Humedad en el cuarto de basuras" />
                 <Row k="Unidad" v="Torre B · Apto 302" />
               </div>
               <div className="mt-4">
@@ -1060,7 +1060,7 @@ function Pqrs() {
           <ProdLink
             href={PQRS_FORM_URL}
             title="Formulario público de PQRS"
-            description="Ejemplo real: así lo ve el residente al escanear el QR del conjunto. Puede radicar de forma anónima y recibe un código de seguimiento."
+            description="Formulario público del producto real, en el que trabajé: así lo ve el residente al escanear el QR del conjunto."
           />
           <Panel title="Flujos que se dispararon" icon="bolt">
             {st.flows.length === 0 ? (

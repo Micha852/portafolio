@@ -9,10 +9,10 @@ import { contagracia } from "@/data/profile";
 // Qué se dice de cada simulador en el recorrido
 const TOUR_TEXT = {
   ph: "Factura una copropiedad por coeficiente, mueve la fecha para ver mora y pronto pago, y maneja portería, asamblea y PQRS.",
-  restaurant: "Atiende una mesa: arma platos con adiciones, haz de cocina, cobra en el POS y mira cuándo se mueve el inventario.",
-  crm: "Escríbele al equipo como cliente y mira el flujo de WhatsApp, el agente IA y la oportunidad avanzando por el embudo.",
-  automations: "Pídele un flujo a la IA, míralo dibujarse en el lienzo, simúlalo y préndelo. Lo que no existe queda como petición.",
-  ai: "Configura proveedores con respaldo, pregúntale al chat que detecta el módulo y procesa extractos bancarios.",
+  restaurant: "Atiende una mesa: arma platos con adiciones, haz de cocina, cobra y mira cómo se mueven el inventario y la contabilidad.",
+  crm: "Escríbele al equipo como cliente y mira el flujo de WhatsApp, la asistente IA y la oportunidad avanzando por el embudo.",
+  automations: "Pídele un flujo a la IA, míralo dibujarse en el lienzo, pruébalo y actívalo. Lo que no se puede hacer queda como solicitud.",
+  ai: "Configura proveedores con respaldo, conversa con el asistente que detecta el tema y procesa extractos bancarios.",
 };
 
 // Invitación al recorrido por los simuladores (driver.js).

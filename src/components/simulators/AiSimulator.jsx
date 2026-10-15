@@ -4,8 +4,8 @@ import { useEffect, useRef, useState } from "react";
 import { Icon } from "../Icons";
 import { useSim, ExecLog, Panel, Row, Badge } from "./ui";
 
-// Réplica de la capa de IA de Contagracia: configuración por proveedor y funcionalidad con respaldo,
-// chat "Gracia" con router de módulos, y extractos bancarios con plantillas generadas por IA + parser determinístico.
+// Demo propia de una capa de IA: proveedores con respaldo, un asistente que detecta el tema de cada pregunta
+// y lectura de extractos bancarios con plantillas creadas por IA. Bancos, datos y respuestas son ficticios.
 // Etiquetas, reglas y mensajes salen del código; los datos financieros son de ejemplo.
 
 const cop = (n) => `${n < 0 ? "−" : ""}$${Math.abs(Math.round(n)).toLocaleString("es-CO")}`;
@@ -19,7 +19,7 @@ const PROVIDERS = {
 // Resultado de "Probar" para cada API key en la demo
 const KEY_TEST = {
   gemini: ["ok", "Conexión exitosa (412ms)"],
-  openai: ["err", "Sin créditos. La cuenta asociada a esta API key no tiene saldo. Revisa el plan de facturación del proveedor."],
+  openai: ["err", "La cuenta del proveedor no tiene saldo."],
   anthropic: ["ok", "Conexión exitosa (688ms)"],
   deepseek: ["ok", "Conexión exitosa (531ms)"],
 };
@@ -39,7 +39,7 @@ const initialState = () => ({
   },
   quotaOut: false, // simula "cuota agotada" en el proveedor principal
   identity: {
-    name: "Gracia",
+    name: "Clara",
     role: "Asistente contable especializado",
     welcome: "¿En qué le puedo ayudar hoy?",
     avatar: "✨",
@@ -49,7 +49,6 @@ const initialState = () => ({
     proactive: true,
   },
   keyTests: {},
-  showRecs: false,
   // Chat
   messages: [],
   pill: "auto",
@@ -58,24 +57,17 @@ const initialState = () => ({
   // Extractos
   ext: null,
   templates: [
-    { banco: "AV-VILLAS", variante: "cuenta movil", version: 2, usos: 41, fallos: 1, active: true },
-    { banco: "BAN100", variante: "Cuenta Ban100", version: 1, usos: 9, fallos: 0, active: true },
-    { banco: "BANCO DE OCCIDENTE", variante: "Cuenta Corriente", version: 1, usos: 17, fallos: 0, active: true },
-    { banco: "BANCOLOMBIA", variante: "CUENTA CORRIENTE", version: 3, usos: 88, fallos: 2, active: true },
-    { banco: "BANCOLOMBIA", variante: "Cuenta de Ahorros", version: 1, usos: 126, fallos: 3, active: true },
-    { banco: "BBVA", variante: "Ahorros Libretón", version: 2, usos: 23, fallos: 0, active: true },
-    { banco: "BOLD", variante: "Depósito de Bajo Monto", version: 2, usos: 14, fallos: 0, active: true },
-    { banco: "DAVIVIENDA", variante: "Ahorros", version: 1, usos: 57, fallos: 1, active: true },
-    { banco: "NEQUI", variante: "Depósito de Bajo Monto", version: 2, usos: 73, fallos: 6, active: true },
-    { banco: "NU", variante: "Cuenta Nu", version: 1, usos: 11, fallos: 0, active: true },
-    { banco: "POPULAR", variante: "Ahorros", version: 1, usos: 8, fallos: 0, active: true },
+    { banco: "BANCO ANDINO", variante: "Ahorros", version: 2, usos: 34, fallos: 1, active: true },
+    { banco: "BANCO ANDINO", variante: "Corriente", version: 1, usos: 12, fallos: 0, active: true },
+    { banco: "BANCO DEL SUR", variante: "Ahorros", version: 1, usos: 9, fallos: 0, active: true },
+    { banco: "BILLETERA ÁGIL", variante: "Depósito digital", version: 1, usos: 21, fallos: 6, active: true },
   ],
   log: [],
 });
 
 const TABS = [
   ["config", "Configuración de IA", "grid"],
-  ["chat", "Chat · Gracia", "sparkles"],
+  ["chat", "Chat · Clara", "sparkles"],
   ["extractos", "Extractos bancarios", "download"],
   ["plantillas", "Plantillas · admin", "filter"],
 ];
@@ -205,7 +197,7 @@ function Config({ sim, log }) {
       <div className="space-y-6">
         <section>
           <p className="font-display font-bold">Proveedor de IA y Modelos</p>
-          <p className="mb-3 text-xs text-muted">Proveedor Activo · El proveedor seleccionado se usará para todas las consultas del asistente.</p>
+          <p className="mb-3 text-xs text-muted">Proveedor principal para todas las consultas.</p>
           <div className="grid gap-2 sm:grid-cols-2">
             {Object.entries(PROVIDERS).map(([k, p]) => (
               <button
@@ -226,8 +218,8 @@ function Config({ sim, log }) {
           <label className="mt-3 flex cursor-pointer items-start gap-2 rounded-xl border border-line p-3 text-xs">
             <input type="checkbox" checked={st.router} onChange={(e) => update((x) => (x.router = e.target.checked))} className="mt-0.5 accent-[rgb(var(--accent))]" />
             <span>
-              <span className="font-semibold">✨ Router automático de módulos</span>
-              <span className="block text-muted">La IA elige qué módulo usar según cada pregunta del chat, con DeepSeek Flash (~$0.00007 USD por pregunta). Si lo desactivas, el chat solo usa el módulo que el usuario seleccione.</span>
+              <span className="font-semibold">✨ Detectar el tema automáticamente</span>
+              <span className="block text-muted">La IA identifica el tema de cada pregunta antes de responder. Si lo apagas, el chat usa solo el tema que elija el usuario.</span>
             </span>
           </label>
         </section>
@@ -235,14 +227,10 @@ function Config({ sim, log }) {
         <section>
           <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
             <div>
-              <p className="font-display font-bold">Modelos por Funcionalidad</p>
-              <p className="text-xs text-muted">Si no configuras una, se usa el proveedor activo global. Con respaldo automático si se agota la cuota.</p>
+              <p className="font-display font-bold">Modelo para cada uso</p>
+              <p className="text-xs text-muted">Cada uso puede tener su modelo y un respaldo por si el principal falla.</p>
             </div>
-            <button onClick={() => update((x) => (x.showRecs = !x.showRecs))} className="rounded-full border border-line px-3 py-1 text-[11px] transition hover:border-accent hover:text-accent">
-              Indicaciones y recomendaciones
-            </button>
           </div>
-          {st.showRecs && <Recommendations />}
           <div className="grid gap-3 md:grid-cols-3">
             {Object.entries(FEATURES).map(([k, label]) => {
               const f = st.features[k];
@@ -280,9 +268,6 @@ function Config({ sim, log }) {
                         <option key={m}>{m}</option>
                       ))}
                     </Select>
-                  )}
-                  {k === "extractos" && (f.model === "deepseek-v4-pro" || f.fallbackModel === "deepseek-v4-pro") && (
-                    <p className="text-[11px] text-[#EF4444]">⚠️ NUNCA usar DeepSeek V4 Pro en extractos: consume todos los tokens en razonamiento interno y devuelve 0 movimientos.</p>
                   )}
                 </div>
               );
@@ -412,27 +397,6 @@ function Identity({ st, update, log }) {
   );
 }
 
-function Recommendations() {
-  return (
-    <div className="mb-3 animate-pop space-y-3 rounded-xl border border-accent/40 bg-accent/5 p-4 text-xs">
-      <p className="font-semibold">Indicaciones y recomendaciones (jun-2026)</p>
-      <p className="text-muted">Basado en pruebas reales con extractos colombianos (Nequi, Bancolombia) y conversaciones de chat. Estas son las combinaciones que mejor balance velocidad/costo/calidad mostraron.</p>
-      <div>
-        <p className="font-semibold">📄 Extractos Bancarios</p>
-        <p>Primario sugerido: Gemini 2.5 Flash · Respaldo sugerido: DeepSeek Flash</p>
-        <p className="text-muted">Gemini fue el más rápido (~15-20s) con buena precisión. DeepSeek también extrae correctamente todos los movimientos, pero es lento (3+ min) por ser muy verbose — sirve genial como respaldo barato cuando Gemini se cae por cuota.</p>
-        <p className="text-[#EF4444]">⚠️ NUNCA usar DeepSeek V4 Pro en extractos: consume todos los tokens en razonamiento interno y devuelve 0 movimientos.</p>
-      </div>
-      <div>
-        <p className="font-semibold">💬 Chat Asistente</p>
-        <p>Primario sugerido: Gemini 2.5 Flash o DeepSeek Flash · Respaldo sugerido: DeepSeek Flash (si primario es Gemini)</p>
-        <p className="text-muted">DeepSeek se desempeñó muy bien en chat (4-7s de latencia, respuestas claras y bien estructuradas). Gemini sigue siendo el más rápido. Anthropic Haiku 4.5 es excelente en ambos cuando hay saldo, pero más caro.</p>
-      </div>
-      <p className="text-muted">El respaldo responde automáticamente cuando el principal no puede hacerlo: sin API key, key inválida, cuota agotada o cualquier otro error.</p>
-    </div>
-  );
-}
-
 /* ───────────────────────────── 2. Chat ───────────────────────────── */
 
 const CHAT_MODULES = {
@@ -479,7 +443,7 @@ const QUESTIONS = [
     module: "bancos",
     reason: "Pregunta por saldos de cuentas bancarias.",
     answer:
-      "Así están sus cuentas hoy:\n\n| Cuenta | Saldo |\n|---|---|\n| Bancolombia Ahorros ****4821 | $48.250.300 |\n| Davivienda Corriente ****1190 | $12.904.100 |\n| Nequi ****7765 | $1.320.000 |\n| **Total** | **$62.474.400** |\n\nTiene **2 conciliaciones pendientes** (octubre en Bancolombia y Nequi).",
+      "Así están sus cuentas hoy:\n\n| Cuenta | Saldo |\n|---|---|\n| Banco Andino Ahorros ****4821 | $48.250.300 |\n| Banco del Sur Corriente ****1190 | $12.904.100 |\n| Billetera Ágil ****7765 | $1.320.000 |\n| **Total** | **$62.474.400** |\n\nTiene **2 conciliaciones pendientes** (octubre en Banco Andino y Billetera Ágil).",
     tokens: 2840,
     followUp: "¿Quiere que le muestre los movimientos de esta semana?",
   },
@@ -513,7 +477,7 @@ const QUESTIONS = [
     q: "¿Cuánto debo pagar de nómina este mes?",
     module: "nomina",
     reason: "Pregunta por la nómina del mes.",
-    denied: "No puedo consultar Nómina: ese módulo no está activo para su empresa.",
+    denied: "Nómina no está incluida en el plan de esta empresa de ejemplo, así que no puedo consultarla.",
   },
 ];
 
@@ -537,7 +501,7 @@ function Chat({ sim, log }) {
           x.thinking = null;
           x.messages.push({
             from: "error",
-            text: `La cuota de ${p} se agotó (no es un saturamiento momentáneo). Espere al reinicio del período (diario/mensual) o pida al administrador que aumente el tier en el panel del proveedor.`,
+            text: `${p} no respondió (cuota agotada) y no hay un proveedor de respaldo configurado. Configura uno o intenta más tarde.`,
           });
         });
         log(`Chat: falló ${p} y no hay respaldo configurado`, "warn");
@@ -575,15 +539,15 @@ function Chat({ sim, log }) {
         log("Acceso: el módulo Nómina no está en el plan; se responde sin llamar al modelo", "warn");
         return;
       }
-      // 2) Router con DeepSeek Flash
+      // 2) Detección del tema con IA
       const auto = st.pill === "auto";
       if (auto && !st.router) {
         update((x) => (x.thinking = null));
-        log("Router desactivado: en modo Auto responde General");
+        log("Detección automática apagada: responde con el tema General");
         await answer({ ...item, answer: "Con el router apagado respondo como **General**: no tengo los datos de ese módulo. Elija el módulo arriba para una respuesta precisa." }, "general", "seleccionado por usted");
         return;
       }
-      log(`Router (DeepSeek Flash): «${CHAT_MODULES[item.module][0]}» — ${item.reason}`);
+      log(`Tema detectado: «${CHAT_MODULES[item.module][0]}» — ${item.reason}`);
       if (!auto && st.pill !== item.module) {
         update((x) => {
           x.thinking = null;
@@ -630,7 +594,7 @@ function Chat({ sim, log }) {
         <>
           <Panel title="Cómo responde">
             <p className="text-xs text-muted">1. Revisa si el plan y los permisos dejan consultar ese módulo.</p>
-            <p className="text-xs text-muted">2. El router (DeepSeek Flash) elige el módulo según la pregunta.</p>
+            <p className="text-xs text-muted">2. La IA detecta el tema de la pregunta.</p>
             <p className="text-xs text-muted">3. El módulo carga sus datos y se los pasa al modelo con sus instrucciones.</p>
             <p className="text-xs text-muted">4. Si el principal falla, contesta el respaldo.</p>
           </Panel>
@@ -691,7 +655,7 @@ function Chat({ sim, log }) {
                       <span className="text-accent">✓ Reporte {CHAT_MODULES[m.module][0]}.{m.exported === "PDF" ? "pdf" : "xlsx"} generado</span>
                     ) : (
                       <>
-                        <span className="text-muted">¿Desea exportar esta respuesta?</span>
+                        <span className="text-muted">¿Exportar esta respuesta?</span>
                         <button onClick={() => exportAnswer(i, "PDF")} className="rounded-full border border-line px-2 hover:border-accent hover:text-accent">
                           PDF
                         </button>
@@ -709,7 +673,7 @@ function Chat({ sim, log }) {
           {st.suggestion && (
             <div className="animate-pop rounded-xl border border-warm/50 bg-warm/10 p-3 text-xs">
               <p>
-                💡 Esto parece una pregunta de {CHAT_MODULES[st.suggestion.item.module][1]} {CHAT_MODULES[st.suggestion.item.module][0]}. ¿Con qué módulo respondo?
+                💡 Parece una pregunta sobre {CHAT_MODULES[st.suggestion.item.module][1]} {CHAT_MODULES[st.suggestion.item.module][0]}. ¿Respondo con ese tema?
               </p>
               <p className="mt-0.5 italic text-muted">{st.suggestion.item.reason}</p>
               <div className="mt-2 flex flex-wrap gap-2">
@@ -723,7 +687,7 @@ function Chat({ sim, log }) {
               {countdown != null && (
                 <>
                   <p className="mt-2 text-muted">
-                    Enviando en {CHAT_MODULES[st.suggestion.from][0]} en {countdown}s...
+                    Respondo con {CHAT_MODULES[st.suggestion.from][0]} en {countdown}s...
                   </p>
                   <div className="mt-1 h-1 overflow-hidden rounded-full bg-line/60">
                     <div className="h-full bg-warm transition-all duration-1000" style={{ width: `${(countdown / 15) * 100}%` }} />
@@ -736,7 +700,7 @@ function Chat({ sim, log }) {
         </div>
 
         <div className="mt-4 border-t border-line pt-3">
-          <p className="mb-2 text-[11px] text-muted">Escriba su pregunta — yo detecto el módulo automáticamente. En la demo, elija una:</p>
+          <p className="mb-2 text-[11px] text-muted">Escribe tu pregunta y detecto el tema. En la demo, elija una:</p>
           <div className="flex flex-wrap gap-1.5">
             {QUESTIONS.map((item) => (
               <button
@@ -809,10 +773,10 @@ function MarkdownTable({ text }) {
 const FILES = [
   {
     id: "bancolombia",
-    name: "Extracto Bancolombia octubre.pdf",
-    banco: "BANCOLOMBIA",
-    variante: "Cuenta de Ahorros",
-    account: "Bancolombia Ahorros ****4821",
+    name: "Extracto Banco Andino octubre.pdf",
+    banco: "BANCO ANDINO",
+    variante: "Ahorros",
+    account: "Banco Andino Ahorros ****4821",
     period: "01/10/2026 – 31/10/2026",
     opening: 12500000,
     rowPattern: String.raw`^(\d{2}/\d{2})\s+(.+?)\s+(-?[\d.,]+)\s+([\d.,]+)$`,
@@ -829,10 +793,10 @@ const FILES = [
   },
   {
     id: "cajasocial",
-    name: "Extracto Banco Caja Social.pdf",
-    banco: "BANCO CAJA SOCIAL",
+    name: "Extracto Cooperativa del Río.pdf",
+    banco: "COOPERATIVA DEL RÍO",
     variante: "Ahorros",
-    account: "Caja Social Ahorros ****3307",
+    account: "Cooperativa del Río ****3307",
     period: "01/10/2026 – 31/10/2026",
     opening: 4800000,
     rowPattern: String.raw`^(\d{2}-[A-Z]{3})\s+(.+?)\s+([\d.,]+)?\s+([\d.,]+)?\s+([\d.,]+)$`,
@@ -848,10 +812,10 @@ const FILES = [
   },
   {
     id: "nequi",
-    name: "Extracto Nequi (con contraseña).pdf",
-    banco: "NEQUI",
-    variante: "Depósito de Bajo Monto",
-    account: "Nequi ****7765",
+    name: "Extracto Billetera Ágil (con contraseña).pdf",
+    banco: "BILLETERA ÁGIL",
+    variante: "Depósito digital",
+    account: "Billetera Ágil ****7765",
     period: "01/10/2026 – 31/10/2026",
     opening: 320000,
     rowPattern: String.raw`^(\d{2}/\d{2}/\d{4})\s+(.+?)\s+\$\s?(-?[\d.,]+)\s+\$\s?([\d.,]+)$`,
@@ -860,7 +824,7 @@ const FILES = [
       ["04/10/2026", "RECIBI DE CARLOS PEREZ", 150000, true],
       ["08/10/2026", "PAGO EN COMERCIO", -45900, true],
       ["16/10/2026", "ENVIO A DAVIPLATA", -80000, true],
-      ["22/10/2026", "RECARGA DESDE BANCOLOMBIA", 60000, true],
+      ["22/10/2026", "RECARGA DESDE BANCO ANDINO", 60000, true],
       ["29/10/2026", "PAGO SERVICIOS", -12000, false],
     ],
   },
@@ -916,7 +880,7 @@ function Extractos({ sim, log, goTemplates }) {
     if (choice === GENERATE) {
       await step("Buscando plantilla existente que aplique…", 900);
       if (existing) {
-        update((x) => x.ext.warnings.push(`Ya existía la plantilla "${tplLabel(existing)}" y aplica a este PDF (cuadra). Se usó esa en lugar de generar una nueva — ahorra tiempo y tokens de IA.`));
+        update((x) => x.ext.warnings.push(`Ya había una plantilla para "${tplLabel(existing)}" que funciona con este PDF, así que se usó esa y no se gastó IA.`));
         log(`Ya existía la plantilla ${tplLabel(existing)}: no se gasta IA`, "ok");
       }
     } else {
@@ -928,10 +892,10 @@ function Extractos({ sim, log, goTemplates }) {
         });
         log(`La firma del PDF no coincide con ${choice}: fallos_count + 1`, "warn");
         if (existing) {
-          update((x) => x.ext.warnings.push(`Elegiste "${choice}" pero el PDF corresponde a "${tplLabel(existing)}". Se usó la plantilla correcta automáticamente.`));
+          update((x) => x.ext.warnings.push(`El PDF no era de "${choice}" sino de "${tplLabel(existing)}"; se usó la plantilla correcta.`));
           log(`Se probó con las demás plantillas activas: aplica ${tplLabel(existing)}`, "ok");
         } else {
-          update((x) => x.ext.warnings.push("La plantilla anterior falló en este PDF; se regeneró automáticamente con IA. Verifica los movimientos y saldos antes de conciliar."));
+          update((x) => x.ext.warnings.push("Ninguna plantilla sirvió para este PDF, así que se creó una nueva con IA. Revisa los movimientos antes de conciliar."));
           log("Ninguna plantilla activa aplica: se genera una nueva con IA", "warn");
         }
       }
@@ -956,7 +920,7 @@ function Extractos({ sim, log, goTemplates }) {
         x.templates.push({ banco: src.banco, variante: src.variante, version: 1, usos: 0, fallos: 0, active: true, generated: true });
         x.ext.progress = null;
       });
-      log(`Plantilla nueva ${src.banco} · ${src.variante} v1 «Auto-generada por IA v1» con ${using}. Desde ahora la usan todas las empresas`, "ok");
+      log(`Plantilla nueva ${src.banco} · ${src.variante} v1 «Generada con IA» con ${using}. Queda lista para los próximos extractos`, "ok");
       used = { banco: src.banco, variante: src.variante };
     }
 
@@ -978,7 +942,7 @@ function Extractos({ sim, log, goTemplates }) {
   };
   const matchByDateAndValue = () => {
     update((x) => x.ext.result.items.forEach((it) => (it.status = it.m[3] ? "MATCHED" : "PENDING")));
-    log(`Cruce «Fecha y valor»: ${ext.result.items.filter((it) => it.m[3]).length} conciliados, ${ext.result.items.filter((it) => !it.m[3]).length} pendientes`, "ok");
+    log(`Cruce por fecha y monto: ${ext.result.items.filter((it) => it.m[3]).length} conciliados, ${ext.result.items.filter((it) => !it.m[3]).length} pendientes`, "ok");
   };
   const registerPending = () => {
     update((x) => {
@@ -986,7 +950,7 @@ function Extractos({ sim, log, goTemplates }) {
       x.ext.result.system = x.ext.result.closing;
       x.ext.conc.registered = true;
     });
-    log("Registrar extractos en sistema: los cargos bancarios se registran y la diferencia queda en $0", "ok");
+    log("Se registran los movimientos que faltaban y la diferencia queda en $0", "ok");
   };
 
   const statusColor = { PENDING: "#F59E0B", MATCHED: "#10B981" };
@@ -1007,7 +971,7 @@ function Extractos({ sim, log, goTemplates }) {
           {ext?.result && (
             <Panel title="Plantilla aplicada">
               <p className="text-xs font-semibold">{tplLabel(ext.result.template)}</p>
-              <p className="text-[10px] text-muted">rowPattern</p>
+              <p className="text-[10px] text-muted">Patrón de fila</p>
               <code className="block break-all rounded bg-bg/80 p-1.5 font-mono text-[10px] text-accent">{ext.file.rowPattern}</code>
               <button onClick={goTemplates} className="text-[11px] text-accent hover:underline">
                 Ver en Plantillas · admin →
@@ -1021,7 +985,7 @@ function Extractos({ sim, log, goTemplates }) {
         <div className="grid gap-3 sm:grid-cols-2">
           <Select label="Tipo de extracto (plantilla)" value={choice} onChange={setChoice}>
             <option value="">— elige una opción —</option>
-            <option value={GENERATE}>✨ Mi banco/variante no aparece — generar plantilla nueva con IA</option>
+            <option value={GENERATE}>✨ Mi banco no está: crear plantilla con IA</option>
             {active.map((t) => (
               <option key={tplLabel(t)} value={tplLabel(t)}>
                 {tplLabel(t)} · {t.usos} usos
@@ -1036,7 +1000,7 @@ function Extractos({ sim, log, goTemplates }) {
             ))}
           </Select>
         </div>
-        <p className="text-[11px] text-muted">Las plantillas son globales — si no está la de tu banco, genera una nueva y todas las empresas la usarán después.</p>
+        <p className="text-[11px] text-muted">Si tu banco no tiene plantilla, la IA crea una y queda lista para los próximos extractos.</p>
         <button
           onClick={() => (choice ? run() : log("Elige primero el tipo de extracto (dropdown de arriba).", "warn"))}
           disabled={busy}
@@ -1073,7 +1037,7 @@ function Extractos({ sim, log, goTemplates }) {
             {ext.needPassword && (
               <div className="animate-pop rounded-xl border border-warm/50 bg-warm/10 p-3 text-xs">
                 <p className="font-semibold">PDF protegido con contraseña</p>
-                <p className="text-muted">Algunos bancos usan tu cédula o NIT como clave.</p>
+                <p className="text-muted">La clave suele ser la cédula del titular.</p>
                 <div className="mt-2 flex gap-2">
                   <input readOnly value="1020333444" className="w-40 rounded-lg border border-line bg-bg px-2 py-1 font-mono" />
                   <button onClick={unlock} disabled={busy} className="rounded-full bg-warm px-3 py-1 font-semibold text-bg disabled:opacity-40">
@@ -1136,12 +1100,12 @@ function Extractos({ sim, log, goTemplates }) {
                   )}
                   {ext.conc && ext.result.items.every((it) => it.status === "PENDING") && (
                     <button onClick={matchByDateAndValue} className="rounded-full bg-accent px-4 py-2 text-xs font-semibold text-bg">
-                      Cruzar por «Fecha y valor»
+                      Cruzar por fecha y monto
                     </button>
                   )}
                   {ext.conc && !ext.conc.registered && ext.result.items.some((it) => it.status === "MATCHED") && (
                     <button onClick={registerPending} className="rounded-full bg-warm px-4 py-2 text-xs font-semibold text-bg">
-                      Registrar extractos en sistema
+                      Registrar movimientos faltantes
                     </button>
                   )}
                   {ext.conc?.registered && <span className="self-center text-xs text-accent">✓ Conciliación {ext.conc.number} cuadrada: diferencia $0</span>}
@@ -1164,13 +1128,11 @@ function Templates({ sim, log }) {
     const fileMatch = FILES.find((x) => x.banco === t.banco && x.variante === t.variante);
     return JSON.stringify(
       {
-        detection: { signature: [t.banco, t.variante.toUpperCase()] },
-        movimientos: {
-          rowPattern: fileMatch?.rowPattern ?? String.raw`^(\d{2}/\d{2})\s+(.+?)\s+(-?[\d.,]+)\s+([\d.,]+)$`,
-          fields: ["fecha", "descripcion", "monto", "saldo"],
-          tipoInference: { method: t.banco === "BBVA" || t.banco === "AV-VILLAS" ? "delta_saldo" : "sign" },
-        },
-        numberFormat: "colombiano",
+        banco: t.banco,
+        cuenta: t.variante,
+        patronFila: fileMatch?.rowPattern ?? String.raw`^(\d{2}/\d{2})\s+(.+?)\s+(-?[\d.,]+)\s+([\d.,]+)$`,
+        columnas: ["fecha", "descripcion", "valor", "saldo"],
+        separadorMiles: ".",
       },
       null,
       2
@@ -1179,10 +1141,10 @@ function Templates({ sim, log }) {
 
   return (
     <Shell
-      hint="Plantillas globales: una vez creada, la usan todas las empresas. Las que generes en «Extractos bancarios» aparecen aquí."
+      hint="Plantillas de lectura por banco. Las que se creen en «Extractos bancarios» aparecen aquí."
       log={st.log}
       side={
-        <Panel title="template_json">
+        <Panel title="Plantilla (JSON)">
           {json ? (
             <>
               <p className="text-xs font-semibold">{tplLabel(json)}</p>
@@ -1214,7 +1176,7 @@ function Templates({ sim, log }) {
                 <td className="py-2 font-semibold">{t.banco}</td>
                 <td>{t.variante}</td>
                 <td>v{t.version}</td>
-                <td className="text-muted">{t.generated ? "Auto-generada por IA v1" : "Plantilla del banco"}</td>
+                <td className="text-muted">{t.generated ? "Generada con IA" : "Plantilla del banco"}</td>
                 <td>
                   {t.usos} / <span className={t.fallos > 5 ? "text-[#EF4444]" : ""}>{t.fallos}</span>
                 </td>

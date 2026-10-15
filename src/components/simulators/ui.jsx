@@ -91,7 +91,7 @@ export function ProdLink({ href, title, description }) {
     >
       <p className="flex items-center gap-1.5 text-[11px] font-semibold uppercase tracking-widest text-accent">
         <span className="h-1.5 w-1.5 rounded-full bg-accent" />
-        En producción
+        En producción · Contagracia (Arawana)
       </p>
       <p className="mt-1 flex items-center justify-between gap-2 text-sm font-semibold">
         {title}

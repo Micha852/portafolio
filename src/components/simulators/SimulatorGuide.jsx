@@ -9,15 +9,15 @@ import { Icon } from "../Icons";
 const GUIDES = {
   crm: [
     ["crm-choices", "Empieza aquí", "Eres un cliente que vio un anuncio. Elige qué le escribes al equipo: con cada mensaje corre el flujo."],
-    ["crm-flow", "El flujo en vivo", "Mira cómo se ilumina cada paso: reparto entre asesores, el agente IA «Sofía» con sus herramientas y el traspaso a un humano."],
+    ["crm-flow", "El flujo en vivo", "Mira cómo se ilumina cada paso: reparto por turnos, la asistente IA «Ana» con su agenda y el paso a un asesor."],
     ["crm-views", "Flujo o embudo", "Cuando el asesor toma la conversación, cambia al embudo de ventas para ver la oportunidad avanzar hasta ganarse o perderse."],
     ["crm-panel", "Lo que guarda el CRM", "Aquí aparecen el contacto, el lead, la oportunidad y las notificaciones que recibe el equipo."],
   ],
   restaurant: [
     ["rest-hint", "Te digo qué hacer", "Esta franja cambia en cada paso con la siguiente acción."],
     ["rest-mesero", "Eres el mesero", "Elige una mesa libre, arma platos con variantes, adiciones y notas, y envíalos a preparación."],
-    ["rest-cocina", "Ahora eres la cocina", "Las comandas llegan por área. Márcalas «Preparando» y luego «¡Listo!»; mira el cronómetro."],
-    ["rest-sistema", "Lo que pasa por dentro", "Comanda impresa, órdenes de cocina, factura y, al cobrar, el inventario y los asientos contables."],
+    ["rest-cocina", "Ahora eres la cocina", "Los pedidos llegan por estación. Márcalos «Preparando» y luego «¡Listo!»; mira el cronómetro."],
+    ["rest-sistema", "Lo que pasa por dentro", "Pedido impreso, consumo de recetas, factura y, al cobrar, el inventario y los asientos contables."],
     ["rest-views", "Sedes y menú público", "En esta pestaña decides qué muestra el menú por QR de cada sede."],
   ],
   ph: [
@@ -28,14 +28,14 @@ const GUIDES = {
   ],
   automations: [
     ["auto-module", "Elige el módulo", "CRM, propiedad horizontal o restaurante: cada uno tiene sus propios disparadores y acciones."],
-    ["auto-examples", "Pídele un flujo a la IA", "Elige un ejemplo. Los marcados «no existe aún» muestran cómo se convierte en petición para el equipo."],
-    ["auto-canvas", "El lienzo", "El flujo se dibuja nodo a nodo. Debajo podrás aceptarlo, simularlo y prenderlo."],
-    ["auto-tabs", "Flujos y peticiones", "Revisa los flujos creados y, como admin, aprueba peticiones para que el usuario reciba el aviso."],
+    ["auto-examples", "Pídele un flujo a la IA", "Elige un ejemplo. Los marcados «no existe aún» muestran cómo queda como solicitud para el equipo."],
+    ["auto-canvas", "El lienzo", "El flujo se dibuja nodo a nodo. Debajo podrás crearlo, probarlo y activarlo."],
+    ["auto-tabs", "Flujos y solicitudes", "Revisa los flujos creados y, como admin, aprueba solicitudes para que el usuario reciba el aviso."],
   ],
   ai: [
     ["ai-tabs", "Cuatro pestañas conectadas", "Configuración, chat, extractos y plantillas: lo que cambies en la configuración afecta a las demás."],
     ["ai-who", "Quién responde", "Qué proveedor y modelo atiende cada funcionalidad según la configuración."],
-    ["ai-quota", "Provoca una falla", "Activa esto y ve al chat: verás contestar al respaldo o el error real si no hay respaldo."],
+    ["ai-quota", "Provoca una falla", "Activa esto y ve al chat: verás contestar al respaldo o un error si no hay respaldo."],
   ],
 };
 

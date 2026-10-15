@@ -29,7 +29,7 @@ export const profile = {
   heroBadge: { value: "2+", label: "Años de experiencia" },
   // Cifras de la sección Sobre mí
   stats: [
-    { value: "3.9k+", label: "Commits en Contagracia" },
+    { value: "3.4k+", label: "Commits en GitHub", detail: "2024 – 2026 · 16+ repositorios" },
     { value: "2 podios", label: "Maratón de Programación", detail: "1.º 2025 · 3.º 2024-1" },
   ],
   // Fotos de los espacios de trabajo (columna derecha de Sobre mí)
@@ -63,17 +63,20 @@ export const contact = {
   ],
 };
 
-// Contagracia se muestra como un bloque propio: una introducción y una tarjeta por producto o capacidad.
+// Contagracia es un producto de Arawana Home Studio: se muestra como caso de estudio, con "Mi parte" en cada módulo.
 // links: lista de enlaces. icon puede ser "external" (sitio) o "github" (código)
 export const contagracia = {
   title: "Ecosistema Contagracia",
+  owner: "Arawana Home Studio S.A.S.",
+  role: "Desarrollador full stack · prestación de servicios",
   description:
-    "Plataforma SaaS multitenant para empresas colombianas, construida en 20 microservicios. Un mismo núcleo da vida a varios productos —ERP, CRM, propiedad horizontal y restaurantes—, cada uno con su propia landing. Llevo más de 3.900 commits entre el front y el back.",
+    "Plataforma SaaS de Arawana Home Studio para empresas colombianas, con arquitectura de microservicios. Un mismo núcleo da vida a varios productos —ERP, CRM, propiedad horizontal y restaurantes—. Trabajo en ella como contratista; abajo están los módulos en los que participé y mi parte en cada uno.",
   tags: ["Next.js", "React", "TypeScript", "NestJS", "Microservicios", "Prisma", "PostgreSQL", "Redis · BullMQ"],
   links: [{ label: "contagracia.com", href: "https://contagracia.com", icon: "external" }],
   modules: [
     {
       title: "ERP contable",
+      mine: "Nómina y PILA, calendario tributario y reportes.",
       description: "Software contable para MiPymes: facturación electrónica DIAN, contabilidad, nómina, inventario y tesorería.",
       highlights: [
         "Nómina electrónica y planilla PILA con consolidado mensual",
@@ -84,6 +87,7 @@ export const contagracia = {
     },
     {
       title: "Propiedad horizontal",
+      mine: "Cuotas con mora y pronto pago, documentos, portería y PQRS.",
       description: "Administración de copropiedades bajo la Ley 675: cartera, cuotas, portería y comunicación con residentes.",
       highlights: [
         "Facturación de cuotas con mora y pronto pago configurables",
@@ -100,6 +104,7 @@ export const contagracia = {
     },
     {
       title: "Restaurantes",
+      mine: "Comandas, menú público, domicilios y reporte de ventas.",
       description: "Operación completa de restaurante: comandas desde la mesa, cocina sincronizada, domicilios y cierre de caja.",
       highlights: [
         "Comandas para cocina en carta y POS, imprimibles o en PDF",
@@ -111,11 +116,12 @@ export const contagracia = {
         id: "restaurant",
         title: "Simulador de restaurante y POS",
         subtitle:
-          "Atiende una mesa de punta a punta (platos con variantes, adiciones y notas, cocina, cobro en el POS, inventario y contabilidad) y administra qué muestra el menú público de cada sede.",
+          "Atiende una mesa de punta a punta (platos con variantes, adiciones y notas, cocina y cobro) y decide qué muestra el menú público de cada sede.",
       },
     },
     {
       title: "CRM",
+      mine: "Desarrollador principal del módulo.",
       description: "Gestión comercial con embudo de oportunidades, fichas de contacto y campañas conectadas a Meta y WhatsApp.",
       highlights: [
         "Conversaciones de WhatsApp dentro del CRM",
@@ -128,11 +134,12 @@ export const contagracia = {
         id: "crm",
         title: "Simulador del CRM",
         subtitle:
-          "Haz de cliente: mira cómo corre el flujo real «Ventas por WhatsApp: campaña, equipo comercial e IA» y cómo avanza la oportunidad hasta cerrarse. Las respuestas están guionizadas para la demo.",
+          "Haz de cliente: escribe por WhatsApp, mira cómo un flujo con asistente IA atiende el lead y cómo avanza la oportunidad hasta cerrarse.",
       },
     },
     {
       title: "Automatizaciones tipo n8n",
+      mine: "Diseño y desarrollo del motor de flujos y del asistente con IA.",
       description: "Editor visual de flujos con disparadores, condiciones y acciones que conectan todos los módulos de la plataforma.",
       highlights: [
         "Lienzo de nodos con notas, vista previa y validación antes de activar",
@@ -145,15 +152,16 @@ export const contagracia = {
         id: "automations",
         title: "Simulador del hub de automatizaciones",
         subtitle:
-          "Pídale un flujo al asistente de IA para CRM, propiedad horizontal o restaurante: mírelo dibujarse en el lienzo, acéptelo, simúlelo y préndalo. Lo que aún no existe queda como petición para el equipo.",
+          "Pídele un flujo al asistente de IA: míralo dibujarse en el lienzo, créalo, pruébalo y actívalo. Lo que aún no se puede hacer queda como solicitud.",
       },
     },
     {
       title: "Inteligencia artificial",
+      mine: "Integración de proveedores, chat por módulo y lectura de extractos.",
       description: "Capa de IA con cuatro proveedores intercambiables —OpenAI, Anthropic, Gemini y DeepSeek— usada en varios frentes.",
       highlights: [
         "Asistente que genera flujos de automatización a partir de lenguaje natural",
-        "Lectura de extractos bancarios en PDF: la IA crea la plantilla una vez y luego el parser trabaja sin IA",
+        "Lectura de extractos bancarios en PDF con IA",
         "Chatbot por módulo con exportación de respuestas a PDF y Excel",
       ],
       tags: ["OpenAI", "Anthropic", "Gemini", "DeepSeek"],
@@ -162,15 +170,16 @@ export const contagracia = {
         id: "ai",
         title: "Simulador de la capa de IA",
         subtitle:
-          "Configura proveedores y modelos con respaldo, pregúntale a Gracia (el chat que detecta el módulo) y procesa extractos bancarios: la IA genera la plantilla una vez y luego se leen sin IA hasta conciliar.",
+          "Configura proveedores de IA con respaldo, conversa con un asistente que detecta el tema de cada pregunta y procesa extractos bancarios hasta conciliarlos.",
       },
     },
     {
       title: "CMS, landings y tienda en línea",
+      mine: "Landings editables, tienda en línea e integración con Tiendanube.",
       description: "Gestor de contenido propio para editar las landings de cada producto, el blog y las pantallas de acceso sin tocar código.",
       highlights: [
         "Landings de ERP, PH, restaurantes y contadores editables desde el CMS",
-        "Negocios reales publican su propio sitio y tienda con él",
+        "Negocios que usan Contagracia publican su sitio y su tienda con él",
         "Tienda en línea con plantillas, filtros, scroll infinito y SEO con JSON-LD",
         "Integración con Tiendanube: OAuth, webhooks firmados y recepción de pedidos",
       ],
@@ -179,7 +188,7 @@ export const contagracia = {
       // Sitios reales de clientes hechos con el CMS (se abren en un modal)
       gallery: {
         title: "Sitios creados con el CMS de Contagracia",
-        subtitle: "Negocios de distintos sectores que publican su sitio y su tienda en línea con el CMS que desarrollé.",
+        subtitle: "Sitios de negocios que usan Contagracia, armados con su CMS. Los muestro como ejemplo de lo que permite construir el CMS en el que trabajé.",
         sites: [
           { name: "NovaTech", category: "Tecnología y accesorios", href: "https://novatech.contagracia.com/", image: "/showcase/novatech.webp" },
           { name: "CS Supplements", category: "Suplementos naturales", href: "https://cssupplements.contagracia.com/", image: "/showcase/cssupplements.webp" },
@@ -199,8 +208,11 @@ export const contagracia = {
 export const projects = [
   {
     title: "Factura Fácil",
+    group: "arawana",
+    owner: "Arawana Home Studio S.A.S.",
+    mine: "Personalización visual por empresa, plantillas de tienda, extractos con IA y mejoras contables.",
     description:
-      "Plataforma colombiana de facturación electrónica DIAN, POS, contabilidad, nómina, inventario y tienda virtual. Aporté nuevas funciones y mejoras sobre un sistema ya en producción.",
+      "Plataforma de Arawana Home Studio para facturación electrónica DIAN, POS, contabilidad, nómina, inventario y tienda virtual. Aporté nuevas funciones y mejoras sobre un sistema ya en producción.",
     highlights: [
       "Personalización visual por empresa: paleta libre con contraste automático (WCAG) y modo oscuro",
       "Tienda virtual con nuevas plantillas que heredan el tema de cada empresa",
@@ -216,6 +228,8 @@ export const projects = [
   },
   {
     title: "Herbario Digital HUAZ 2.0",
+    group: "propios",
+    owner: "Proyecto propio · Universidad de la Amazonia",
     description:
       "Plataforma para la colección botánica del Herbario de la Universidad de la Amazonia: muestras con taxonomía, imágenes, mapa de recolección, importación y exportación Darwin Core (SiB Colombia / GBIF), fichas y etiquetas en PDF, roles con permisos y un CMS para el sitio público.",
     image: "/projects/herbario.webp",
@@ -223,26 +237,40 @@ export const projects = [
     links: [{ label: "herbariohuaz.com", href: "https://herbariohuaz.com/consultas", icon: "external" }],
   },
   {
-    title: "Desarrollo Web",
+    title: "Sitios para clientes de Arawana",
+    group: "arawana",
+    owner: "Arawana Home Studio S.A.S.",
+    mine: "Desarrollo de los sitios.",
     description:
-      "Sitios corporativos, landing pages y plataformas para empresas de marketing, salud, noticias y entretenimiento.",
+      "Sitios corporativos, landing pages y plataformas para clientes del estudio: marketing, salud, noticias, comercio y juegos en línea.",
     image: "",
     tags: ["Next.js", "React", "Tailwind CSS", "SEO"],
     links: [],
     gallery: {
-      title: "Desarrollo Web",
-      subtitle: "Sitios corporativos, landing pages y plataformas que he construido.",
+      title: "Sitios para clientes de Arawana",
+      subtitle: "Sitios corporativos, landing pages y plataformas que desarrollé en Arawana Home Studio para sus clientes.",
       sites: [
         { name: "Arawana Studio", category: "Agencia de marketing digital", href: "https://arawanahomestudio.com", image: "/web/arawana.webp" },
-        { name: "PrometeonDev", category: "Desarrollo de software", href: "https://prometeondev.com", image: "/web/prometeon.webp" },
         { name: "Red Digital Noticias", category: "Portal de noticias", href: "https://reddigitalnoticias.co", image: "/web/reddigital-caqueta.webp" },
         { name: "Global Play Zone", category: "Juego de billar en línea", href: "https://globalplayzone.com", image: "/web/globalplayzone.webp" },
         { name: "Trajes Típicos", category: "Alquiler y venta de trajes · reservas en línea", href: "https://trajestipicos.com.co/", image: "/web/trajestipicos.webp" },
-        { name: "Dalujo", category: "CRM y finanzas para negocios", href: "https://dalujo.com.co/", image: "/web/dalujo-sitio.webp" },
         { name: "Intergool", category: "Juego en línea por turnos", href: "https://intergooladmin.globalplayzone.com/", image: "/web/intergool.webp" },
         { name: "Dr. Gilberto Rincón", category: "Psiquiatría · landing", href: "https://gilberto-landing.vercel.app", image: "/web/gilberto.webp" },
       ],
     },
+  },
+  {
+    title: "Colaboraciones con PrometeOnDev",
+    group: "propios",
+    owner: "PrometeOnDev · emprendimiento de Johan Ramírez y amigos",
+    mine: "Colaboré en el sitio del estudio y en la landing de Dalujo.",
+    description: "Sitios de PrometeOnDev, un estudio de desarrollo de Florencia, y de Dalujo, su CRM con finanzas para negocios.",
+    image: "/web/prometeon.webp",
+    tags: ["Next.js", "React", "Tailwind CSS"],
+    links: [
+      { label: "prometeondev.com", href: "https://prometeondev.com", icon: "external" },
+      { label: "dalujo.com.co", href: "https://dalujo.com.co/", icon: "external" },
+    ],
   },
 ];
 
@@ -285,10 +313,10 @@ export const skills = [
 export const experience = [
   {
     period: "Mar 2025 — Actualidad",
-    title: "Desarrollador Full Stack",
-    place: "Arawana Home Studio · Florencia",
+    title: "Desarrollador Full Stack · contratista",
+    place: "Arawana Home Studio S.A.S. · prestación de servicios · Florencia",
     description:
-      "Desarrollo de Contagracia (ERP, CRM, propiedad horizontal, restaurantes, CMS, automatizaciones e IA) y de Factura Fácil (temas por empresa, tienda virtual, extractos con IA), además de sitios corporativos con React, Next.js, NestJS, Vue, PHP y Laravel. Administración de bases de datos PostgreSQL, MySQL y Supabase, y trabajo junto a los equipos de UX/UI, SEO y marketing.",
+      "Desarrollo de software para los productos del estudio: Contagracia (ERP, CRM, propiedad horizontal, restaurantes, CMS, automatizaciones e IA) y Factura Fácil (temas por empresa, tienda virtual, extractos con IA), además de sitios para sus clientes con React, Next.js, NestJS, Vue, PHP y Laravel. Administración de bases de datos PostgreSQL, MySQL y Supabase, y trabajo junto a los equipos de UX/UI, SEO y marketing.",
   },
   {
     period: "Feb 2024 — Mar 2025",
