@@ -7,10 +7,11 @@ import { useSim, ExecLog, Panel, Badge } from "./ui";
 // Demo propia de un hub de automatizaciones: un asistente con IA propone flujos, se dibujan en un lienzo
 // tipo n8n, se prueban y se activan; lo que no se puede hacer queda como solicitud. Todo es guionizado y ficticio.
 
+// Negocios ficticios de Grupo Nova; cada uno usa un módulo distinto del sistema
 const MODULES = {
-  crm: { label: "CRM", icon: "users" },
-  ph: { label: "Propiedad horizontal", icon: "grid" },
-  restaurant: { label: "Restaurante", icon: "calendar" },
+  crm: { label: "Academia", area: "CRM", biz: "Nova Idiomas", icon: "users" },
+  ph: { label: "Conjunto", area: "PH", biz: "Residencial Nova", icon: "grid" },
+  restaurant: { label: "Café-bar", area: "Restaurante", biz: "Nova Café", icon: "calendar" },
 };
 
 // Tipos de nodo y su color en el lienzo
@@ -26,65 +27,91 @@ const T = (id, label, icon, x, y = 0) => ({ id, kind: "trigger", label, icon, x,
 const A = (id, label, icon, x, y = 0, role) => ({ id, kind: "action", label, icon, x, y, role });
 const C = (id, label, icon, x, y = 0, role) => ({ id, kind: "control", label, icon, x, y, role });
 
-// Ejemplos propios de la demo: tres que se pueden armar y uno que queda como solicitud, por módulo
+// Ejemplos propios de la demo: tres que se pueden armar (uno queda en borrador) y uno que queda como solicitud, por negocio
 const EXAMPLES = {
   crm: [
     {
-      id: "crm-form",
-      prompt: "Cuando llegue un lead desde el formulario web, enviarle un correo de bienvenida y crear una tarea de llamada.",
+      id: "acad-lead",
+      prompt: "Cuando llegue un lead desde un anuncio de Meta o el formulario web, darle la bienvenida por WhatsApp.",
       reply:
-        "Te propongo un flujo que arranca con cada **formulario recibido** y hace dos cosas en paralelo: le envía un **correo de bienvenida** al lead y crea una **tarea de llamada** para el equipo.\n\nRevísalo a la derecha y, si te sirve, crea el flujo. Antes de activarlo, pruébalo.",
+        "Te propongo un flujo con **dos disparadores**: **lead de anuncio de Meta** y **formulario web**. Los dos llegan a un **WhatsApp de bienvenida** con los horarios de la clase de prueba y luego se **asigna un asesor** comercial.\n\nRevísalo a la derecha y, si te sirve, crea el flujo. Antes de activarlo, pruébalo.",
       flow: {
-        name: "Bienvenida a leads del formulario web",
-        description: "Correo de bienvenida y tarea de llamada para cada lead nuevo del sitio web.",
-        does: ["Se dispara con cada formulario recibido.", "Envía un correo de bienvenida al lead.", "Crea una tarea de llamada para el equipo comercial."],
-        nodes: [T("t", "Formulario recibido", "mail", 0), A("a1", "Enviar correo", "mail", 1, -0.6), A("a2", "Crear tarea", "calendar", 1, 0.6)],
-        edges: [["t", "a1"], ["t", "a2"]],
+        name: "Bienvenida por WhatsApp a leads nuevos",
+        description: "Cada lead de Meta o del sitio web recibe un WhatsApp de bienvenida y queda con un asesor asignado.",
+        trigger: "Lead de Meta o formulario",
+        does: ["Se dispara con cada lead de un anuncio de Meta o del formulario web.", "Envía un WhatsApp de bienvenida con los horarios de la clase de prueba.", "Asigna el lead a un asesor comercial."],
+        nodes: [
+          T("t1", "Lead de anuncio Meta", "megaphone", 0, -0.65),
+          T("t2", "Formulario web", "globe", 0, 0.65),
+          A("a1", "WhatsApp de bienvenida", "whatsapp", 1),
+          A("a2", "Asignar asesor", "user", 2),
+        ],
+        edges: [["t1", "a1"], ["t2", "a1"], ["a1", "a2"]],
+        test: {
+          t1: "Lead de prueba: Mateo Herrera · campaña «Inglés para viajar»",
+          a1: "WhatsApp a +57 300 000 0000 con 3 horarios de clase de prueba",
+          a2: "Asesor asignado por turno: Julián Cárdenas",
+        },
       },
     },
     {
-      id: "crm-quote",
-      prompt: "Si un cliente no responde una cotización en 7 días, recordársela por WhatsApp.",
+      id: "acad-trial",
+      prompt: "Recordarle al estudiante su clase de prueba un día antes, por WhatsApp.",
       reply:
-        "Listo: el disparador **«Cotización sin respuesta»** configurado a **7 días** y un **WhatsApp** de recordatorio con el número de la cotización.\n\nSi te sirve, crea el flujo.",
+        "Listo: el disparador **«Clase de prueba · 1 día antes»**, un **filtro** para seguir solo si la clase **sigue agendada** y un **WhatsApp** con la hora, la sede y el nombre del docente.\n\nSi te sirve, crea el flujo.",
       flow: {
-        name: "Recordatorio de cotización a los 7 días",
-        description: "WhatsApp al cliente cuando una cotización lleva una semana sin respuesta.",
-        does: ["Se dispara 7 días después de enviar una cotización sin respuesta.", "Le recuerda la cotización al cliente por WhatsApp."],
-        nodes: [T("t", "Cotización sin respuesta · 7 días", "bolt", 0), A("a1", "Enviar WhatsApp", "whatsapp", 1)],
-        edges: [["t", "a1"]],
+        name: "Recordatorio de clase de prueba",
+        description: "WhatsApp al estudiante 24 horas antes de su clase de prueba.",
+        does: ["Se dispara 24 horas antes de cada clase de prueba.", "Sigue solo si la clase no fue cancelada.", "Le recuerda al estudiante la hora, la sede y el docente."],
+        nodes: [T("t", "Clase de prueba · 1 día antes", "calendar", 0), C("c1", "¿Sigue agendada?", "filter", 1, 0, "FILTRO"), A("a1", "Recordatorio por WhatsApp", "whatsapp", 2)],
+        edges: [["t", "c1"], ["c1", "a1", { label: "Sí", color: "#10B981" }]],
+        test: {
+          t: "Clase de prueba de ejemplo: Sara Quintero · francés A1 · mañana 6:00 p. m.",
+          c1: "Estado de la clase: agendada → sigue",
+          a1: "WhatsApp con hora, sede Norte y docente Andrés Peña",
+        },
       },
     },
     {
-      id: "crm-weekly",
-      prompt: "Cada lunes a las 8 a. m., enviarme por correo el resumen de ventas de la semana.",
+      id: "acad-weekly",
+      prompt: "Cada lunes, enviarle a la coordinación un resumen de las inscripciones de la semana.",
       reply:
-        "Armé un flujo **programado los lunes a las 8:00** que calcula el **resumen de ventas** de la semana y te lo envía por **correo**.\n\nFalta elegir la **plantilla del correo**, así que se guarda como **borrador**.",
+        "Armé un flujo **programado los lunes a las 7:00 a. m.** que cuenta las **inscripciones de la semana por idioma y nivel** y las envía por **correo**.\n\nNo me dijiste a qué correo, así que falta el **destinatario** y se guarda como **borrador**.",
       flow: {
-        name: "Resumen semanal de ventas",
-        description: "Correo con las ventas de la semana, cada lunes a primera hora.",
-        does: ["Corre los lunes a las 8:00 a. m.", "Calcula las ventas de la semana anterior.", "Te envía el resumen por correo."],
-        pending: [{ node: "Enviar correo", field: "Plantilla", fix: "Resumen semanal" }],
-        nodes: [T("t", "Programado · lunes 8:00", "calendar", 0), A("a1", "Resumen de ventas", "filter", 1), A("a2", "Enviar correo", "mail", 2)],
+        name: "Resumen semanal de inscripciones",
+        description: "Correo a la coordinación con las inscripciones de la semana, por idioma y nivel.",
+        does: ["Corre los lunes a las 7:00 a. m.", "Cuenta las inscripciones de la semana anterior por idioma y nivel.", "Envía el resumen por correo."],
+        pending: [{ node: "Enviar correo", field: "Destinatario", fix: "Coordinación académica", cta: "Enviar a Coordinación académica" }],
+        nodes: [T("t", "Programado · lunes 7:00", "calendar", 0), A("a1", "Resumen de inscripciones", "filter", 1), A("a2", "Enviar correo", "mail", 2)],
         edges: [["t", "a1"], ["a1", "a2"]],
+        test: {
+          t: "Ejecución manual de prueba",
+          a1: "Semana de ejemplo: 14 inscripciones (inglés 9 · francés 3 · portugués 2)",
+          a2: "Correo armado con el resumen",
+        },
       },
     },
     {
-      id: "crm-no",
-      prompt: "Cuando se gane una venta, emitir la factura electrónica automáticamente.",
+      id: "acad-no",
+      prompt: "Inscribir automáticamente al estudiante en la plataforma de clases externa.",
       impossible: {
         reply:
-          "Puedo arrancar con **«Venta ganada»**, pero por ahora los flujos no tienen una acción para **emitir facturas**.\n\nLo más cercano es avisarle al equipo de facturación para que la emita.",
-        falta: "Una acción para emitir facturas desde un flujo",
-        alternativa: "Avisar al equipo de facturación cuando se gane la venta",
+          "Puedo arrancar con **«Matrícula pagada»**, pero los flujos todavía **no se conectan con la plataforma de clases externa**, así que no puedo crear el usuario del estudiante allá.\n\nLo más cercano es avisarle a la coordinación para que lo inscriba a mano.",
+        falta: "Conexión con la plataforma de clases externa",
+        alternativa: "Avisar a la coordinación cuando se pague una matrícula",
         resolved: {
-          reply: "¡Ya se puede! Ahora existe la acción **«Emitir factura»**. Te propongo arrancar con **«Venta ganada»** y emitir la factura del cliente.\n\nRevísalo y crea el flujo.",
+          reply: "¡Ya se puede! Ahora existe la acción **«Inscribir en plataforma de clases»**. Te propongo arrancar con **«Matrícula pagada»**, inscribir al estudiante en su curso y enviarle el acceso por **WhatsApp**.\n\nRevísalo y crea el flujo.",
           flow: {
-            name: "Factura automática al ganar una venta",
-            description: "Emite la factura en cuanto una venta pasa a ganada.",
-            does: ["Se dispara cuando una venta pasa a Ganado.", "Emite la factura con los datos del cliente."],
-            nodes: [T("t", "Venta ganada", "bolt", 0), { ...A("a1", "Emitir factura", "grid", 1), isNew: true }],
-            edges: [["t", "a1"]],
+            name: "Inscripción automática en la plataforma de clases",
+            description: "Al pagar la matrícula, el estudiante queda inscrito en su curso y recibe el acceso.",
+            does: ["Se dispara cuando se paga una matrícula.", "Inscribe al estudiante en su curso de la plataforma de clases.", "Le envía el acceso por WhatsApp."],
+            nodes: [T("t", "Matrícula pagada", "bolt", 0), { ...A("a1", "Inscribir en plataforma", "grid", 1), isNew: true }, A("a2", "Enviar acceso", "whatsapp", 2)],
+            edges: [["t", "a1"], ["a1", "a2"]],
+            test: {
+              t: "Matrícula de ejemplo: Tomás Rengifo · inglés B1",
+              a1: "Inscripción simulada en el curso «Inglés B1 · noche»",
+              a2: "WhatsApp con usuario y enlace de acceso",
+            },
           },
         },
       },
@@ -93,39 +120,50 @@ const EXAMPLES = {
   ph: [
     {
       id: "ph-reserva",
-      prompt: "Cuando un residente reserve el salón social, avisarle a portería.",
-      reply: "Te propongo **«Reserva de zona común»** filtrada al **salón social**, con un **aviso a portería** que incluye la fecha y la unidad.\n\nSi te sirve, crea el flujo.",
+      prompt: "Cuando se confirme una reserva de zona común, avisarle a portería.",
+      reply:
+        "Te propongo **«Reserva confirmada»** con dos pasos en paralelo: un **aviso a portería** con la zona, la fecha y la unidad, y un **WhatsApp al residente** con las reglas de uso.\n\nSi te sirve, crea el flujo.",
       flow: {
-        name: "Aviso a portería por reservas del salón",
-        description: "Portería se entera de cada reserva del salón social.",
-        does: ["Se dispara con cada reserva de una zona común.", "Sigue solo si es el salón social.", "Avisa a portería con la fecha y la unidad."],
-        nodes: [T("t", "Reserva de zona común", "calendar", 0), C("c1", "Solo salón social", "filter", 1, 0, "FILTRO"), A("a1", "Avisar a portería", "bell", 2)],
-        edges: [["t", "c1"], ["c1", "a1", { label: "Sí", color: "#10B981" }]],
+        name: "Aviso a portería por reservas confirmadas",
+        description: "Portería se entera de cada reserva confirmada y el residente recibe las reglas de uso.",
+        does: ["Se dispara cuando la administración confirma una reserva.", "Avisa a portería con la zona, la fecha y la unidad.", "Le envía al residente las reglas de uso de la zona."],
+        nodes: [T("t", "Reserva confirmada", "calendar", 0), A("a1", "Avisar a portería", "bell", 1, -0.65), A("a2", "Reglas al residente", "whatsapp", 1, 0.65)],
+        edges: [["t", "a1"], ["t", "a2"]],
+        test: {
+          t: "Reserva de ejemplo: BBQ · sábado 3:00 p. m. · Torre 2 Apto 504",
+          a1: "Aviso en la pantalla de portería",
+          a2: "WhatsApp con horario y aforo de la zona BBQ",
+        },
       },
     },
     {
-      id: "ph-morosos",
-      prompt: "Si un residente acumula dos cuotas vencidas, enviarle su estado de cuenta por correo.",
+      id: "ph-cuota",
+      prompt: "El día 5 de cada mes, recordarles a los residentes con cuota de administración pendiente que paguen.",
       reply:
-        "Usé **«Cuota vencida»**, una **condición** para seguir solo si la unidad tiene **2 o más cuotas vencidas**, y un **correo** con el estado de cuenta.\n\nFalta elegir la **plantilla**, así que queda en **borrador**.",
+        "Usé un disparador **programado el día 5 a las 8:00 a. m.**, una **condición** para seguir solo con las unidades que tienen la **cuota del mes pendiente** y un **WhatsApp** con el valor y el enlace de pago.\n\nFalta elegir la **plantilla del mensaje**, así que queda en **borrador**.",
       flow: {
-        name: "Estado de cuenta a unidades con dos cuotas vencidas",
-        description: "Correo con el estado de cuenta cuando una unidad acumula dos cuotas vencidas.",
-        does: ["Se dispara cuando una cuota se vence.", "Sigue solo si la unidad ya tiene 2 o más vencidas.", "Envía el estado de cuenta al responsable de pagos."],
-        pending: [{ node: "Enviar correo", field: "Plantilla", fix: "Estado de cuenta" }],
-        nodes: [T("t", "Cuota vencida", "calendar", 0), C("c1", "¿2 o más vencidas?", "branch", 1, 0, "CONDICIÓN"), A("a1", "Enviar correo", "mail", 2)],
+        name: "Recordatorio de cuota de administración",
+        description: "WhatsApp el día 5 a las unidades que aún no han pagado la cuota del mes.",
+        does: ["Corre el día 5 de cada mes a las 8:00 a. m.", "Sigue solo con las unidades que tienen la cuota pendiente.", "Les envía el valor y el enlace de pago por WhatsApp."],
+        pending: [{ node: "Enviar WhatsApp", field: "Plantilla", fix: "Recordatorio de cuota", cta: "Elegir plantilla «Recordatorio de cuota»" }],
+        nodes: [T("t", "Programado · día 5, 8:00", "calendar", 0), C("c1", "¿Cuota pendiente?", "branch", 1, 0, "CONDICIÓN"), A("a1", "Enviar WhatsApp", "whatsapp", 2)],
         edges: [["t", "c1"], ["c1", "a1", { label: "Sí", color: "#10B981" }]],
+        test: {
+          t: "Ejecución manual de prueba",
+          c1: "Unidades de ejemplo con cuota pendiente: 23 de 120",
+          a1: "Mensaje armado para Torre 1 Apto 302 (no se envía)",
+        },
       },
     },
     {
       id: "ph-ai",
       prompt: "Cuando entre una PQRS, que la IA la clasifique por tema y la asigne al área encargada.",
       reply:
-        "Armé **«PQRS recibida»**, un **asistente IA** con su modelo que clasifica el tema (mantenimiento, convivencia, cartera…) y una acción que **asigna el responsable** según ese tema.\n\nSi te sirve, crea el flujo.",
+        "Armé **«PQRS recibida»**, un **asistente IA** con su modelo que clasifica el tema (mantenimiento, convivencia, seguridad, cartera…) y una acción que **asigna el responsable** según ese tema.\n\nSi te sirve, crea el flujo.",
       flow: {
         name: "Clasificación de PQRS con IA",
-        description: "La IA clasifica cada PQRS y la asigna al área que corresponde.",
-        does: ["Se dispara con cada PQRS recibida.", "La IA identifica el tema.", "Asigna la PQRS al área encargada."],
+        description: "La IA clasifica cada PQRS del conjunto y la asigna al área que corresponde.",
+        does: ["Se dispara con cada PQRS recibida.", "La IA identifica el tema y la urgencia.", "Asigna la PQRS al área encargada."],
         nodes: [
           T("t", "PQRS recibida", "mail", 0),
           { id: "ai", kind: "ai", label: "Asistente IA", icon: "sparkles", x: 1 },
@@ -133,24 +171,38 @@ const EXAMPLES = {
           A("a1", "Asignar responsable", "user", 2),
         ],
         edges: [["t", "ai"], ["ai", "a1"], ["ai", "cm", { dashed: true }]],
+        test: {
+          t: "PQRS de ejemplo: «Hay una filtración en el techo del gimnasio»",
+          ai: "Tema: mantenimiento · urgencia alta",
+          a1: "Asignada a Mantenimiento (Héctor Salgado)",
+        },
       },
     },
     {
       id: "ph-no",
-      prompt: "Abrir la talanquera del parqueadero cuando llegue un visitante registrado.",
+      prompt: "Abrir la puerta del parqueadero cuando llegue el carro de un residente.",
       impossible: {
         reply:
-          "El registro de visitantes existe, pero el sistema todavía **no se conecta con el control de acceso** del parqueadero, así que no puedo abrir la talanquera.\n\nComo alternativa, puedo avisarle a portería en cuanto llegue el visitante.",
+          "Tengo las placas registradas de cada unidad, pero el sistema todavía **no se conecta con el control de acceso** del parqueadero, así que no puedo abrir la puerta.\n\nComo alternativa, puedo avisarle a portería cuando llegue un vehículo registrado.",
         falta: "Integración con el control de acceso del parqueadero",
-        alternativa: "Avisar a portería cuando llegue un visitante registrado",
+        alternativa: "Avisar a portería cuando llegue un vehículo registrado",
         resolved: {
-          reply: "¡Ya se puede! Ahora existe la acción **«Abrir talanquera»**. Te propongo arrancar con **«Visitante registrado»** y abrir el acceso.\n\nRevísalo y crea el flujo.",
+          reply: "¡Ya se puede! Ahora existe la acción **«Abrir puerta del parqueadero»**. Te propongo arrancar con **«Placa reconocida»**, revisar que esté **registrada** y abrir el acceso.\n\nRevísalo y crea el flujo.",
           flow: {
-            name: "Acceso automático para visitantes registrados",
-            description: "Abre la talanquera cuando llega un visitante que ya estaba registrado.",
-            does: ["Se dispara cuando llega un visitante registrado.", "Abre la talanquera del parqueadero."],
-            nodes: [T("t", "Visitante registrado", "user", 0), { ...A("a1", "Abrir talanquera", "grid", 1), isNew: true }],
-            edges: [["t", "a1"]],
+            name: "Acceso automático al parqueadero",
+            description: "Abre la puerta del parqueadero cuando llega un vehículo registrado de un residente.",
+            does: ["Se dispara cuando la cámara de la entrada reconoce una placa.", "Sigue solo si la placa está registrada.", "Abre la puerta del parqueadero."],
+            nodes: [
+              T("t", "Placa reconocida", "bolt", 0),
+              C("c1", "¿Placa registrada?", "filter", 1, 0, "FILTRO"),
+              { ...A("a1", "Abrir puerta", "grid", 2), isNew: true },
+            ],
+            edges: [["t", "c1"], ["c1", "a1", { label: "Sí", color: "#10B981" }]],
+            test: {
+              t: "Placa de ejemplo: KLM 482",
+              c1: "Registrada en Torre 3 Apto 101 → sigue",
+              a1: "Apertura simulada de la puerta vehicular",
+            },
           },
         },
       },
@@ -158,59 +210,81 @@ const EXAMPLES = {
   ],
   restaurant: [
     {
-      id: "rest-delivery",
-      prompt: "Cuando un pedido a domicilio salga de cocina, avisarle al cliente por WhatsApp.",
-      reply: "Te propongo **«Pedido listo»** filtrado a **domicilios**, con un **WhatsApp** al cliente avisando que su pedido va en camino.\n\nSi te sirve, crea el flujo.",
-      flow: {
-        name: "Aviso de domicilio en camino",
-        description: "WhatsApp al cliente cuando su domicilio sale de cocina.",
-        does: ["Se dispara cuando un pedido queda listo.", "Sigue solo si es a domicilio.", "Avisa al cliente por WhatsApp."],
-        nodes: [T("t", "Pedido listo", "bolt", 0), C("c1", "Solo domicilios", "filter", 1, 0, "FILTRO"), A("a1", "Enviar WhatsApp", "whatsapp", 2)],
-        edges: [["t", "c1"], ["c1", "a1", { label: "Sí", color: "#10B981" }]],
-      },
-    },
-    {
-      id: "rest-agotado",
-      prompt: "Si un plato se agota, ocultarlo del menú público y avisarme.",
-      reply: "Listo: **«Producto agotado»** con dos pasos en paralelo: **ocultarlo del menú público** y **avisarte** con una notificación.\n\nSi te sirve, crea el flujo.",
-      flow: {
-        name: "Ocultar platos agotados del menú",
-        description: "Saca del menú público lo que se agota y te avisa.",
-        does: ["Se dispara cuando un producto se agota.", "Lo oculta del menú público.", "Te envía una notificación."],
-        nodes: [T("t", "Producto agotado", "bolt", 0), A("a1", "Ocultar del menú", "grid", 1, -0.6), A("a2", "Notificarme", "bell", 1, 0.6)],
-        edges: [["t", "a1"], ["t", "a2"]],
-      },
-    },
-    {
-      id: "rest-daily",
-      prompt: "Todas las noches, enviarme por correo las ventas del día.",
+      id: "cafe-reserva",
+      prompt: "Cuando alguien reserve una mesa, confirmarle la reserva por WhatsApp.",
       reply:
-        "Armé un flujo **programado a las 11:00 p. m.** que calcula las **ventas del día** y te las envía por **correo**.\n\nFalta elegir la **plantilla**, así que queda en **borrador**.",
+        "Te propongo **«Reserva de mesa»** con dos pasos en paralelo: un **WhatsApp de confirmación** al cliente con la sede, la hora y el número de personas, y un **aviso al anfitrión** de esa sede.\n\nSi te sirve, crea el flujo.",
       flow: {
-        name: "Cierre diario de ventas",
-        description: "Correo con las ventas del día, cada noche.",
-        does: ["Corre todos los días a las 11:00 p. m.", "Calcula las ventas del día.", "Te las envía por correo."],
-        pending: [{ node: "Enviar correo", field: "Plantilla", fix: "Cierre del día" }],
-        nodes: [T("t", "Programado · 11:00 p. m.", "calendar", 0), A("a1", "Ventas del día", "filter", 1), A("a2", "Enviar correo", "mail", 2)],
-        edges: [["t", "a1"], ["a1", "a2"]],
+        name: "Confirmación de reservas por WhatsApp",
+        description: "El cliente recibe la confirmación por WhatsApp y el anfitrión de la sede se entera.",
+        does: ["Se dispara con cada reserva de mesa.", "Le confirma la reserva al cliente por WhatsApp.", "Avisa al anfitrión de la sede."],
+        nodes: [T("t", "Reserva de mesa", "calendar", 0), A("a1", "Confirmar por WhatsApp", "whatsapp", 1, -0.65), A("a2", "Avisar al anfitrión", "bell", 1, 0.65)],
+        edges: [["t", "a1"], ["t", "a2"]],
+        test: {
+          t: "Reserva de ejemplo: Daniela Mora · 4 personas · viernes 8:00 p. m.",
+          a1: "WhatsApp «Tu mesa en Nova Café Centro está confirmada»",
+          a2: "Aviso al anfitrión de la sede Centro",
+        },
       },
     },
     {
-      id: "rest-no",
-      prompt: "Cuando se acabe un insumo, pedírselo al proveedor por WhatsApp.",
+      id: "cafe-tiempo",
+      prompt: "Avisarme cuando un plato pase su tiempo de preparación en cocina.",
+      reply:
+        "Listo: **«Comanda en preparación»**, una **condición** que compara el tiempo transcurrido con el **tiempo de preparación** de cada plato y, si se pasa, una **alerta** al jefe de cocina y a ti.\n\nSi te sirve, crea el flujo.",
+      flow: {
+        name: "Alerta de platos demorados",
+        description: "Avisa cuando un plato lleva en cocina más de su tiempo de preparación.",
+        does: ["Revisa cada comanda mientras está en preparación.", "Sigue solo si un plato superó su tiempo de preparación.", "Alerta al jefe de cocina y a ti."],
+        nodes: [T("t", "Comanda en preparación", "bolt", 0), C("c1", "¿Pasó su tiempo?", "branch", 1, 0, "CONDICIÓN"), A("a1", "Alertar a cocina", "bell", 2)],
+        edges: [["t", "c1"], ["c1", "a1", { label: "Sí", color: "#10B981" }]],
+        test: {
+          t: "Comanda de ejemplo: mesa 7 · hamburguesa Nova",
+          c1: "18 min en cocina vs. 12 min de preparación → se pasó",
+          a1: "Alerta «Mesa 7: hamburguesa Nova con 6 min de retraso»",
+        },
+      },
+    },
+    {
+      id: "cafe-cierre",
+      prompt: "Todas las noches, enviarme las ventas del día separadas por sede.",
+      reply:
+        "Armé un flujo **programado a las 11:30 p. m.** que suma las **ventas del día por sede** y te las envía por **correo**.\n\nNo me dijiste qué **sedes** incluir, así que queda en **borrador** hasta que las elijas.",
+      flow: {
+        name: "Cierre diario de ventas por sede",
+        description: "Correo con las ventas del día de cada sede, cada noche.",
+        does: ["Corre todos los días a las 11:30 p. m.", "Suma las ventas del día de cada sede.", "Te envía el resumen por correo."],
+        pending: [{ node: "Ventas por sede", field: "Sedes", fix: "Centro y Norte", cta: "Incluir sedes Centro y Norte" }],
+        nodes: [T("t", "Programado · 11:30 p. m.", "calendar", 0), A("a1", "Ventas por sede", "filter", 1), A("a2", "Enviar correo", "mail", 2)],
+        edges: [["t", "a1"], ["a1", "a2"]],
+        test: {
+          t: "Ejecución manual de prueba",
+          a1: "Día de ejemplo: Centro $4.280.000 · Norte $3.150.000",
+          a2: "Correo armado con el cierre del día",
+        },
+      },
+    },
+    {
+      id: "cafe-no",
+      prompt: "Cuando un insumo esté por acabarse, pedírselo al proveedor por su app.",
       impossible: {
         reply:
-          "Puedo detectar cuando un insumo se acaba, pero los flujos todavía **no tienen los datos de contacto de los proveedores**, así que no puedo escribirles.\n\nMientras tanto, puedo avisarte a ti para que hagas el pedido.",
-        falta: "Datos de contacto de los proveedores disponibles en los flujos",
-        alternativa: "Avisarte cuando un insumo se acabe",
+          "Puedo detectar cuando un insumo baja del **mínimo**, pero los flujos todavía **no se conectan con la app de pedidos del proveedor**, así que no puedo hacer el pedido por ti.\n\nMientras tanto, puedo avisarte para que lo pidas tú.",
+        falta: "Conexión con la app de pedidos del proveedor",
+        alternativa: "Avisarte cuando un insumo baje del mínimo",
         resolved: {
-          reply: "¡Ya se puede! Los flujos ahora tienen el **contacto del proveedor** de cada insumo. Te propongo **«Insumo agotado»** y un **WhatsApp** al proveedor con el pedido.\n\nRevísalo y crea el flujo.",
+          reply: "¡Ya se puede! Ahora existe la acción **«Pedido al proveedor»**. Te propongo **«Insumo bajo el mínimo»**, pedir la cantidad sugerida en la **app del proveedor** y avisarte.\n\nRevísalo y crea el flujo.",
           flow: {
             name: "Pedido automático de insumos",
-            description: "WhatsApp al proveedor cuando se acaba un insumo.",
-            does: ["Se dispara cuando un insumo llega a cero.", "Le escribe al proveedor por WhatsApp con el pedido."],
-            nodes: [{ ...T("t", "Insumo agotado", "bolt", 0), isNew: true }, A("a1", "WhatsApp al proveedor", "whatsapp", 1)],
-            edges: [["t", "a1"]],
+            description: "Hace el pedido en la app del proveedor cuando un insumo baja del mínimo.",
+            does: ["Se dispara cuando un insumo baja de su stock mínimo.", "Hace el pedido en la app del proveedor.", "Te avisa con el número del pedido."],
+            nodes: [T("t", "Insumo bajo el mínimo", "bolt", 0), { ...A("a1", "Pedido al proveedor", "send", 1), isNew: true }, A("a2", "Notificarme", "bell", 2)],
+            edges: [["t", "a1"], ["a1", "a2"]],
+            test: {
+              t: "Insumo de ejemplo: café en grano · quedan 2 kg (mínimo 5 kg)",
+              a1: "Pedido simulado de 10 kg",
+              a2: "Aviso con el número del pedido",
+            },
           },
         },
       },
@@ -239,21 +313,27 @@ const initialState = () => ({
   peticiones: [
     {
       id: 1,
-      module: "Tienda",
+      module: "Café-bar",
+      biz: "Nova Café",
       date: "08 oct",
-      email: "admin@demo.co",
-      pedido: "Cuando un cliente pague en la tienda en línea, enviarle un WhatsApp de agradecimiento.",
-      falta: "El pago de la tienda todavía no trae el teléfono del cliente",
-      alternativa: "Un aviso interno cuando se pague el pedido",
-      moduleKey: null,
+      email: "sede.norte@novacafe.demo",
+      pedido: "Cuando un cliente deje una reseña de 2 estrellas o menos, que el gerente de la sede lo llame.",
+      falta: "Las reseñas todavía no llegan al sistema como evento",
+      alternativa: "Un resumen semanal de reseñas para revisarlas a mano",
+      moduleKey: "restaurant",
       resolved: {
-        reply: "¡Ya se puede! El **pago de la tienda** ahora trae el teléfono del cliente. Te propongo un **WhatsApp** de agradecimiento apenas pague.\n\nRevísalo y crea el flujo.",
+        reply: "¡Ya se puede! Ahora existe el disparador **«Reseña recibida»**. Te propongo filtrar las de **2 estrellas o menos** y crear una **tarea de llamada** para el gerente de la sede.\n\nRevísalo y crea el flujo.",
         flow: {
-          name: "Agradecimiento por WhatsApp al pagar en la tienda",
-          description: "WhatsApp de agradecimiento cuando un cliente paga en la tienda en línea.",
-          does: ["Se dispara cuando se paga un pedido de la tienda.", "Le envía un WhatsApp de agradecimiento al cliente."],
-          nodes: [{ ...T("t", "Pago en la tienda", "bolt", 0), isNew: true }, A("a1", "Enviar WhatsApp", "whatsapp", 1)],
-          edges: [["t", "a1"]],
+          name: "Llamada a clientes con reseña baja",
+          description: "El gerente de la sede llama a cada cliente que deja una reseña de 2 estrellas o menos.",
+          does: ["Se dispara con cada reseña recibida.", "Sigue solo si tiene 2 estrellas o menos.", "Crea una tarea de llamada para el gerente de la sede."],
+          nodes: [{ ...T("t", "Reseña recibida", "bolt", 0), isNew: true }, C("c1", "¿2 estrellas o menos?", "filter", 1, 0, "FILTRO"), A("a1", "Tarea al gerente", "user", 2)],
+          edges: [["t", "c1"], ["c1", "a1", { label: "Sí", color: "#10B981" }]],
+          test: {
+            t: "Reseña de ejemplo: 2 estrellas · «El café llegó frío»",
+            c1: "2 estrellas → sigue",
+            a1: "Tarea de llamada para el gerente de la sede Norte",
+          },
         },
       },
       estado: "en_revision",
@@ -272,8 +352,13 @@ export default function AutomationsSimulator() {
   const chatEnd = useRef(null);
   const log = (msg, tone = "info") => update((x) => x.log.push({ msg, tone, id: x.log.length }));
 
+  const chatBox = useRef(null);
+
+  // En escritorio el chat tiene su propio scroll: se baja solo ese, sin mover el resto del modal
   useEffect(() => {
-    chatEnd.current?.scrollIntoView({ behavior: "smooth", block: "end" });
+    const box = chatBox.current;
+    if (box && box.scrollHeight > box.clientHeight && getComputedStyle(box).overflowY === "auto") box.scrollTo({ top: box.scrollHeight, behavior: "smooth" });
+    else if (st.messages.length) chatEnd.current?.scrollIntoView({ behavior: "smooth", block: "nearest" });
   }, [st.messages.length, st.thinking]);
 
   const changeModule = (m) => {
@@ -285,7 +370,7 @@ export default function AutomationsSimulator() {
       x.simStatus = {};
       x.showDraft = false;
     });
-    log(`Módulo del flujo: ${MODULES[m].label} · nueva conversación`);
+    log(`Negocio: ${MODULES[m].biz} (módulo ${MODULES[m].area}) · nueva conversación`);
   };
 
   // Si lo que se pidió ya pasó a Disponible, la IA usa el flujo resuelto
@@ -336,7 +421,7 @@ export default function AutomationsSimulator() {
         id,
         name: f.name,
         module: x.module,
-        trigger: f.nodes[0].label,
+        trigger: f.trigger ?? f.nodes[0].label,
         pending: f.pending ? [...f.pending] : [],
         active: false,
         runs: 0,
@@ -357,10 +442,10 @@ export default function AutomationsSimulator() {
       for (const n of st.proposal.ex.flow.nodes) {
         await wait(700);
         update((x) => (x.simStatus[n.id] = SIM_STATUS[n.kind]));
-        if (n.kind !== "sub") log(`${n.label}: ${SIM_STATUS[n.kind]}`);
+        if (n.kind !== "sub") log(`${n.label}: ${st.proposal.ex.flow.test?.[n.id] ?? SIM_STATUS[n.kind]}`);
       }
-      const pending = currentFlow?.pending.length ?? 0;
-      log(pending ? `Hay ${pending} cosa por configurar` : "Prueba completa sin advertencias", pending ? "warn" : "ok");
+      const pending = currentFlow?.pending ?? [];
+      log(pending.length ? `Falta configurar «${pending[0].field}» en «${pending[0].node}»` : "Prueba completa sin advertencias", pending.length ? "warn" : "ok");
     });
 
   const turnOn = (flowId) => {
@@ -370,8 +455,9 @@ export default function AutomationsSimulator() {
       log("El flujo está incompleto y todavía no se puede activar", "warn");
       return;
     }
-    update((x) => (x.flows.find((y) => y.id === flowId).active = !f.active));
-    log(f.active ? `Se desactivó «${f.name}»` : `Se activó «${f.name}»`, f.active ? "warn" : "ok");
+    const was = f.active; // el estado es mutable: se lee antes de cambiarlo
+    update((x) => (x.flows.find((y) => y.id === flowId).active = !was));
+    log(was ? `Se desactivó «${f.name}»` : `Se activó «${f.name}»`, was ? "warn" : "ok");
   };
 
   const completePending = (flowId) => {
@@ -381,7 +467,7 @@ export default function AutomationsSimulator() {
       x.flows.find((y) => y.id === flowId).pending = [];
       x.showDraft = false;
     });
-    log(`«${p.node}»: se eligió la plantilla «${p.fix}». Ya no es borrador`, "ok");
+    log(`«${p.node}» · ${p.field}: ${p.fix}. Ya no es borrador`, "ok");
   };
 
   const leaveSuggestion = (msgIndex) => {
@@ -394,8 +480,9 @@ export default function AutomationsSimulator() {
         x.peticiones.unshift({
           id: x.peticiones.length + 1,
           module: MODULES[x.module].label,
+          biz: MODULES[x.module].biz,
           date: "13 oct",
-          email: "michael@demo.co",
+          email: "admin@grupo-nova.demo",
           pedido: ex.prompt,
           falta: ex.impossible.falta,
           alternativa: ex.impossible.alternativa,
@@ -427,7 +514,7 @@ export default function AutomationsSimulator() {
         x.userNotices.unshift({
           id: Date.now(),
           title: "Revisamos tu solicitud",
-          body: `Por ahora no vamos a construir: "${p.pedido}". Motivo: ${review.nota || "no aplica por ahora"}.`,
+          body: `Por ahora no vamos a construir: "${p.pedido}". Motivo: ${(review.nota || "no aplica por ahora").replace(/\.$/, "")}.`,
         });
     });
     log(`Solicitud #${p.id} → ${PETICION_STATUS[review.estado][0]}${["disponible", "descartada"].includes(review.estado) ? " · se avisó al usuario" : ""}`, "ok");
@@ -445,7 +532,7 @@ export default function AutomationsSimulator() {
         x.simStatus = {};
         x.showDraft = false;
       }
-      x.prefill = { pedido: p.pedido, resolved: p.resolved, moduleLabel: p.module, id: p.id };
+      x.prefill = { pedido: p.pedido, resolved: p.resolved, moduleLabel: p.biz ?? p.module, id: p.id };
     });
     setView("asistente");
     log(`Se abrió el asistente con el pedido precargado (${p.module})`);
@@ -465,7 +552,7 @@ export default function AutomationsSimulator() {
         {[
           ["asistente", "Crear con IA", "sparkles"],
           ["flujos", `Flujos (${st.flows.length})`, "bolt"],
-          ["peticiones", `Solicitudes · admin (${st.peticiones.filter((p) => p.estado === "pendiente").length})`, "mail"],
+          ["peticiones", `Solicitudes · admin (${st.peticiones.filter((p) => ["pendiente", "en_revision"].includes(p.estado)).length})`, "mail"],
         ].map(([k, label, icon]) => (
           <button
             key={k}
@@ -484,28 +571,33 @@ export default function AutomationsSimulator() {
       </div>
 
       {/* ───── Asistente ───── */}
-      <div className={view === "asistente" ? "min-h-0 flex-1 overflow-y-auto lg:grid lg:grid-cols-[380px_1fr] lg:overflow-hidden" : "hidden"}>
+      <div className={view === "asistente" ? "min-h-0 flex-1 overflow-y-auto lg:grid lg:grid-cols-[380px_1fr] lg:overflow-clip" : "hidden"}>
         <section className="flex flex-col border-line lg:min-h-0 lg:border-r">
           <div data-guide="auto-module" className="shrink-0 space-y-2 border-b border-line p-4">
-            <p className="text-[11px] font-semibold uppercase tracking-widest text-muted">Módulo del flujo</p>
-            <div className="flex flex-wrap gap-1.5">
+            <p className="text-[11px] font-semibold uppercase tracking-widest text-muted">Negocio de Grupo Nova</p>
+            <div className="grid grid-cols-3 gap-1.5">
               {Object.entries(MODULES).map(([k, m]) => (
                 <button
                   key={k}
                   disabled={busy}
                   onClick={() => changeModule(k)}
-                  className={`rounded-full border px-3 py-1 text-xs transition disabled:opacity-50 ${st.module === k ? "border-accent bg-accent/15 text-accent" : "border-line text-muted hover:text-ink"}`}
+                  className={`flex min-w-0 flex-col items-start rounded-xl border px-2.5 py-1.5 text-left transition disabled:opacity-50 ${st.module === k ? "border-accent bg-accent/15 text-accent" : "border-line text-muted hover:text-ink"}`}
                 >
-                  {m.label}
+                  <span className="flex max-w-full items-center gap-1 text-xs font-semibold">
+                    <Icon name={m.icon} className="h-3.5 w-3.5 shrink-0" />
+                    <span className="truncate">{m.label}</span>
+                  </span>
+                  <span className="block max-w-full truncate text-[10px] opacity-80">{m.biz}</span>
+                  <span className="mt-0.5 block max-w-full truncate text-[9px] font-semibold uppercase tracking-wide opacity-60">{m.area}</span>
                 </button>
               ))}
             </div>
           </div>
 
-          <div className="space-y-3 p-4 lg:min-h-0 lg:flex-1 lg:overflow-y-auto">
+          <div ref={chatBox} className="space-y-3 p-4 lg:min-h-0 lg:flex-1 lg:overflow-y-auto">
             {st.messages.length === 0 && (
               <div className="pt-2 text-center">
-                <p className="font-display font-bold">¿Qué quieres automatizar en {MODULES[st.module].label}?</p>
+                <p className="font-display font-bold">¿Qué quieres automatizar en {MODULES[st.module].biz}?</p>
                 <p className="mt-1 text-xs text-muted">Cuéntame qué debe pasar y cuándo. Elige un ejemplo:</p>
               </div>
             )}
@@ -614,7 +706,7 @@ export default function AutomationsSimulator() {
                     <Badge color={badge[1]}>{badge[0]}</Badge>
                   </div>
                   <p className="mt-1 text-xs text-muted">
-                    {MODULES[f.module].label} · {f.trigger} · {f.runs} ejecuciones
+                    {MODULES[f.module].biz} · {f.trigger} · {f.runs} ejecuciones
                   </p>
                   {f.pending.length > 0 && (
                     <p className="mt-2 text-[11px] text-[#F59E0B]">
@@ -624,7 +716,7 @@ export default function AutomationsSimulator() {
                   <div className="mt-3 flex gap-2">
                     {f.pending.length > 0 ? (
                       <button onClick={() => completePending(f.id)} className="rounded-full border border-line px-3 py-1 text-[11px] transition hover:border-accent hover:text-accent">
-                        Elegir plantilla «{f.pending[0].fix}»
+                        {f.pending[0].cta}
                       </button>
                     ) : (
                       <button onClick={() => turnOn(f.id)} className={`rounded-full px-3 py-1 text-[11px] font-semibold transition ${f.active ? "border border-line text-muted" : "bg-accent text-bg"}`}>
@@ -655,7 +747,7 @@ export default function AutomationsSimulator() {
                   <Badge color={color}>{label}</Badge>
                   <Badge color="#6366F1">{p.module}</Badge>
                   <span className="text-muted">
-                    {p.date} · Empresa de ejemplo · {p.email}
+                    {p.date} · {p.biz} · {p.email}
                   </span>
                 </div>
                 <p className="mt-2 text-sm">{p.pedido}</p>
@@ -777,7 +869,7 @@ function ProposalCard({ proposal, flow, busy, showDraft, onAccept, onSimulate, o
             · «{pending[0].node}»: falta completar «{pending[0].field}».
           </p>
           <button onClick={onComplete} className="mt-1 rounded-full bg-[#F59E0B] px-3 py-1 text-[11px] font-semibold text-bg">
-            Elegir plantilla «{pending[0].fix}»
+            {pending[0].cta}
           </button>
         </div>
       )}

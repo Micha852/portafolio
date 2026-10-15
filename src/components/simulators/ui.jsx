@@ -62,12 +62,13 @@ export function MobileTabs({ tabs, tab, setTab, pulse }) {
 
 // Registro de ejecución con desplazamiento automático
 export function ExecLog({ log, empty = "Esperando la primera acción…", className = "h-36" }) {
-  const end = useRef(null);
+  const box = useRef(null);
+  // Desplaza solo el registro (no la página): scrollIntoView arrastraba el modal en celular
   useEffect(() => {
-    end.current?.scrollIntoView({ behavior: "smooth", block: "end" });
+    box.current?.scrollTo({ top: box.current.scrollHeight, behavior: "smooth" });
   }, [log.length]);
   return (
-    <div className={`shrink-0 overflow-y-auto border-t border-line bg-bg/60 px-5 py-3 font-mono text-xs ${className}`}>
+    <div ref={box} className={`shrink-0 overflow-y-auto border-t border-line bg-bg/60 px-5 py-3 font-mono text-xs ${className}`}>
       <p className="mb-1 font-sans text-[11px] font-semibold uppercase tracking-widest text-muted">Registro de ejecución</p>
       {log.length === 0 && <p className="text-muted">{empty}</p>}
       {log.map((l) => (
@@ -75,7 +76,6 @@ export function ExecLog({ log, empty = "Esperando la primera acción…", classN
           › {l.msg}
         </p>
       ))}
-      <div ref={end} />
     </div>
   );
 }

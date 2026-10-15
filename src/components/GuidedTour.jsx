@@ -8,11 +8,11 @@ import { contagracia } from "@/data/profile";
 
 // Qué se dice de cada simulador en el recorrido
 const TOUR_TEXT = {
-  ph: "Factura una copropiedad por coeficiente, mueve la fecha para ver mora y pronto pago, y maneja portería, asamblea y PQRS.",
-  restaurant: "Atiende una mesa: arma platos con adiciones, haz de cocina, cobra y mira cómo se mueven el inventario y la contabilidad.",
-  crm: "Escríbele al equipo como cliente y mira el flujo de WhatsApp, la asistente IA y la oportunidad avanzando por el embudo.",
+  ph: "Crea una copropiedad con torres y unidades, y síguela por reservas, recordatorios de cobro, documentos, asamblea y PQRS.",
+  restaurant: "Reserva y mira cómo se asignan las mesas, atiende como mesero, mueve la cocina, diseña el menú público y cierra el día.",
+  crm: "Haz llegar un lead por formulario o anuncio de Meta, mira cómo se asigna, cómo lo califica la IA por WhatsApp y llévalo hasta la matrícula.",
   automations: "Pídele un flujo a la IA, míralo dibujarse en el lienzo, pruébalo y actívalo. Lo que no se puede hacer queda como solicitud.",
-  ai: "Configura proveedores con respaldo, conversa con el asistente que detecta el tema y procesa extractos bancarios.",
+  ai: "Elige modelos con respaldo, simula una caída, pregúntale al asistente y lee listas de precios en PDF con plantillas.",
 };
 
 // Invitación al recorrido por los simuladores (driver.js).

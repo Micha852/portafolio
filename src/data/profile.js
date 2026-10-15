@@ -87,54 +87,54 @@ export const contagracia = {
     },
     {
       title: "Propiedad horizontal",
-      mine: "Cuotas con mora y pronto pago, documentos, portería y PQRS.",
-      description: "Administración de copropiedades bajo la Ley 675: cartera, cuotas, portería y comunicación con residentes.",
+      mine: "La mayor parte del módulo: estructura de la copropiedad, unidades y copropietarios, zonas comunes, documentos, asambleas, PQRS, comunicados y recordatorios de cobro.",
+      description: "Administración de copropiedades: estructura, residentes, zonas comunes, asambleas y comunicación con la administración.",
       highlights: [
-        "Facturación de cuotas con mora y pronto pago configurables",
-        "Documentos por torre y apartamento",
-        "Minuta de portería con trazabilidad",
+        "Estructura de copropiedades: torres, pisos, tipos de unidad y coeficientes",
+        "Asambleas con quórum por coeficiente y voto solo de propietarios",
+        "Zonas comunes con reservas, documentos por torre y unidad, y PQRS con conversación",
       ],
       links: [{ label: "contagracia.com/ph", href: "https://contagracia.com/ph", icon: "external" }],
       simulator: {
         id: "ph",
-        title: "Simulador de propiedad horizontal",
+        title: "Simulador de software de propiedad horizontal",
         subtitle:
-          "Cinco escenarios del día a día de una copropiedad: facturación por coeficiente, mora y pronto pago, portería, asamblea con quórum y PQRS con flujos automáticos.",
+          "Crea una copropiedad ficticia con torres, unidades y coeficientes, y síguela por reservas, cobros, documentos, asamblea y PQRS.",
       },
     },
     {
       title: "Restaurantes",
-      mine: "Comandas, menú público, domicilios y reporte de ventas.",
-      description: "Operación completa de restaurante: comandas desde la mesa, cocina sincronizada, domicilios y cierre de caja.",
+      mine: "El flujo inicial del módulo, sedes, reservas, sesiones de mesa, cocina con tiempos, menú público y reportes de ventas y propinas.",
+      description: "Operación de restaurantes con varias sedes: reservas, atención de mesas, cocina sincronizada y menú público.",
       highlights: [
-        "Comandas para cocina en carta y POS, imprimibles o en PDF",
-        "Menú público configurable visualmente por cada negocio",
-        "Domicilios y reporte de ventas con permisos",
+        "Reservas con disponibilidad en tiempo real y asignación automática que une mesas para grupos grandes",
+        "Sesiones de mesa con mesero responsable y cocina en tablero con cronómetro por plato",
+        "Menú público por sede con editor visual, y reportes de ventas y propinas por persona",
       ],
       links: [{ label: "contagracia.com/restaurant", href: "https://contagracia.com/restaurant", icon: "external" }],
       simulator: {
         id: "restaurant",
-        title: "Simulador de restaurante y POS",
+        title: "Simulador de café-bar con sedes y reservas",
         subtitle:
-          "Atiende una mesa de punta a punta (platos con variantes, adiciones y notas, cocina y cobro) y decide qué muestra el menú público de cada sede.",
+          "Reserva con asignación automática de mesas, atiende la mesa como su mesero, mueve la cocina, diseña el menú público y cierra el día por sede.",
       },
     },
     {
       title: "CRM",
-      mine: "Desarrollador principal del módulo.",
+      mine: "Desarrollador principal del módulo: leads, oportunidades, integración con Meta, asignación al equipo, cotizaciones, actividades, salud comercial y los flujos de WhatsApp con IA.",
       description: "Gestión comercial con embudo de oportunidades, fichas de contacto y campañas conectadas a Meta y WhatsApp.",
       highlights: [
-        "Conversaciones de WhatsApp dentro del CRM",
-        "Sincronización de Lead Forms y campañas de Meta Ads",
-        "Importador de contactos por pasos y health score de clientes",
+        "Leads desde formularios públicos y Meta Lead Ads, con deduplicación y reparto en rotación al equipo",
+        "Embudo con actividades, recordatorios y cotización que convierte al contacto en cliente",
+        "Salud comercial con señales, y flujos de WhatsApp con IA que pasan la conversación al asesor",
       ],
       links: [],
       // Simulador interactivo (src/components/simulators)
       simulator: {
         id: "crm",
-        title: "Simulador del CRM",
+        title: "Simulador de CRM comercial",
         subtitle:
-          "Haz de cliente: escribe por WhatsApp, mira cómo un flujo con asistente IA atiende el lead y cómo avanza la oportunidad hasta cerrarse.",
+          "Sigue un lead de una academia de idiomas desde el formulario o el anuncio hasta la matrícula, con IA que lo califica y un asesor que cierra.",
       },
     },
     {
@@ -161,16 +161,16 @@ export const contagracia = {
       description: "Capa de IA con cuatro proveedores intercambiables —OpenAI, Anthropic, Gemini y DeepSeek— usada en varios frentes.",
       highlights: [
         "Asistente que genera flujos de automatización a partir de lenguaje natural",
-        "Lectura de extractos bancarios en PDF con IA",
+        "Lectura de PDFs con plantillas que la IA crea una sola vez, con OCR y archivos con contraseña",
         "Chatbot por módulo con exportación de respuestas a PDF y Excel",
       ],
       tags: ["OpenAI", "Anthropic", "Gemini", "DeepSeek"],
       links: [],
       simulator: {
         id: "ai",
-        title: "Simulador de la capa de IA",
+        title: "Simulador de una capa de IA multiproveedor",
         subtitle:
-          "Configura proveedores de IA con respaldo, conversa con un asistente que detecta el tema de cada pregunta y procesa extractos bancarios hasta conciliarlos.",
+          "Modelos con respaldo automático, un asistente que enruta cada pregunta y un lector de PDFs que aprende el formato de cada proveedor una sola vez.",
       },
     },
     {
