@@ -8,8 +8,8 @@ import { profile } from "@/data/profile";
 const navItems = [
   { id: "sobre-mi", label: "Sobre mí" },
   { id: "proyectos", label: "Proyectos" },
-  { id: "habilidades", label: "Habilidades" },
   { id: "experiencia", label: "Experiencia" },
+  { id: "habilidades", label: "Habilidades" },
   { id: "contacto", label: "Contacto" },
 ];
 

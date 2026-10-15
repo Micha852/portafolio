@@ -326,6 +326,7 @@ export const skills = [
 
 export const experience = [
   {
+    kind: "work",
     period: "Mar 2025 — Actualidad",
     title: "Desarrollador Full Stack · contratista",
     place: "Arawana Home Studio S.A.S. · prestación de servicios · Florencia",
@@ -333,6 +334,7 @@ export const experience = [
       "Desarrollo de software para los productos del estudio: Contagracia (ERP, CRM, propiedad horizontal, restaurantes, CMS, automatizaciones e IA) y Factura Fácil (temas por empresa, tienda virtual, extractos con IA), además de sitios para sus clientes con React, Next.js, NestJS, Vue, PHP y Laravel. Administración de bases de datos PostgreSQL, MySQL y Supabase, y trabajo junto a los equipos de UX/UI, SEO y marketing.",
   },
   {
+    kind: "work",
     period: "Feb 2024 — Mar 2025",
     title: "Analista Funcional / Desarrollador UX",
     place: "Fundación Música, Danza y Teatro del Caquetá (FUNMUDATE)",
@@ -340,12 +342,14 @@ export const experience = [
       "Levantamiento y documentación de requerimientos, diseño de prototipos y flujos de navegación, pruebas de usabilidad y enlace entre usuarios, directivos y el equipo de desarrollo. Mejora continua de plataformas y sitios institucionales, soporte funcional y capacitación a usuarios finales. Desempeño certificado como sobresaliente.",
   },
   {
+    kind: "study",
     period: "Jul 2019 — Dic 2025",
     title: "Ingeniería de Sistemas",
     place: "Universidad de la Amazonia",
     description: "Formación profesional como Ingeniero de Sistemas.",
   },
   {
+    kind: "study",
     period: "Feb 2017 — Dic 2018",
     title: "Técnico en Sistemas",
     place: "Servicio Nacional de Aprendizaje (SENA)",

@@ -48,7 +48,7 @@ export default function Skills() {
   return (
     <section id="habilidades" className="py-24">
       <div className="mx-auto max-w-6xl px-6">
-        <SectionHeading number="03" title="Habilidades" subtitle="Las herramientas con las que trabajo día a día." />
+        <SectionHeading number="04" title="Habilidades" subtitle="Las herramientas con las que trabajo día a día." />
 
         <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
           {skills.map((group, i) => (
