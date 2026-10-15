@@ -242,6 +242,13 @@ export const projects = [
     mine: "Desarrollo de los sitios.",
     description:
       "Sitios corporativos, landing pages y plataformas para clientes del estudio: marketing, salud, noticias, comercio y juegos en línea.",
+    highlights: [
+      "Sitio de la agencia Arawana Studio y portal de noticias Red Digital",
+      "Juegos en línea: billar en Global Play Zone y partidas por turnos en Intergool",
+      "Catálogo con reservas en línea para Trajes Típicos",
+      "Landing para el consultorio de psiquiatría del Dr. Gilberto Rincón",
+      "Diseño responsive, rendimiento y SEO técnico en todos los sitios",
+    ],
     image: "",
     tags: ["Next.js", "React", "Tailwind CSS", "SEO"],
     links: [],
