@@ -55,7 +55,7 @@ export default function Contact() {
               </span>
             </a>
             <a
-              href={`https://wa.me/${contact.whatsapp}`}
+              href={`https://wa.me/${contact.whatsapp}?text=${encodeURIComponent(contact.whatsappText)}`}
               target="_blank"
               rel="noopener noreferrer"
               className="flex items-center gap-4 rounded-2xl border border-line bg-surface p-5 transition hover:border-accent"

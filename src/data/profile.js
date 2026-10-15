@@ -56,6 +56,7 @@ export const profile = {
 export const contact = {
   email: "may13xd@gmail.com",
   whatsapp: "573122453755", // solo números, con código de país
+  whatsappText: "Hola Michael, vi tu portafolio y me gustaría hablar contigo.", // mensaje que queda escrito al abrir el chat
   socials: [
     { name: "GitHub", href: "https://github.com/Micha852", icon: "github" },
     { name: "LinkedIn", href: "https://www.linkedin.com/in/mamg0852/", icon: "linkedin" },
