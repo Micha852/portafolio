@@ -188,7 +188,7 @@ export const contagracia = {
       // Sitios reales de clientes hechos con el CMS (se abren en un modal)
       gallery: {
         title: "Sitios creados con el CMS de Contagracia",
-        subtitle: "Sitios de negocios que usan Contagracia, armados con su CMS. Los muestro como ejemplo de lo que permite construir el CMS en el que trabajé.",
+        subtitle: "Negocios que usan Contagracia y armaron su sitio con su CMS.",
         sites: [
           { name: "NovaTech", category: "Tecnología y accesorios", href: "https://novatech.contagracia.com/", image: "/showcase/novatech.webp" },
           { name: "CS Supplements", category: "Suplementos naturales", href: "https://cssupplements.contagracia.com/", image: "/showcase/cssupplements.webp" },
@@ -252,7 +252,7 @@ export const projects = [
     links: [],
     gallery: {
       title: "Sitios para clientes de Arawana",
-      subtitle: "Sitios corporativos, landing pages y plataformas que desarrollé en Arawana Home Studio para sus clientes.",
+      subtitle: "Sitios que desarrollé en Arawana Home Studio para sus clientes.",
       sites: [
         { name: "Arawana Studio", category: "Agencia de marketing digital", href: "https://arawanahomestudio.com", image: "/web/arawana.webp" },
         { name: "Red Digital Noticias", category: "Portal de noticias", href: "https://reddigitalnoticias.co", image: "/web/reddigital-caqueta.webp" },

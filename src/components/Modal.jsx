@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { createPortal } from "react-dom";
 import { Icon } from "./Icons";
 
@@ -12,6 +12,8 @@ const sizes = {
 // Modal de tamaño fijo: encabezado arriba y el cuerpo maneja su propio scroll.
 // Se monta en <body>: dentro de una tarjeta, su transform encerraría al position: fixed.
 export default function Modal({ open, onClose, title, subtitle, size = "md", bodyClassName = "overflow-y-auto p-6", children }) {
+  // En celular el subtítulo se corta a dos líneas; al tocarlo se ve completo
+  const [fullSubtitle, setFullSubtitle] = useState(false);
   useEffect(() => {
     if (!open) return;
     // Si hay una guía de driver.js activa, Esc la cierra a ella y no al modal
@@ -41,7 +43,14 @@ export default function Modal({ open, onClose, title, subtitle, size = "md", bod
         <div className="flex shrink-0 items-start gap-4 border-b border-line px-6 py-5">
           <div className="min-w-0">
             <h3 className="font-display text-xl font-bold sm:text-2xl">{title}</h3>
-            {subtitle && <p className="mt-1 line-clamp-2 text-sm text-muted sm:line-clamp-none">{subtitle}</p>}
+            {subtitle && (
+              <p
+                onClick={() => setFullSubtitle((v) => !v)}
+                className={`mt-1 text-sm text-muted sm:line-clamp-none ${fullSubtitle ? "" : "line-clamp-2 cursor-pointer sm:cursor-auto"}`}
+              >
+                {subtitle}
+              </p>
+            )}
           </div>
           <button
             onClick={onClose}
