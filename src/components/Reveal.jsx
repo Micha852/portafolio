@@ -3,7 +3,7 @@
 import { useEffect, useRef } from "react";
 
 // Hace aparecer su contenido suavemente cuando entra en pantalla
-export default function Reveal({ children, delay = 0, className = "", as: Tag = "div" }) {
+export default function Reveal({ children, delay = 0, className = "", as: Tag = "div", ...rest }) {
   const ref = useRef(null);
 
   useEffect(() => {
@@ -22,7 +22,7 @@ export default function Reveal({ children, delay = 0, className = "", as: Tag = 
   }, []);
 
   return (
-    <Tag ref={ref} className={`reveal ${className}`} style={{ transitionDelay: `${delay}ms` }}>
+    <Tag ref={ref} {...rest} className={`reveal ${className}`} style={{ transitionDelay: `${delay}ms` }}>
       {children}
     </Tag>
   );

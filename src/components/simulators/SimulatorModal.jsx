@@ -31,6 +31,7 @@ export default function SimulatorModal({ simulator }) {
     <>
       <button
         data-tour={`sim-${simulator.id}`}
+        data-card-action="1"
         onClick={() => {
           setOpen(true);
           // Avisa al recorrido guiado para que se pause mientras el simulador está abierto

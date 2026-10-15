@@ -48,6 +48,7 @@ function ThumbsTrigger({ gallery, onOpen }) {
   return (
     <button
       onClick={onOpen}
+      data-card-action="2"
       className="group/thumbs mt-6 w-full rounded-2xl border border-accent/40 bg-accent/5 p-4 text-left transition hover:border-accent hover:bg-accent/10"
     >
       <div className="flex">
@@ -110,6 +111,7 @@ export default function GalleryModal({ gallery, variant = "button" }) {
       {variant === "button" && (
         <button
           onClick={() => setOpen(true)}
+          data-card-action="2"
           className="mt-6 inline-flex items-center gap-2 self-start rounded-full bg-accent px-5 py-2.5 text-sm font-semibold text-bg shadow-lg shadow-accent/20 transition hover:-translate-y-0.5 hover:brightness-110"
         >
           <Icon name="grid" className="w-4 h-4" />

@@ -1,6 +1,7 @@
 import Image from "next/image";
 import SectionHeading from "./SectionHeading";
 import Reveal from "./Reveal";
+import ClickableCard from "./ClickableCard";
 import { Icon } from "./Icons";
 import GalleryModal from "./GalleryModal";
 import SimulatorModal from "./simulators/SimulatorModal";
@@ -37,9 +38,10 @@ function Links({ items = [] }) {
   if (items.length === 0) return null;
   return (
     <div className="mt-6 flex flex-wrap gap-x-5 gap-y-2 text-sm font-semibold">
-      {items.map((link) => (
+      {items.map((link, i) => (
         <a
           key={link.href}
+          data-card-action={i === 0 ? "3" : undefined}
           href={link.href}
           target="_blank"
           rel="noopener noreferrer"
@@ -85,7 +87,7 @@ function ProjectCard({ project, index }) {
   const { title, description, highlights, image, imageMobile, tags, links, featured, gallery, owner, mine } = project;
 
   return (
-    <Reveal delay={(index % 3) * 120} className={`${cardClass} ${featured ? "md:col-span-2 md:flex-row" : ""}`}>
+    <ClickableCard delay={(index % 3) * 120} className={`${cardClass} ${featured ? "md:col-span-2 md:flex-row" : ""}`}>
       <div className={`relative overflow-hidden bg-bg ${imageMobile ? "h-80" : "aspect-video"} ${featured ? "md:aspect-auto md:h-auto md:min-h-[440px] md:w-2/5 md:shrink-0" : ""}`}>
         {imageMobile ? (
           // Captura de celular dentro de un marco de teléfono, sobre un degradado
@@ -123,13 +125,13 @@ function ProjectCard({ project, index }) {
         <Links items={links} />
         {gallery && <GalleryModal gallery={gallery} />}
       </div>
-    </Reveal>
+    </ClickableCard>
   );
 }
 
 function ModuleCard({ module, index }) {
   return (
-    <Reveal delay={(index % 3) * 100} className={`${cardClass} p-6`}>
+    <ClickableCard delay={(index % 3) * 100} className={`${cardClass} p-6`}>
       <p className="font-display text-sm font-semibold text-warm">{String(index + 1).padStart(2, "0")}</p>
       <h4 className="font-display mt-1 text-xl font-bold">{module.title}</h4>
       <p className="mt-2 text-sm text-muted leading-relaxed">{module.description}</p>
@@ -140,14 +142,14 @@ function ModuleCard({ module, index }) {
       <Links items={module.links} />
       {module.gallery && <GalleryModal gallery={module.gallery} variant="thumbs" />}
       {module.simulator && <SimulatorModal simulator={module.simulator} />}
-    </Reveal>
+    </ClickableCard>
   );
 }
 
 function ContagraciaShowcase() {
   return (
     <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-      <Reveal className="relative overflow-hidden rounded-3xl border border-accent/40 bg-surface p-8 md:col-span-2">
+      <ClickableCard className="relative overflow-hidden rounded-3xl border border-accent/40 bg-surface p-8 transition duration-300 hover:border-accent md:col-span-2">
         <div className="absolute -right-20 -top-20 h-64 w-64 rounded-full bg-accent/15 blur-3xl" aria-hidden="true" />
         <p className="text-xs font-semibold uppercase tracking-widest text-warm">Producto de {contagracia.owner}</p>
         <h3 className="font-display mt-2 text-3xl sm:text-4xl font-bold">{contagracia.title}</h3>
@@ -155,7 +157,7 @@ function ContagraciaShowcase() {
         <p className="mt-4 max-w-2xl text-muted leading-relaxed">{contagracia.description}</p>
         <Tags items={contagracia.tags} />
         <Links items={contagracia.links} />
-      </Reveal>
+      </ClickableCard>
 
       {contagracia.modules.map((m, i) => (
         <ModuleCard key={m.title} module={m} index={i} />
