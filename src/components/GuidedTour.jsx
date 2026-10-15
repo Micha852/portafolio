@@ -139,7 +139,7 @@ export default function GuidedTour() {
         </span>
         <div className="min-w-0">
           <p className="text-sm font-semibold">¿Quieres probar lo que he construido?</p>
-          <p className="mt-1 text-xs text-muted">Te muestro {contagracia.modules.filter((m) => m.simulator).length} simuladores interactivos de funcionalidades que programé en mi experiencia.</p>
+          <p className="mt-1 text-xs text-muted">Te muestro {contagracia.modules.filter((m) => m.simulator).length} demos interactivas inspiradas en lo que he construido.</p>
         </div>
         <button onClick={dismiss} aria-label="Cerrar" className="-mr-2 -mt-2 grid h-8 w-8 shrink-0 place-items-center rounded-full border border-line bg-bg/70 text-ink transition hover:border-accent hover:text-accent">
           <Icon name="close" className="h-4 w-4" strokeWidth={2.5} />
