@@ -98,8 +98,8 @@ export default function SimulatorGuide({ id }) {
           <p className="text-sm font-semibold">¿Te guío en el simulador?</p>
           <p className="mt-0.5 text-xs text-muted">Te muestro por dónde empezar y qué mirar en cada parte.</p>
         </div>
-        <button onClick={() => setMode("pill")} aria-label="Cerrar" className="-mr-1 -mt-1 shrink-0 text-muted transition hover:text-ink">
-          <Icon name="close" className="h-4 w-4" />
+        <button onClick={() => setMode("pill")} aria-label="Cerrar" className="-mr-2 -mt-2 grid h-8 w-8 shrink-0 place-items-center rounded-full border border-line bg-bg/70 text-ink transition hover:border-accent hover:text-accent">
+          <Icon name="close" className="h-4 w-4" strokeWidth={2.5} />
         </button>
       </div>
       <div className="mt-3 flex gap-2">

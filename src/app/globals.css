@@ -116,6 +116,7 @@ body {
 .tour-popover .driver-popover-title {
   font-family: var(--font-display);
   font-size: 1.05rem;
+  padding-right: 32px;
 }
 .tour-popover .driver-popover-description,
 .tour-popover .driver-popover-progress-text {
@@ -148,8 +149,27 @@ body {
 .tour-popover .driver-popover-footer button {
   white-space: nowrap;
 }
+/* X de cerrar: círculo con borde para que se vea bien, también en celular */
 .tour-popover .driver-popover-close-btn {
-  color: rgb(var(--muted));
+  top: 10px;
+  right: 10px;
+  width: 30px;
+  height: 30px;
+  display: grid;
+  place-items: center;
+  border: 1px solid rgb(var(--line));
+  border-radius: 9999px;
+  background: rgb(var(--bg) / 0.7);
+  color: rgb(var(--ink));
+  font-size: 20px;
+  font-weight: 500;
+  line-height: 1;
+  transition: color 0.15s, border-color 0.15s;
+}
+.tour-popover .driver-popover-close-btn:hover,
+.tour-popover .driver-popover-close-btn:focus {
+  color: rgb(var(--accent));
+  border-color: rgb(var(--accent));
 }
 .tour-popover .driver-popover-arrow-side-top.driver-popover-arrow {
   border-top-color: rgb(var(--surface));
