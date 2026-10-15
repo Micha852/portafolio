@@ -624,7 +624,7 @@ export default function RestaurantSimulator() {
             </p>
           )}
           <div className="min-h-0 flex-1 overflow-y-auto p-4">
-            {showPlanMobile && <div className="mb-4 rounded-2xl border border-line p-3 lg:hidden">{plan}</div>}
+            {showPlanMobile && <div data-guide="rest-plano" className="mb-4 rounded-2xl border border-line p-3 lg:hidden">{plan}</div>}
             {st.step === "sedes" && <SedeStage ctx={ctx} onEdit={editSede} onNext={() => goStep("reservas")} />}
             {st.step === "reservas" && <ReservasStage ctx={ctx} plan={plan} setForm={setForm} onConfirm={confirmBooking} onNext={() => goStep("mesa")} />}
             {st.step === "mesa" && (
@@ -1017,7 +1017,7 @@ function ReservasStage({ ctx, plan, setForm, onConfirm, onNext }) {
         </div>
       </div>
 
-      <div className="rounded-2xl border border-line p-3 lg:hidden">{plan}</div>
+      <div data-guide="rest-plano" className="rounded-2xl border border-line p-3 lg:hidden">{plan}</div>
 
       {!booked && info?.pick && (
         <div className="animate-pop rounded-2xl border border-dashed border-accent/60 bg-accent/5 p-3">

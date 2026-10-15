@@ -5,27 +5,27 @@ import { driver } from "driver.js";
 import "driver.js/dist/driver.css";
 import { Icon } from "../Icons";
 
-// Pasos de la guía de cada simulador: [data-guide, título, descripción]
+// Pasos de la guía de cada simulador: [data-guide, título, descripción, pestaña móvil donde vive la zona]
 const GUIDES = {
   crm: [
-    ["crm-source", "Elige por dónde llega el lead", "Llena el formulario web de la academia o escoge un anuncio de Facebook o Instagram. Marca la casilla si quieres ver cómo se evita un contacto duplicado."],
-    ["crm-views", "Tres vistas del proceso", "Entrada muestra lo que hace el CRM al recibir el lead, Automatización el flujo de WhatsApp con IA y Embudo cómo avanza la oportunidad."],
-    ["crm-process", "Mira qué pasa por dentro", "Los pasos se encienden mientras corren y el registro cuenta cada cosa: webhook, deduplicación, rotación, avisos y cambios de etapa."],
-    ["crm-actions", "Juegas los dos papeles", "En el chat respondes como el lead; cuando la IA pasa la conversación, tomas las decisiones del asesor: agendar la clase, enviar la propuesta y hacer seguimiento."],
-    ["crm-card", "La ficha del contacto", "Origen, campaña, responsable, salud comercial, línea de tiempo y notificaciones del equipo se actualizan con cada acción."],
+    ["crm-source", "Elige por dónde llega el lead", "Llena el formulario web de la academia o escoge un anuncio de Facebook o Instagram. Marca la casilla si quieres ver cómo se evita un contacto duplicado.", "Acción"],
+    ["crm-views", "Tres vistas del proceso", "Entrada muestra lo que hace el CRM al recibir el lead, Automatización el flujo de WhatsApp con IA y Embudo cómo avanza la oportunidad.", "Proceso"],
+    ["crm-process", "Mira qué pasa por dentro", "Los pasos se encienden mientras corren y el registro cuenta cada cosa: webhook, deduplicación, rotación, avisos y cambios de etapa.", "Proceso"],
+    ["crm-actions", "Juegas los dos papeles", "En el chat respondes como el lead; cuando la IA pasa la conversación, tomas las decisiones del asesor: agendar la clase, enviar la propuesta y hacer seguimiento.", "Acción"],
+    ["crm-card", "La ficha del contacto", "Origen, campaña, responsable, salud comercial, línea de tiempo y notificaciones del equipo se actualizan con cada acción.", "Ficha"],
   ],
   restaurant: [
     ["rest-pasos", "La historia en 6 pasos", "Sedes, reservas, llegada de la mesa, cocina, menú público y cierre del día. Puedes saltar entre pasos cuando quieras; lo que hagas se conserva."],
-    ["rest-hint", "Te digo qué hacer", "Esta franja cambia en cada paso con la siguiente acción que te toca."],
-    ["rest-plano", "El plano del salón", "Mesas y puestos de la sede activa. Al reservar ves la mesa sugerida, o las mesas unidas para grupos grandes; con la sesión abierta ves de quién es cada mesa."],
-    ["rest-etapa", "Aquí trabajas", "Configuras la sede, reservas, tomas el pedido, mueves la cocina, diseñas el menú público y revisas el cierre."],
-    ["rest-sistema", "Lo que pasa en el sistema", "Reservas, sesiones con su mesero, avisos y el registro de cada paso, incluida la disponibilidad que cambia en vivo."],
+    ["rest-hint", "Te digo qué hacer", "Esta franja cambia en cada paso con la siguiente acción que te toca.", "Operación"],
+    ["rest-plano", "El plano del salón", "Mesas y puestos de la sede activa. Al reservar ves la mesa sugerida, o las mesas unidas para grupos grandes; con la sesión abierta ves de quién es cada mesa.", "Operación"],
+    ["rest-etapa", "Aquí trabajas", "Configuras la sede, reservas, tomas el pedido, mueves la cocina, diseñas el menú público y revisas el cierre.", "Operación"],
+    ["rest-sistema", "Lo que pasa en el sistema", "Reservas, sesiones con su mesero, avisos y el registro de cada paso, incluida la disponibilidad que cambia en vivo.", "Sistema"],
   ],
   ph: [
     ["ph-tabs", "Una historia en siete pasos", "Empieza creando la copropiedad: las unidades y coeficientes que generes son los que usan reservas, cobros, documentos, asamblea y PQRS."],
-    ["ph-hint", "Te digo qué hacer", "Esta franja cambia con tu avance y te propone el siguiente paso, incluso probar los casos que el sistema rechaza."],
-    ["ph-main", "Interactúa aquí", "Crea torres, abre unidades, reserva zonas, envía recordatorios, sube documentos, vota y responde PQRS."],
-    ["ph-system", "Lo que pasa en el sistema", "Registros clave, notificaciones enviadas por correo, WhatsApp o app, y el registro de cada acción."],
+    ["ph-hint", "Te digo qué hacer", "Esta franja cambia con tu avance y te propone el siguiente paso, incluso probar los casos que el sistema rechaza.", "Pantalla"],
+    ["ph-main", "Interactúa aquí", "Crea torres, abre unidades, reserva zonas, envía recordatorios, sube documentos, vota y responde PQRS.", "Pantalla"],
+    ["ph-system", "Lo que pasa en el sistema", "Registros clave, notificaciones enviadas por correo, WhatsApp o app, y el registro de cada acción.", "Sistema"],
   ],
   automations: [
     ["auto-tabs", "Tres vistas", "Aquí cambias entre crear flujos con IA, ver tus flujos y revisar, como admin, las solicitudes de lo que aún no se puede automatizar."],
@@ -43,6 +43,17 @@ const GUIDES = {
 // Primer elemento visible con ese data-guide (algunos simuladores tienen varias vistas montadas)
 const visible = (key) => [...document.querySelectorAll(`[role="dialog"] [data-guide="${key}"]`)].find((el) => el.offsetParent !== null);
 
+// En celular la zona puede estar en otra pestaña: la abre antes de resaltarla
+const clickTab = (tab) => {
+  const btn = [...document.querySelectorAll('[role="dialog"] button')].find((b) => b.offsetParent !== null && b.innerText.trim() === tab);
+  btn?.click();
+  return !!btn;
+};
+const showTab = (key, tab) => {
+  if (!tab || visible(key)) return false;
+  return clickTab(tab);
+};
+
 // Invitación dentro del modal del simulador + guía paso a paso con driver.js
 export default function SimulatorGuide({ id }) {
   // mode: "hidden" → "card" (invitación) → "pill" (botón «Guía» tras cerrarla o terminar); "touring" mientras corre
@@ -57,8 +68,24 @@ export default function SimulatorGuide({ id }) {
 
   const start = () => {
     setMode("touring");
-    driver({
-      onDestroyed: () => setMode("pill"),
+    const steps = GUIDES[id];
+    // Cambia de pestaña si hace falta y espera a que React la pinte antes de mover el resaltado
+    const go = (i) => {
+      if (i < 0) return;
+      if (i >= steps.length) return tour.destroy();
+      const [key, , , tab] = steps[i];
+      if (showTab(key, tab)) setTimeout(() => tour.moveTo(i), 200);
+      else tour.moveTo(i);
+    };
+    const tour = driver({
+      onNextClick: () => go(tour.getActiveIndex() + 1),
+      onPrevClick: () => go(tour.getActiveIndex() - 1),
+      onDestroyed: () => {
+        // Al terminar, deja al usuario en la pestaña donde empieza el simulador
+        const first = steps.find((st) => st[3])?.[3];
+        if (first) clickTab(first);
+        setMode("pill");
+      },
       showProgress: true,
       progressText: "{{current}} de {{total}}",
       nextBtnText: "Siguiente →",
@@ -67,12 +94,14 @@ export default function SimulatorGuide({ id }) {
       popoverClass: "tour-popover",
       stagePadding: 4,
       stageRadius: 14,
-      steps: GUIDES[id].map(([key, title, description]) => ({
-        // Si la zona no está a la vista (p. ej. otra pestaña en móvil), el paso sale centrado
+      steps: steps.map(([key, title, description]) => ({
         element: () => visible(key),
         popover: { title, description },
       })),
-    }).drive();
+    });
+    const [key0, , , tab0] = steps[0];
+    if (showTab(key0, tab0)) setTimeout(() => tour.drive(), 200);
+    else tour.drive();
   };
 
   if (mode === "pill") {
