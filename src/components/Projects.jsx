@@ -129,6 +129,27 @@ function ProjectCard({ project, index }) {
   );
 }
 
+// Recorrido de la demo en texto. Va en el HTML aunque esté cerrado, así lo leen también las IA y buscadores
+function FlowSteps({ steps = [] }) {
+  if (steps.length === 0) return null;
+  return (
+    <details className="group/flow mt-5 rounded-xl border border-line text-sm">
+      <summary className="flex cursor-pointer list-none items-center justify-between gap-2 px-3 py-2 font-medium text-muted transition hover:text-ink [&::-webkit-details-marker]:hidden">
+        Ver el flujo paso a paso
+        <Icon name="arrow" className="h-4 w-4 rotate-90 transition group-open/flow:-rotate-90" />
+      </summary>
+      <ol className="space-y-2 border-t border-line px-3 py-3 text-muted">
+        {steps.map((step, i) => (
+          <li key={i} className="flex gap-2.5">
+            <span className="font-display font-semibold text-accent">{i + 1}.</span>
+            <span>{step}</span>
+          </li>
+        ))}
+      </ol>
+    </details>
+  );
+}
+
 function ModuleCard({ module, index }) {
   return (
     <ClickableCard delay={(index % 3) * 100} className={`${cardClass} p-6`}>
@@ -141,6 +162,7 @@ function ModuleCard({ module, index }) {
       <Tags items={module.tags} />
       <Links items={module.links} />
       {module.gallery && <GalleryModal gallery={module.gallery} variant="thumbs" />}
+      {module.simulator && <FlowSteps steps={module.simulator.flow} />}
       {module.simulator && <SimulatorModal simulator={module.simulator} />}
     </ClickableCard>
   );

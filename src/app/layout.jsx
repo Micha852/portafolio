@@ -4,11 +4,11 @@ import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import Tracker from "@/components/Tracker";
 import { profile } from "@/data/profile";
+import { SITE_URL, personJsonLd } from "@/lib/site";
 
 const inter = Inter({ subsets: ["latin"], variable: "--font-sans" });
 const spaceGrotesk = Space_Grotesk({ subsets: ["latin"], variable: "--font-display" });
 
-const SITE_URL = "https://michael.prometeondev.com";
 const TITLE = `${profile.name} · ${profile.role}`;
 const OG_IMAGE = { url: "/og.jpg", width: 1200, height: 630, alt: `${TITLE} · ${profile.degree}` };
 
@@ -51,6 +51,8 @@ export default function RootLayout({ children }) {
     <html lang="es" className={`${inter.variable} ${spaceGrotesk.variable}`} suppressHydrationWarning>
       <head>
         <script dangerouslySetInnerHTML={{ __html: themeScript }} />
+        {/* Datos estructurados de la persona para buscadores y asistentes de IA */}
+        <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(personJsonLd()).replace(/</g, "\\u003c") }} />
       </head>
       <body>
         <Header />

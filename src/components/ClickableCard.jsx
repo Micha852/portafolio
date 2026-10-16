@@ -10,7 +10,7 @@ export default function ClickableCard({ children, className = "", ...rest }) {
     const card = e.currentTarget;
     // Los modales salen por un portal: sus clics burbujean en React pero no están dentro de la tarjeta
     if (!card.contains(e.target)) return;
-    if (e.target.closest("a, button, input, textarea, select, [role=button]")) return;
+    if (e.target.closest("a, button, input, textarea, select, details, [role=button]")) return;
     // Si el usuario está seleccionando texto, no abrir nada
     if (window.getSelection()?.toString()) return;
     const action = [...card.querySelectorAll("[data-card-action]")].sort(

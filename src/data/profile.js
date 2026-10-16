@@ -98,6 +98,16 @@ export const contagracia = {
       links: [{ label: "contagracia.com/ph", href: "https://contagracia.com/ph", icon: "external" }],
       simulator: {
         id: "ph",
+        // Recorrido de la demo en texto: lo leen quienes no la abren y las IA que visitan la página
+        flow: [
+          "Creas la copropiedad con un asistente: nombre, dirección, color y logo; torres, pisos y unidades por piso. El sistema genera las unidades y sus coeficientes, que suman 100 %.",
+          "Recorres las unidades por torre y abres su ficha: propietario, residentes (propietario, arrendatario o familiar), vehículos, parqueadero e historial.",
+          "Creas una zona común con aforo, horario y reglas, y un residente la reserva: se validan horario, cupo, choques y saldo pendiente.",
+          "Calculas la cuota de administración por coeficiente y envías recordatorios por WhatsApp o correo a quien está pendiente, con estado de entrega; al registrar el pago se desbloquean sus reservas.",
+          "Subes documentos por carpeta (actas, reglamento, contratos, planos) con visibilidad para todos, una torre o una unidad, y envías comunicados.",
+          "En la asamblea, los propietarios registran asistencia, el quórum se calcula por coeficiente y votan solo los propietarios; al cerrar, el acta queda en Documentos.",
+          "Un residente radica una PQRS, recibe un número y conversa con la administración hasta que se resuelve.",
+        ],
         title: "Simulador de software de propiedad horizontal",
         subtitle:
           "Crea una copropiedad ficticia con torres, unidades y coeficientes, y síguela por reservas, cobros, documentos, asamblea y PQRS.",
@@ -115,6 +125,15 @@ export const contagracia = {
       links: [{ label: "contagracia.com/restaurant", href: "https://contagracia.com/restaurant", icon: "external" }],
       simulator: {
         id: "restaurant",
+        // Recorrido de la demo en texto: lo leen quienes no la abren y las IA que visitan la página
+        flow: [
+          "Configuras las sedes de un café-bar: horario y plano de mesas con su capacidad.",
+          "Un cliente reserva fecha, hora y número de personas; el sistema busca disponibilidad en tiempo real y asigna la mesa, o une mesas vecinas para grupos grandes.",
+          "Llega la mesa: el mesero abre la sesión desde la reserva, la mesa queda a su nombre y toma el pedido con notas.",
+          "La cocina trabaja en un tablero (pendiente, preparando, listo) con cronómetro por plato que avisa cuando se pasa del tiempo, y notifica al mesero cuando el plato está listo.",
+          "Diseñas el menú público de cada sede con un editor visual (encabezado, colores, patrón, distribución, platos visibles) y lo ves en vivo en un celular.",
+          "Cierras el día con ventas por sede, por producto y por mesero, y las propinas de cada persona.",
+        ],
         title: "Simulador de café-bar con sedes y reservas",
         subtitle:
           "Reserva con asignación automática de mesas, atiende la mesa como su mesero, mueve la cocina, diseña el menú público y cierra el día por sede.",
@@ -133,6 +152,15 @@ export const contagracia = {
       // Simulador interactivo (src/components/simulators)
       simulator: {
         id: "crm",
+        // Recorrido de la demo en texto: lo leen quienes no la abren y las IA que visitan la página
+        flow: [
+          "Llega un lead de una academia de idiomas por el formulario público del sitio o por un anuncio de Meta (Facebook o Instagram) mediante webhook.",
+          "El CRM evita contactos duplicados por teléfono, crea el lead con su origen y campaña, y lo asigna en rotación a un asesor del equipo de esa campaña, que recibe un aviso.",
+          "Corre la automatización de atención por WhatsApp con IA: da la bienvenida, pregunta nivel y horario, y pasa la conversación al asesor asignado cuando el lead pide algo puntual o una persona.",
+          "El asesor agenda una clase de prueba como actividad con recordatorio y mueve la oportunidad por el embudo (nuevo, contactado, clase de prueba, propuesta, matriculado o perdido).",
+          "Envía una cotización; si el lead la acepta, el contacto pasa a ser estudiante (cliente). También hay caminos de seguimiento a los 7 días y de pérdida con motivo.",
+          "La ficha del contacto reúne origen, campaña, responsable, línea de tiempo y un puntaje de salud que sube o baja con señales comerciales.",
+        ],
         title: "Simulador de CRM comercial",
         subtitle:
           "Sigue un lead de una academia de idiomas desde el formulario o el anuncio hasta la matrícula, con IA que lo califica y un asesor que cierra.",
@@ -151,6 +179,14 @@ export const contagracia = {
       links: [],
       simulator: {
         id: "automations",
+        // Recorrido de la demo en texto: lo leen quienes no la abren y las IA que visitan la página
+        flow: [
+          "Eliges un negocio (academia, conjunto residencial o café-bar) y le pides a la IA lo que quieres automatizar en lenguaje natural.",
+          "La IA revisa los disparadores y acciones disponibles y propone un flujo, que se dibuja nodo a nodo en un lienzo tipo n8n: disparador, condiciones, acciones e IA.",
+          "Creas el flujo; si le falta un dato queda como borrador hasta completarlo.",
+          "Lo pruebas con datos de ejemplo, sin enviar nada real, y lo activas.",
+          "Si pides algo que todavía no se puede automatizar, queda como solicitud: el administrador la revisa y, al aprobarla, el usuario recibe un aviso y puede crear el flujo.",
+        ],
         title: "Simulador del hub de automatizaciones",
         subtitle:
           "Pídele un flujo al asistente de IA: míralo dibujarse en el lienzo, créalo, pruébalo y actívalo. Lo que aún no se puede hacer queda como solicitud.",
@@ -169,6 +205,14 @@ export const contagracia = {
       links: [],
       simulator: {
         id: "ai",
+        // Recorrido de la demo en texto: lo leen quienes no la abren y las IA que visitan la página
+        flow: [
+          "Cada uso de la IA (asistente, lectura de documentos, creación de flujos) tiene su proveedor y modelo principal (OpenAI, Anthropic, Gemini o DeepSeek) y un respaldo.",
+          "Puedes simular la caída del proveedor principal (cuota agotada, clave inválida o tiempo de espera): el sistema clasifica el error y reintenta con el respaldo, o muestra un mensaje claro si no hay respaldo.",
+          "El asistente detecta el área de negocio de cada pregunta antes de responder y pregunta cuando no está seguro; las respuestas se pueden exportar a PDF o Excel.",
+          "El lector de PDFs convierte listas de precios de proveedores en un catálogo: la primera vez la IA crea una plantilla de lectura y las siguientes listas del mismo proveedor se leen sin IA, sin gastar tokens.",
+          "Soporta PDFs escaneados con OCR y archivos con contraseña, como trabajos en segundo plano, con validación de filas y totales antes de importar.",
+        ],
         title: "Simulador de una capa de IA multiproveedor",
         subtitle:
           "Modelos con respaldo automático, un asistente que enruta cada pregunta y un lector de PDFs que aprende el formato de cada proveedor una sola vez.",
