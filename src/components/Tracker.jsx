@@ -32,6 +32,9 @@ function source() {
   const params = new URLSearchParams(location.search);
   const utm = params.get("utm_source");
   if (utm) return utm;
+  // Facebook, Instagram y Google agregan su propio identificador al enlace aunque no envíen de dónde viene la visita
+  if (params.has("fbclid")) return /instagram/i.test(document.referrer) ? "Instagram" : "Facebook";
+  if (params.has("gclid")) return "Google";
   if (!document.referrer) return "Directo";
   try {
     const host = new URL(document.referrer).hostname.replace(/^www\./, "");
