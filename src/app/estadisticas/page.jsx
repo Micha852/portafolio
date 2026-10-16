@@ -1,7 +1,9 @@
+import { cookies } from "next/headers";
 import { readEvents, dayOf } from "@/lib/stats";
+import { STATS_COOKIE, isValidSession } from "@/lib/stats-auth";
 import { contagracia } from "@/data/profile";
 
-// Panel privado del contador de visitas: /stats?key=STATS_KEY
+// Panel privado del contador de visitas: /estadisticas (pide la contraseña una vez y recuerda el navegador)
 export const dynamic = "force-dynamic";
 export const metadata = { title: "Estadísticas", robots: { index: false, follow: false } };
 
@@ -55,15 +57,41 @@ function Ranked({ title, rows, empty = "Sin datos todavía." }) {
   );
 }
 
+const LOGIN_ERRORS = {
+  clave: "Contraseña incorrecta.",
+  espera: "Demasiados intentos. Espera unos minutos y vuelve a probar.",
+};
+
+function Login({ error }) {
+  return (
+    <section className="grid min-h-screen place-items-center px-6">
+      <form method="post" action="/api/estadisticas/entrar" className="w-full max-w-sm space-y-4 rounded-3xl border border-line bg-surface p-8">
+        <div>
+          <h1 className="font-display text-2xl font-bold">Estadísticas</h1>
+          <p className="mt-1 text-sm text-muted">Panel privado. Este navegador quedará recordado por un año.</p>
+        </div>
+        <label className="block">
+          <span className="mb-1.5 block text-sm font-medium">Contraseña</span>
+          <input
+            name="password"
+            type="password"
+            required
+            autoFocus
+            autoComplete="current-password"
+            className="w-full rounded-xl border border-line bg-bg px-4 py-3 text-ink outline-none transition focus:border-accent focus:ring-2 focus:ring-accent/20"
+          />
+        </label>
+        {LOGIN_ERRORS[error] && <p className="text-sm text-red-500">{LOGIN_ERRORS[error]}</p>}
+        <button className="w-full rounded-full bg-accent px-5 py-3 font-semibold text-bg transition hover:brightness-110">Entrar</button>
+      </form>
+    </section>
+  );
+}
+
 export default async function StatsPage({ searchParams }) {
-  const { key, dias } = await searchParams;
-  if (!process.env.STATS_KEY || key !== process.env.STATS_KEY) {
-    return (
-      <section className="grid min-h-screen place-items-center px-6">
-        <p className="text-muted">Página no disponible.</p>
-      </section>
-    );
-  }
+  const { dias, error } = await searchParams;
+  const session = (await cookies()).get(STATS_COOKIE)?.value;
+  if (!isValidSession(session)) return <Login error={error} />;
 
   const days = RANGES[dias] ? Number(dias) : 30;
   const since = Date.now() - days * 864e5;
@@ -89,12 +117,15 @@ export default async function StatsPage({ searchParams }) {
         <div>
           <h1 className="font-display text-4xl font-bold">Estadísticas del portafolio</h1>
           <p className="mt-1 text-sm text-muted">Sin contar tus visitas, bots ni previsualizaciones de enlaces.</p>
+          <form method="post" action="/api/estadisticas/salir" className="mt-2">
+            <button className="text-xs text-muted underline-offset-2 hover:text-ink hover:underline">Cerrar sesión en este navegador</button>
+          </form>
         </div>
         <nav className="flex gap-1 rounded-full border border-line p-1 text-sm">
           {Object.entries(RANGES).map(([d, label]) => (
             <a
               key={d}
-              href={`/stats?key=${encodeURIComponent(key)}&dias=${d}`}
+              href={`/estadisticas?dias=${d}`}
               className={`rounded-full px-3 py-1 ${Number(d) === days ? "bg-accent/15 text-accent" : "text-muted hover:text-ink"}`}
             >
               {label}

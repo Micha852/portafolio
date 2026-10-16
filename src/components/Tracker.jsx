@@ -4,6 +4,8 @@ import { useEffect } from "react";
 
 const SKIP_KEY = "no-contar";
 const VID_KEY = "vid";
+// Páginas que no son visitas al portafolio
+const PRIVATE_PATHS = ["/stats", "/estadisticas", "/no-contar", "/contar"];
 
 const storage = {
   get: (s, k) => {
@@ -47,14 +49,14 @@ function source() {
 }
 
 // Contador de visitas propio: una visita por sesión del navegador + eventos de los simuladores.
-// Para no contar tus propias visitas, entra una vez con ?no-contar (y ?contar para volver).
+// Para no contar tus propias visitas, entra una vez a /no-contar (y /contar para volver). También sirven ?no-contar y ?contar.
 export default function Tracker() {
   useEffect(() => {
     const params = new URLSearchParams(location.search);
     if (params.has("no-contar")) storage.set("localStorage", SKIP_KEY, "1");
     if (params.has("contar")) storage.del("localStorage", SKIP_KEY);
     // Navegadores automatizados (pruebas) y los excluidos no cuentan
-    if (storage.get("localStorage", SKIP_KEY) || navigator.webdriver || location.pathname.startsWith("/stats")) return;
+    if (storage.get("localStorage", SKIP_KEY) || navigator.webdriver || PRIVATE_PATHS.some((p) => location.pathname.startsWith(p))) return;
 
     let vid = storage.get("localStorage", VID_KEY);
     if (!vid) {
